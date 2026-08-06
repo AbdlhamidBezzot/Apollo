@@ -7,6 +7,19 @@ from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+def coerce_postgres_dialect(url: str) -> str:
+    """Return a psycopg v3 (postgresql+psycopg://) URL from any common form.
+
+    Providers often hand back `postgres://` or `postgresql://` (no dialect),
+    which SQLAlchemy maps to psycopg2. This rewrites those to psycopg 3 and
+    also migrates any explicit legacy `+psycopg2` dialect.
+    """
+    for prefix in ("postgresql+psycopg2://", "postgresql://", "postgres://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg://" + url[len(prefix):]
+    return url
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
@@ -67,6 +80,19 @@ class Settings(BaseSettings):
                 "CORS_ORIGINS must not contain '*' because the API serves credentials "
                 "(allow_credentials=True). List explicit origins instead."
             )
+        return self
+
+    @model_validator(mode="after")
+    def _coerce_postgres_dialect(self) -> "Settings":
+        """Force every Postgres URL onto psycopg v3.
+
+        PaaS providers (Render/Railway) inject connection strings like
+        `postgresql://user:pass@host/db` with no dialect suffix. SQLAlchemy 2.x
+        maps a bare `postgresql://` to psycopg2 (not installed here), so we
+        normalize to `postgresql+psycopg://` (the official psycopg 3 dialect).
+        Also rewrites any legacy `+psycopg2` URL a user may paste in.
+        """
+        self.database_url = coerce_postgres_dialect(self.database_url)
         return self
 
     @property
