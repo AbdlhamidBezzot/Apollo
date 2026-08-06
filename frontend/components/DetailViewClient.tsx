@@ -1,0 +1,161 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import { DetailTabs } from "@/components/DetailTabs";
+import { MovieNightButton } from "@/components/MovieNightButton";
+import { TitleActions } from "@/components/TitleActions";
+import { backdropUrl, posterUrl, releaseYear, titleName } from "@/lib/api";
+import type { Title, TitleDetail } from "@/lib/types";
+
+export function DetailViewClient({
+  item,
+  similar,
+  mediaType,
+}: {
+  item: TitleDetail;
+  similar: Title[];
+  mediaType: "movie" | "tv";
+}) {
+  const [playing, setPlaying] = useState(false);
+
+  const year = releaseYear(item);
+  const rating = item.vote_average ? item.vote_average.toFixed(1) : null;
+  const genres = (item.genres || []).map((g) => g.name).join(" • ");
+  const runtime = item.runtime ? `${item.runtime} min` : "";
+  const trailer = item.videos?.results?.find((v) => v.type === "Trailer" && v.site === "YouTube");
+  const cast = (item.credits?.cast || []).slice(0, 12);
+
+  return (
+    <div className="min-h-screen bg-bg-void pb-16">
+      {/* CinemaOS Hero Backdrop Header */}
+      <section className="relative h-[560px] w-full overflow-hidden">
+        <Image
+          src={backdropUrl(item.backdrop_path)}
+          alt={titleName(item)}
+          fill
+          priority
+          className="object-cover object-top brightness-90"
+          sizes="100vw"
+        />
+        {/* Dark vignette gradients */}
+        <div className="absolute inset-0 bg-gradient-to-t from-bg-void via-bg-void/40 to-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-bg-void via-bg-void/60 to-transparent" />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ background: "radial-gradient(ellipse at 30% 90%, rgba(255,10,71,0.2), transparent 70%)" }}
+          aria-hidden="true"
+        />
+        <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-bg-void to-transparent" />
+      </section>
+
+      {/* Main Title Metadata Content */}
+      <div className="relative mx-auto -mt-64 max-w-7xl px-4 sm:px-6">
+        <div className="flex flex-col items-start gap-8 md:flex-row">
+          {/* High-res Poster Card */}
+          <div className="relative hidden w-64 shrink-0 overflow-hidden rounded-2xl border border-white/15 bg-bg-card shadow-brand-glow-lg md:block">
+            <Image
+              src={posterUrl(item.poster_path)}
+              alt={titleName(item)}
+              width={256}
+              height={384}
+              priority
+              className="aspect-[2/3] w-full object-cover"
+            />
+            {rating && (
+              <div className="glass absolute left-3 top-3 flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-black text-badge-rating shadow-lg">
+                <span className="text-yellow-400">★</span> {rating}
+              </div>
+            )}
+          </div>
+
+          {/* Title Info Header */}
+          <div className="flex-1 pt-6 md:pt-10">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-brand/40 bg-brand/15 px-3 py-0.5 text-xs font-bold uppercase tracking-wider text-brand-soft">
+                {mediaType === "tv" ? "TV Series" : "Movie"}
+              </span>
+              <span className="glass rounded-md px-2.5 py-0.5 font-mono text-xs font-bold text-white/90">
+                4K ULTRA HD
+              </span>
+              <span className="glass rounded-md px-2.5 py-0.5 font-mono text-xs font-bold text-white/80">
+                HDR10+
+              </span>
+              <span className="glass rounded-md px-2.5 py-0.5 font-mono text-xs font-bold text-white/80">
+                DOLBY ATMOS
+              </span>
+            </div>
+
+            <h1 className="text-3xl font-extrabold leading-none tracking-tight text-white drop-shadow-md sm:text-5xl lg:text-6xl">
+              {titleName(item)}
+              {year ? <span className="ml-3 text-2xl font-normal text-text-muted sm:text-4xl">({year})</span> : null}
+            </h1>
+
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-text-muted">
+              {rating ? (
+                <span className="flex items-center gap-1 font-bold text-badge-rating">
+                  ★ {rating} <span className="text-xs font-normal text-text-muted">/ 10</span>
+                </span>
+              ) : null}
+              {runtime ? <span className="font-mono text-xs text-white/80">⏱ {runtime}</span> : null}
+              {mediaType === "tv" && item.number_of_seasons ? (
+                <span className="font-mono text-xs text-white/80">
+                  📺 {item.number_of_seasons} season{item.number_of_seasons > 1 ? "s" : ""}
+                </span>
+              ) : null}
+              {item.status ? (
+                <span className="glass rounded-md px-2 py-0.5 font-mono text-[11px] uppercase text-white/70">
+                  {item.status}
+                </span>
+              ) : null}
+            </div>
+
+            {genres && <p className="mt-3 text-sm font-semibold tracking-wide text-brand-soft">{genres}</p>}
+
+            <p className="mt-4 max-w-3xl text-sm leading-relaxed text-text-vivid/90 drop-shadow-sm sm:text-base">
+              {item.overview || "No synopsis available for this title."}
+            </p>
+
+            {item.tagline ? (
+              <p className="mt-3 border-l-2 border-brand/60 pl-3 text-sm italic text-text-muted">
+                &ldquo;{item.tagline}&rdquo;
+              </p>
+            ) : null}
+
+            {/* Action Buttons */}
+            <div className="mt-8 flex flex-wrap items-center gap-4">
+              <Link
+                href={`/watch/${mediaType}/${item.id}`}
+                onClick={() => setPlaying(true)}
+                className="card-lift flex items-center gap-2.5 rounded-full bg-brand px-8 py-3.5 text-base font-extrabold text-white shadow-brand-glow-lg transition hover:scale-105 hover:bg-brand-soft"
+              >
+                {playing ? (
+                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden="true">
+                    <path d="M7 5l12 7-12 7V5z" />
+                  </svg>
+                )}
+                Play Now
+              </Link>
+
+              <TitleActions tmdbId={item.id} mediaType={mediaType} hidePlay />
+              <MovieNightButton />
+            </div>
+          </div>
+        </div>
+
+        {/* Detail Tabs Section */}
+        <DetailTabs
+          mediaType={mediaType}
+          tmdbId={item.id}
+          number_of_seasons={item.number_of_seasons}
+          trailerKey={trailer?.key || null}
+          cast={cast}
+          similar={similar}
+        />
+      </div>
+    </div>
+  );
+}

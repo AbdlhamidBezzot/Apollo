@@ -1,0 +1,14 @@
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+# B008 is idiomatic FastAPI (Depends() in defaults). B006 mutable defaults are
+# used for FastAPI query params (they're not mutated). B904: HTTPException
+# raises from external-call handlers are intentionally explicit, not chains.
+# SIM105: `except: pass` fallbacks in the cache/rate-limit layer are deliberate.
+ignore = ["B008", "B006", "UP035", "B904", "SIM105"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
