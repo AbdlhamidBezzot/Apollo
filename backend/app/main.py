@@ -13,12 +13,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+import httpx
+from sqlalchemy import text
+
 from app.api.router import api_router
 from app.core.cache import get_cache
 from app.core.config import get_settings
 from app.core.errors import sanitize_detail
 from app.core.ratelimit import get_rate_limiter
-from app.db import init_db
+from app.db import engine, init_db
 from app.services.tmdb import TMDbError, tmdb
 
 settings = get_settings()
@@ -41,10 +44,11 @@ async def _warm_home_feed() -> None:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    settings.ensure_production_ready()
     init_db()
     get_rate_limiter()  # warm the rate limiter so cache fallback is resolved once
     logger.info("Cache backend selected: %s", get_cache().backend)
-    if get_settings().tmdb_api_key or get_settings().tmdb_api_read_access_token:
+    if settings.tmdb_api_key or settings.tmdb_api_read_access_token:
         await _warm_home_feed()
     yield
 
@@ -83,6 +87,58 @@ async def unhandled_exception_handler(_: Request, exc: Exception) -> JSONRespons
     return JSONResponse(status_code=500, content={"detail": sanitize_detail(exc, 500)})
 
 
+_HEALTH_TMDB_TTL = 120
+
+
+async def _check_database() -> bool:
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return True
+    except Exception:
+        logger.exception("Database health check failed")
+        return False
+
+
+async def _check_redis() -> bool:
+    return get_cache().backend == "redis"
+
+
+async def _check_tmdb() -> bool:
+    if not (settings.tmdb_api_key or settings.tmdb_api_read_access_token):
+        return False
+    cached = get_cache().get("health:tmdb")
+    if cached is not None:
+        return cached == "1"
+    ok = False
+    try:
+        headers = {"Accept": "application/json"}
+        if settings.tmdb_api_read_access_token:
+            headers["Authorization"] = f"Bearer {settings.tmdb_api_read_access_token}"
+        params = {"api_key": settings.tmdb_api_key} if settings.tmdb_api_key else None
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(
+                f"{settings.tmdb_api_base_url.rstrip('/')}/configuration",
+                params=params,
+                headers=headers,
+            )
+            ok = resp.status_code == 200
+    except Exception:
+        logger.exception("TMDB health check failed")
+    try:
+        get_cache().set("health:tmdb", "1" if ok else "0", _HEALTH_TMDB_TTL)
+    except Exception:
+        pass
+    return ok
+
+
 @app.get("/health")
 async def health():
-    return {"status": "ok", "cache": get_cache().backend}
+    return {
+        "status": "ok",
+        "database": await _check_database(),
+        "redis": await _check_redis(),
+        "tmdb": await _check_tmdb(),
+        "version": app.version,
+        "environment": settings.app_env,
+    }

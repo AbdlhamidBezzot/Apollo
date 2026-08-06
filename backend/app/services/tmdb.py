@@ -77,7 +77,7 @@ async def _cached(
     if cached is not None:
         try:
             return json.loads(cached)
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             pass
     data = await loader()
     try:

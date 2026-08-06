@@ -130,7 +130,7 @@ async def google_authorize(response: Response):
         "apollo_oauth_state",
         state,
         httponly=True,
-        samesite="lax",
+        samesite=settings.cookie_samesite_used,
         secure=settings.is_production,
         max_age=600,
         path="/api/v1/auth/google/callback",
@@ -216,7 +216,6 @@ async def google_callback(
 
     # Redirect back to the frontend. Return the SAME injected response so the
     # auth cookies survive; returning a fresh Response() here would drop them.
-    frontend = (settings.cors_origin_list or ["http://localhost:3000"])[0]
     response.status_code = 303
-    response.headers["Location"] = frontend
+    response.headers["Location"] = settings.frontend_origin
     return response

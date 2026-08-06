@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: apollo-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 2
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://apollo-94zv.vercel.app
+      - key: FRONTEND_URL
+        value: https://apollo-94zv.vercel.app
+      - key: COOKIE_SAMESITE
+        value: none
+      - key: DATABASE_URL
+        fromDatabase:
+          name: apollo-db
+          property: connectionString
+      - key: REDIS_URL
+        fromDatabase:
+          name: apollo-redis
+          property: connectionString
+      - key: OAUTH_REDIRECT_URI
+        value: REPLACE_WITH_YOUR_API_URL/api/v1/auth/google/callback
+
+databases:
+  - name: apollo-db
+    databaseName: apollo
+    user: apollo
+    plan: free
+  - name: apollo-redis
+    plan: free
+    ipAllowList: []

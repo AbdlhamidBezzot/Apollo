@@ -3,6 +3,7 @@
 from functools import lru_cache
 from typing import Literal
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -13,9 +14,19 @@ class Settings(BaseSettings):
     app_name: str = "Apollo API"
     secret_key: str = "change-me-to-a-long-random-string"
     jwt_secret: str = ""
-    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
-    database_url: str = "postgresql+psycopg://apollo:YPoDBI5XWDQTG3QHhIcb3Y7f@localhost:5432/apollo"
+    # Comma-separated list of browser origins allowed to call the API.
+    # Dev builds run on localhost:3000 / localhost:5173; Vercel production is
+    # baked in so the API works online even before you set the variable.
+    cors_origins: str = (
+        "http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,"
+        "https://apollo-94zv.vercel.app"
+    )
+
+    # Absolute frontend URL the API redirects to (e.g. Google OAuth callback).
+    frontend_url: str = ""
+
+    database_url: str = "sqlite:///./apollo.db"
     redis_url: str = "redis://localhost:6379/0"
 
     tmdb_api_key: str = ""
@@ -26,7 +37,11 @@ class Settings(BaseSettings):
 
     google_client_id: str = ""
     google_client_secret: str = ""
-    oauth_redirect_uri: str = "http://localhost:8000/api/v1/auth/google/callback"
+    oauth_redirect_uri: str = ""
+
+    # Cross-site auth cookies need SameSite=None + Secure. Default to lax for
+    # same-origin dev; producers should set COOKIE_SAMESITE=none.
+    cookie_samesite: str = "lax"
 
     access_token_minutes: int = 15
     refresh_token_days: int = 30
@@ -44,6 +59,16 @@ class Settings(BaseSettings):
     llm_provider: str = "gemini"
     llm_api_key: str = ""
 
+    @model_validator(mode="after")
+    def _validate_no_wildcard_cors(self) -> "Settings":
+        origins = {o.strip() for o in (self.cors_origins or "").split(",") if o.strip()}
+        if "*" in origins:
+            raise ValueError(
+                "CORS_ORIGINS must not contain '*' because the API serves credentials "
+                "(allow_credentials=True). List explicit origins instead."
+            )
+        return self
+
     @property
     def active_llm_key(self) -> str:
         return self.llm_api_key or self.gemini_api_key or self.deepseek_api_key
@@ -51,6 +76,15 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def frontend_origin(self) -> str:
+        """Base URL to redirect OAuth callbacks back to."""
+        if self.frontend_url:
+            return self.frontend_url.rstrip("/")
+        if self.cors_origin_list:
+            return self.cors_origin_list[0]
+        return "http://localhost:3000"
 
     @property
     def token_secret(self) -> str:
@@ -71,6 +105,25 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.app_env == "production"
+
+    @property
+    def cookie_samesite_used(self) -> str:
+        if self.is_production:
+            return "none" if self.cookie_samesite == "none" else "lax"
+        return self.cookie_samesite
+
+    def ensure_production_ready(self) -> None:
+        """Fail fast on insecure defaults so prod can never ship broken/leaky."""
+        if not self.is_production:
+            return
+        if self.secret_key == "change-me-to-a-long-random-string" and not self.jwt_secret:
+            raise RuntimeError(
+                "Production requires SECRET_KEY (or JWT_SECRET) to be set to a strong random value."
+            )
+        if self.database_url.startswith("sqlite"):
+            raise RuntimeError(
+                "Production DATABASE_URL must be PostgreSQL, not sqlite. Set DATABASE_URL."
+            )
 
 
 @lru_cache
