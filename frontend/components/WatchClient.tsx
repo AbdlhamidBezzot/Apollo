@@ -67,11 +67,7 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
           setSession(res);
         }
       } catch (err: any) {
-        if (err.status === 401 || err.status === 403) {
-          setError("You need to sign in to watch.");
-        } else {
-          setError(err.message || "Could not start playback. Check the backend and your playback provider config.");
-        }
+        setError(err.message || "Could not start playback. Check the backend and your playback provider config.");
       }
     })();
   }, [mediaType, id, searchParams]);
@@ -81,10 +77,10 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
       <div className="mx-auto max-w-xl px-4 py-24 text-center">
         <p className="mb-4 text-text-muted">{error}</p>
         <button
-          onClick={() => router.push("/login")}
+          onClick={() => router.push("/")}
           className="rounded-full bg-brand px-6 py-2 text-sm font-bold text-white shadow-brand-glow"
         >
-          Go to sign in
+          Back to home
         </button>
       </div>
     );

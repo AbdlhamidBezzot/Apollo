@@ -169,10 +169,15 @@ export function Player({ streamUrl, contentType, tmdbId, mediaType, title, poste
       const now = Date.now();
       if (force || now - lastReport.current > 15000) {
         lastReport.current = now;
-        put("/api/v1/me/history", { tmdb_id: tmdbId, media_type: mediaType, progress_seconds: seconds, completed }).catch(() => { });
+        // Watch history ("Continue Watching" / History page) requires an account.
+        // Guests get full playback but progress is NOT tracked server-side —
+        // it only lives in localStorage. Signed-in users also write to the API.
+        if (user) {
+          put("/api/v1/me/history", { tmdb_id: tmdbId, media_type: mediaType, progress_seconds: seconds, completed }).catch(() => { });
+        }
       }
     },
-    [tmdbId, mediaType]
+    [tmdbId, mediaType, user]
   );
 
   useEffect(() => {
