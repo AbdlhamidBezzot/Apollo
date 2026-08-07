@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
+from app.core.errors import UserFacingError
 from app.core.ratelimit import rate_limited
 from app.core.security import create_token, decode_token, hash_password, verify_password
 from app.db import get_db
@@ -29,7 +30,7 @@ async def register(
 ):
     settings = get_settings()
     if db.query(User).filter(User.email == payload.email).first():
-        raise HTTPException(status_code=409, detail="Email already registered")
+        raise UserFacingError(status_code=409, detail="An account with this email already exists. Please sign in.")
 
     user = User(
         email=payload.email,
@@ -54,7 +55,9 @@ async def register(
 async def login(payload: LoginRequest, db: DbDep, response: Response, _rl=Depends(rate_limited("login", "5/15minute"))):
     settings = get_settings()
     user = db.query(User).filter(User.email == payload.email).first()
-    if user is None or user.password_hash is None or not verify_password(payload.password, user.password_hash):
+    if user is None:
+        raise UserFacingError(status_code=404, detail="No account exists with this email. Please create an account.")
+    if user.password_hash is None or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     access = create_token(str(user.id), settings.token_secret, "access", settings.access_token_ttl_min)
     refresh = create_token(str(user.id), settings.token_secret, "refresh", settings.refresh_token_ttl_days * 24 * 60)

@@ -4,14 +4,21 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthContext";
 import { classifyError } from "@/lib/errors";
-import { post } from "@/lib/http";
+import { ApiError, post } from "@/lib/http";
 
 export default function LoginPage() {
   const router = useRouter();
   const { user, loading, refresh } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [error, setError] = useState<string | null>(null);
+  const [accountAction, setAccountAction] = useState<"login" | "register" | null>(null);
   const [busy, setBusy] = useState(false);
+
+  const switchMode = (nextMode: "login" | "register") => {
+    setMode(nextMode);
+    setError(null);
+    setAccountAction(null);
+  };
 
   useEffect(() => {
     if (!loading && user) {
@@ -25,6 +32,7 @@ export default function LoginPage() {
     const email = String(form.get("email"));
     const password = String(form.get("password"));
     setError(null);
+    setAccountAction(null);
     setBusy(true);
     try {
       if (mode === "register") {
@@ -36,7 +44,15 @@ export default function LoginPage() {
       await refresh();
       router.push("/");
     } catch (err: unknown) {
-      setError(classifyError(err).message);
+      if (err instanceof ApiError && mode === "register" && err.status === 409) {
+        setError("An account with this email already exists.");
+        setAccountAction("login");
+      } else if (err instanceof ApiError && mode === "login" && err.status === 404) {
+        setError("This account doesn't exist yet.");
+        setAccountAction("register");
+      } else {
+        setError(classifyError(err).message);
+      }
     } finally {
       setBusy(false);
     }
@@ -77,7 +93,16 @@ export default function LoginPage() {
             placeholder={mode === "register" ? "Password (min 8 chars)" : "Password"}
             className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-text-vivid outline-none placeholder:text-text-muted focus:border-brand/50"
           />
-          {error && <p className="text-xs text-brand-soft">{error}</p>}
+          {error && (
+            <p className="text-xs text-brand-soft" role="alert">
+              {error}
+              {accountAction && (
+                <button type="button" onClick={() => switchMode(accountAction)} className="ml-1 font-bold underline hover:text-white">
+                  {accountAction === "login" ? "Sign in instead" : "Create an account"}
+                </button>
+              )}
+            </p>
+          )}
           <button
             type="submit"
             disabled={busy}
@@ -88,7 +113,7 @@ export default function LoginPage() {
         </form>
         <p className="mt-4 text-center text-sm text-text-muted">
           {mode === "login" ? "New here? " : "Already have an account? "}
-          <button onClick={() => setMode(mode === "login" ? "register" : "login")} className="text-brand-soft hover:underline">
+          <button type="button" onClick={() => switchMode(mode === "login" ? "register" : "login")} className="text-brand-soft hover:underline">
             {mode === "login" ? "Create an account" : "Sign in"}
           </button>
         </p>

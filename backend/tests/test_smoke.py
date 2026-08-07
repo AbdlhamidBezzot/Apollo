@@ -61,6 +61,19 @@ def test_login_wrong_password():
         assert r.status_code == 401
 
 
+
+def test_register_existing_account_and_login_unknown_account():
+    with get_client() as client:
+        payload = {"email": "existing@example.com", "password": "password123", "name": "Existing"}
+        assert client.post("/api/v1/auth/register", json=payload).status_code == 201
+
+        r = client.post("/api/v1/auth/register", json=payload)
+        assert r.status_code == 409
+        assert r.json()["detail"] == "An account with this email already exists. Please sign in."
+
+        r = client.post("/api/v1/auth/login", json={"email": "missing@example.com", "password": "password123"})
+        assert r.status_code == 404
+        assert r.json()["detail"] == "No account exists with this email. Please create an account."
 def test_delete_account():
     with get_client() as client:
         client.post(
