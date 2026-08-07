@@ -58,7 +58,7 @@ async def login(payload: LoginRequest, db: DbDep, response: Response, _rl=Depend
     if user is None:
         raise UserFacingError(status_code=404, detail="No account exists with this email. Please create an account.")
     if user.password_hash is None or not verify_password(payload.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+        raise UserFacingError(status_code=401, detail="Incorrect password. Please try again.")
     access = create_token(str(user.id), settings.token_secret, "access", settings.access_token_ttl_min)
     refresh = create_token(str(user.id), settings.token_secret, "refresh", settings.refresh_token_ttl_days * 24 * 60)
     set_auth_cookies(response, access, refresh)

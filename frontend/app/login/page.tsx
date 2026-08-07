@@ -47,6 +47,8 @@ export default function LoginPage() {
       if (err instanceof ApiError && mode === "register" && err.status === 409) {
         setError("An account with this email already exists.");
         setAccountAction("login");
+      } else if (err instanceof ApiError && mode === "login" && err.status === 401) {
+        setError("Incorrect password. Please try again.");
       } else if (err instanceof ApiError && mode === "login" && err.status === 404) {
         setError("This account doesn't exist yet.");
         setAccountAction("register");

@@ -59,6 +59,7 @@ def test_login_wrong_password():
         )
         r = client.post("/api/v1/auth/login", json={"email": "alice@example.com", "password": "wrongpass"})
         assert r.status_code == 401
+        assert r.json()["detail"] == "Incorrect password. Please try again."
 
 
 
