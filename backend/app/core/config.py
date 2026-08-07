@@ -52,8 +52,9 @@ class Settings(BaseSettings):
     google_client_secret: str = ""
     oauth_redirect_uri: str = ""
 
-    # Cross-site auth cookies need SameSite=None + Secure. Default to lax for
-    # same-origin dev; producers should set COOKIE_SAMESITE=none.
+    # Development (same-origin localhost) uses Lax. In production the Vercel
+    # frontend and Render API are cross-site, so cookies are always SameSite=None
+    # + Secure (forced in cookie_samesite_used). This value affects dev only.
     cookie_samesite: str = "lax"
 
     access_token_minutes: int = 15
@@ -135,7 +136,11 @@ class Settings(BaseSettings):
     @property
     def cookie_samesite_used(self) -> str:
         if self.is_production:
-            return "none" if self.cookie_samesite == "none" else "lax"
+            # Cross-origin deployment (Vercel frontend + Render API): the browser
+            # must send these cookies on cross-site fetch()/XHR calls. SameSite=Lax
+            # is silently omitted on cross-origin XHR, which 401s /auth/me and
+            # /auth/refresh. NONE is required (and Safe with Secure=True below).
+            return "none"
         return self.cookie_samesite
 
     def ensure_production_ready(self) -> None:
