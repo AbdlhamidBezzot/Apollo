@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { clearTokens, get, post } from "@/lib/http";
+import { clearTokens, get, post, refreshSession } from "@/lib/http";
 import type { User } from "@/lib/types";
 
 interface AuthState {
@@ -22,7 +22,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const me = await get<User>("/api/v1/auth/me");
       setUser(me);
     } catch {
-      setUser(null);
+      // Fall back to httpOnly cookies (Google OAuth stores tokens only in
+      // cookies). Hydrate localStorage from the refresh endpoint, then retry.
+      try {
+        const ok = await refreshSession();
+        if (!ok) {
+          setUser(null);
+          return;
+        }
+        const me = await get<User>("/api/v1/auth/me");
+        setUser(me);
+      } catch {
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }

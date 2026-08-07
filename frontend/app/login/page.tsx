@@ -48,22 +48,12 @@ export default function LoginPage() {
     }
   };
 
-  const googleSignIn = async () => {
+  const googleSignIn = () => {
+    // Navigate the browser directly to the backend authorize endpoint. It issues
+    // a 302 to Google with a SameSite/secure state cookie set on the same
+    // top-level navigation — no cross-origin fetch() that could drop the cookie.
     setError(null);
-    setBusy(true);
-    try {
-      const res = await fetch(`${API_URL}/api/v1/auth/google/authorize`, { credentials: "include" });
-      const body = await res.json();
-      if (body.redirect_url) {
-        window.location.href = body.redirect_url;
-      } else {
-        setError(body.detail || "Google sign-in is not configured.");
-      }
-    } catch {
-      setError("Could not reach the server for Google sign-in.");
-    } finally {
-      setBusy(false);
-    }
+    window.location.assign(`${API_URL}/api/v1/auth/google/authorize`);
   };
 
   if (loading || user) {

@@ -16,6 +16,35 @@ ACCESS_COOKIE = "apollo_access"
 REFRESH_COOKIE = "apollo_refresh"
 PROFILE_COOKIE = "apollo_profile"
 
+# Short-lived, single-use CSRF-style state for the Google OAuth flow. The cookie
+# path is scoped to the callback so it is only ever attached to the endpoint that
+# must validate it (never leaked to /me, /logout, or the static paths).
+OAUTH_STATE_COOKIE = "apollo_oauth_state"
+OAUTH_STATE_PATH = "/api/v1/auth/google/callback"
+
+
+def set_oauth_state_cookie(response: Response, state: str, secure: bool, samesite: str) -> None:
+    """Attach the state token to the authorize redirect.
+
+    Its scope is only readable by the OAuth callback. In production (Vercel
+    frontend + Render API on different origins) the cookie MUST be SameSite=None
+    + Secure so the browser stores and returns it across a cross-site callback.
+    HttpOnly keeps the raw state value out of frontend JS.
+    """
+    response.set_cookie(
+        OAUTH_STATE_COOKIE,
+        state,
+        httponly=True,
+        secure=secure,
+        samesite=samesite,
+        max_age=600,
+        path=OAUTH_STATE_PATH,
+    )
+
+
+def clear_oauth_state_cookie(response: Response) -> None:
+    response.delete_cookie(OAUTH_STATE_COOKIE, path=OAUTH_STATE_PATH)
+
 cookie_scheme = APIKeyCookie(name=ACCESS_COOKIE, auto_error=False)
 
 DbDep = Annotated[Session, Depends(get_db)]

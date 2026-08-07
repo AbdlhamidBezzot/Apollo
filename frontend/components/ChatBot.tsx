@@ -3,8 +3,8 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { posterUrl } from "@/lib/api";
-import { get, post } from "@/lib/http";
+import { API_URL, posterUrl } from "@/lib/api";
+import { getAccessToken, get, post } from "@/lib/http";
 import type { ChatResponse, SuggestedTitle } from "@/lib/types";
 
 interface EnrichedSuggestion extends SuggestedTitle {
@@ -84,9 +84,14 @@ export function ChatBot() {
     setMessages((m) => [...m, { role: "bot", content: "" }]);
 
     try {
-      const response = await fetch("/api/v1/chat/stream", {
+      const token = getAccessToken();
+      const response = await fetch(`${API_URL}/api/v1/chat/stream`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: "include",
         body: JSON.stringify({ message: text, session_id: sessionId }),
       });
 

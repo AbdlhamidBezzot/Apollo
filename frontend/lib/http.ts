@@ -1,4 +1,4 @@
-import { API_URL } from "./api";
+import { API_URL, warnIfProductionPointsAtLocalhost } from "./api";
 
 const GENERIC_ERROR_MESSAGE = "Something went wrong. Please try again.";
 
@@ -71,43 +71,57 @@ export function clearTokens(): void {
 // 401s don't fire multiple refresh requests, and dedupe the retry.
 let refreshPromise: Promise<boolean> | null = null;
 
-async function refreshTokens(): Promise<boolean> {
+/** Expose a direct one-shot refresh (used to hydrate tokens from httpOnly cookies). */
+export async function refreshSession(): Promise<boolean> {
+  // Guarantee there is an in-flight refresh to await.
   if (!refreshPromise) {
-    const refreshToken = getRefreshToken();
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (refreshToken) {
-      headers["Authorization"] = `Bearer ${refreshToken}`;
-    }
-    refreshPromise = fetch(`${API_URL}/api/v1/auth/refresh`, {
-      method: "POST",
-      headers,
-      credentials: "include",
-    })
-      .then(async (r) => {
-        if (!r.ok) {
-          // Only a confirmed invalid session should sign the user out. A server
-          // restart or short network/CORS failure must not erase a valid login.
-          if (r.status === 401 || r.status === 403) clearTokens();
-          return false;
-        }
-        try {
-          const data = await r.json();
-          if (data.access_token) setAccessToken(data.access_token);
-          if (data.refresh_token) setRefreshToken(data.refresh_token);
-        } catch {
-          /* keep existing tokens */
-        }
-        return true;
-      })
-      .catch(() => {
-        // Preserve local tokens for a later retry when the API is reachable.
-        return false;
-      })
-      .finally(() => {
-        refreshPromise = null;
-      });
+    refreshPromise = doRefresh().finally(() => {
+      refreshPromise = null;
+    });
   }
   return refreshPromise;
+}
+
+async function refreshTokens(): Promise<boolean> {
+  if (!refreshPromise) {
+    refreshPromise = doRefresh().finally(() => {
+      refreshPromise = null;
+    });
+  }
+  return refreshPromise;
+}
+
+async function doRefresh(): Promise<boolean> {
+  const refreshToken = getRefreshToken();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (refreshToken) {
+    headers["Authorization"] = `Bearer ${refreshToken}`;
+  }
+  return fetch(`${API_URL}/api/v1/auth/refresh`, {
+    method: "POST",
+    headers,
+    credentials: "include",
+  })
+    .then(async (r) => {
+      if (!r.ok) {
+        // Only a confirmed invalid session should sign the user out. A server
+        // restart or short network/CORS failure must not erase a valid login.
+        if (r.status === 401 || r.status === 403) clearTokens();
+        return false;
+      }
+      try {
+        const data = await r.json();
+        if (data.access_token) setAccessToken(data.access_token);
+        if (data.refresh_token) setRefreshToken(data.refresh_token);
+      } catch {
+        /* keep existing tokens */
+      }
+      return true;
+    })
+    .catch(() => {
+      // Preserve local tokens for a later retry when the API is reachable.
+      return false;
+    });
 }
 
 function canRetryAfter401(path: string): boolean {
@@ -117,6 +131,7 @@ function canRetryAfter401(path: string): boolean {
 }
 
 export async function api<T>(path: string, init: RequestInit = {}, revalidate?: number): Promise<T> {
+  warnIfProductionPointsAtLocalhost();
   const token = getAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",

@@ -1,21 +1,43 @@
 import { ContinueWatchingRow } from "@/components/ContinueWatchingRow";
+import { FeedErrorState } from "@/components/FeedErrorState";
 import { HeroBillboard } from "@/components/HeroBillboard";
 import { MovieRow } from "@/components/MovieRow";
 import { DiscoveryHub, ProviderMarquee, Top10Carousel } from "@/components/HomeEnhancements";
 import { RecommendationsRow } from "@/components/RecommendationsRow";
+import { API_URL } from "@/lib/api";
+import { classifyError, logTechnicalDetail } from "@/lib/errors";
+import { checkBackendHealth } from "@/lib/health";
 import { get } from "@/lib/http";
 import type { ContentListResponse, Title } from "@/lib/types";
 
-async function fetchList(path: string): Promise<Title[]> {
+async function fetchList(path: string): Promise<{ items: Title[]; failed: boolean }> {
   try {
     const data = await get<ContentListResponse>(path, 1800);
-    return (data.results || []).map((t) => ({ ...t, media_type: t.media_type || "movie" }));
-  } catch {
-    return [];
+    return {
+      items: (data.results || []).map((t) => ({ ...t, media_type: t.media_type || "movie" })),
+      failed: false,
+    };
+  } catch (err) {
+    const issue = classifyError(err);
+    logTechnicalDetail(issue, path);
+    return { items: [], failed: true };
   }
 }
 
 export default async function HomePage() {
+  // Verify backend health before attempting to load any content. If the API is
+  // unreachable we short-circuit and explain what is wrong instead of showing
+  // an empty feed.
+  const health = await checkBackendHealth(API_URL);
+  if (!health.ok) {
+    const issue =
+      health.issueCode === "timeout"
+        ? classifyError(new Error("Request timed out"))
+        : classifyError(new TypeError("Failed to fetch"));
+    logTechnicalDetail(issue, `health check failed (${health.issueCode})`);
+    return <FeedErrorState issue={issue} />;
+  }
+
   const [trending, topStreaming, popularMovies, popularTv, topRated] = await Promise.all([
     fetchList("/api/v1/content/trending?time_window=week"),
     fetchList("/api/v1/content/top-streaming?media_type=movie"),
@@ -25,30 +47,36 @@ export default async function HomePage() {
   ]);
 
   const rows = [
-    { title: "Trending this week", items: trending, seeAllHref: "/browse?kind=trending" },
-    { title: "Popular movies", items: popularMovies, seeAllHref: "/browse?media_type=movie&sort_by=popularity.desc" },
-    { title: "Popular series", items: popularTv, seeAllHref: "/browse?media_type=tv&sort_by=popularity.desc" },
-    { title: "Top rated", items: topRated, seeAllHref: "/browse?media_type=movie&sort_by=vote_average.desc" },
+    { title: "Trending this week", items: trending.items, seeAllHref: "/browse?kind=trending" },
+    { title: "Popular movies", items: popularMovies.items, seeAllHref: "/browse?media_type=movie&sort_by=popularity.desc" },
+    { title: "Popular series", items: popularTv.items, seeAllHref: "/browse?media_type=tv&sort_by=popularity.desc" },
+    { title: "Top rated", items: topRated.items, seeAllHref: "/browse?media_type=movie&sort_by=vote_average.desc" },
   ];
 
-  if (trending.length === 0 && !rows.some((r) => r.items.length)) {
+  const totalItems = rows.reduce((sum, r) => sum + r.items.length, 0);
+  const allFailed = rows.every((r) => r.items.length === 0) && totalItems === 0;
+
+  if (allFailed) {
+    // Backend is healthy but the upstream content service is failing (TMDB).
     return (
-      <div className="mx-auto max-w-xl px-4 py-24 text-center text-text-muted">
-        <h1 className="mb-2 text-2xl font-extrabold text-text-vivid">Welcome to Apollo</h1>
-        <p>
-          The content feed is unavailable right now. Make sure the backend is running and that{" "}
-          <code className="rounded bg-bg-card px-1.5 py-0.5 font-mono text-xs">TMDB_API_KEY</code> is set in{" "}
-          <code className="rounded bg-bg-card px-1.5 py-0.5 font-mono text-xs">backend/.env</code>.
-        </p>
-      </div>
+      <FeedErrorState
+        issue={{
+          code: "missing_tmdb",
+          title: "Content service unavailable",
+          message:
+            "Apollo is online but the content service returned no data. Make sure TMDB_API_KEY " +
+            "is configured on the deployed backend.",
+          detail: "All home lists returned empty/502.",
+        }}
+      />
     );
   }
 
   return (
     <div className="space-y-12 pb-4">
-      {trending.length > 0 && <HeroBillboard slides={trending} />}
+      {trending.items.length > 0 && <HeroBillboard slides={trending.items} />}
 
-      <Top10Carousel items={topStreaming.length ? topStreaming : trending} />
+      <Top10Carousel items={topStreaming.items.length ? topStreaming.items : trending.items} />
       <DiscoveryHub />
       <ProviderMarquee />
       <ContinueWatchingRow />

@@ -1,28 +1,53 @@
 import { AnimeHubPrefs } from "@/components/AnimeHubPrefs";
+import { FeedErrorState } from "@/components/FeedErrorState";
 import { MovieRow } from "@/components/MovieRow";
+import { API_URL } from "@/lib/api";
+import { classifyError, logTechnicalDetail } from "@/lib/errors";
+import { checkBackendHealth } from "@/lib/health";
 import { get } from "@/lib/http";
 import type { ContentListResponse, Title } from "@/lib/types";
 
-async function fetchAnime(mediaType: "movie" | "tv"): Promise<Title[]> {
+async function fetchAnime(mediaType: "movie" | "tv"): Promise<{ items: Title[]; failed: boolean }> {
   try {
     const data = await get<ContentListResponse>(
       `/api/v1/content/discover?media_type=${mediaType}&genre=16&sort_by=popularity.desc`
     );
-    return (data.results || []).map((t) => ({ ...t, media_type: mediaType }));
-  } catch {
-    return [];
+    return {
+      items: (data.results || []).map((t) => ({ ...t, media_type: mediaType })),
+      failed: false,
+    };
+  } catch (err) {
+    const issue = classifyError(err);
+    logTechnicalDetail(issue, mediaType);
+    return { items: [], failed: true };
   }
 }
 
 export default async function AnimePage() {
+  const health = await checkBackendHealth(API_URL);
+  if (!health.ok) {
+    const issue =
+      health.issueCode === "timeout"
+        ? classifyError(new Error("Request timed out"))
+        : classifyError(new TypeError("Failed to fetch"));
+    logTechnicalDetail(issue, `health check failed (${health.issueCode})`);
+    return <FeedErrorState issue={issue} />;
+  }
+
   const [movies, series] = await Promise.all([fetchAnime("movie"), fetchAnime("tv")]);
 
-  if (!movies.length && !series.length) {
+  if (!movies.items.length && !series.items.length) {
     return (
-      <div className="mx-auto max-w-xl px-4 py-24 text-center text-text-muted">
-        <h1 className="mb-2 text-2xl font-extrabold text-text-vivid">Anime</h1>
-        <p>Anime titles are unavailable right now. Make sure the backend is running and TMDB_API_KEY is set.</p>
-      </div>
+      <FeedErrorState
+        issue={{
+          code: "missing_tmdb",
+          title: "Content service unavailable",
+          message:
+            "Apollo is online but the anime catalog returned no data. Make sure TMDB_API_KEY " +
+            "is configured on the deployed backend.",
+          detail: "Anime discovery lists returned empty/502.",
+        }}
+      />
     );
   }
 
@@ -33,8 +58,8 @@ export default async function AnimePage() {
         <h1 className="mt-1 text-3xl font-extrabold tracking-tightest text-text-vivid">Anime</h1>
       </div>
       <AnimeHubPrefs />
-      <MovieRow title="Anime movies" items={movies} seeAllHref="/browse?media_type=movie&genre=16" />
-      <MovieRow title="Anime series" items={series} seeAllHref="/browse?media_type=tv&genre=16" />
+      <MovieRow title="Anime movies" items={movies.items} seeAllHref="/browse?media_type=movie&genre=16" />
+      <MovieRow title="Anime series" items={series.items} seeAllHref="/browse?media_type=tv&genre=16" />
     </div>
   );
 }
