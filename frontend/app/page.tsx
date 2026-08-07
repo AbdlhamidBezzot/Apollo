@@ -4,6 +4,7 @@ import { HeroBillboard } from "@/components/HeroBillboard";
 import { MovieRow } from "@/components/MovieRow";
 import { DiscoveryHub, ProviderMarquee, Top10Carousel } from "@/components/HomeEnhancements";
 import { RecommendationsRow } from "@/components/RecommendationsRow";
+import { SignInNotice } from "@/components/SignInNotice";
 import { API_URL } from "@/lib/api";
 import { classifyError, logTechnicalDetail } from "@/lib/errors";
 import { checkBackendHealth } from "@/lib/health";
@@ -79,6 +80,7 @@ export default async function HomePage() {
       <Top10Carousel items={topStreaming.items.length ? topStreaming.items : trending.items} />
       <DiscoveryHub />
       <ProviderMarquee />
+      <SignInNotice />
       <ContinueWatchingRow />
 
       <RecommendationsRow />
