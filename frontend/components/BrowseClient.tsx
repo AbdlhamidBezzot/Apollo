@@ -1,8 +1,10 @@
 "use client";
 
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { AdBanner } from "@/components/AdBanner";
 import { MovieCard } from "@/components/MovieCard";
+import { AD_SLOTS } from "@/lib/adsConfig";
 import { get } from "@/lib/http";
 import type { ContentListResponse, Title } from "@/lib/types";
 
@@ -412,7 +414,14 @@ export function BrowseClient({
         <>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {items.map((item, i) => (
-              <MovieCard key={`${item.media_type || "movie"}-${item.id}-${i}`} item={item} />
+              <React.Fragment key={`${item.media_type || "movie"}-${item.id}-${i}`}>
+                <MovieCard item={item} />
+                {(i + 1) % 18 === 0 && (
+                  <div className="col-span-full my-4">
+                    <AdBanner slotId={AD_SLOTS.browseGrid} format="horizontal" />
+                  </div>
+                )}
+              </React.Fragment>
             ))}
           </div>
 

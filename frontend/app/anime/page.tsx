@@ -1,7 +1,9 @@
+import { AdBanner } from "@/components/AdBanner";
 import { AnimeHubPrefs } from "@/components/AnimeHubPrefs";
 import { FeedErrorState } from "@/components/FeedErrorState";
 import { MovieRow } from "@/components/MovieRow";
 import { API_URL } from "@/lib/api";
+import { AD_SLOTS } from "@/lib/adsConfig";
 import { classifyError, logTechnicalDetail } from "@/lib/errors";
 import { checkBackendHealth } from "@/lib/health";
 import { get } from "@/lib/http";
@@ -59,6 +61,7 @@ export default async function AnimePage() {
       </div>
       <AnimeHubPrefs />
       <MovieRow title="Anime movies" items={movies.items} seeAllHref="/browse?media_type=movie&genre=16" />
+      <AdBanner slotId={AD_SLOTS.animeRow} format="horizontal" />
       <MovieRow title="Anime series" items={series.items} seeAllHref="/browse?media_type=tv&genre=16" />
     </div>
   );

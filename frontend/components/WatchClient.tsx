@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Player } from "@/components/Player";
+import { PreWatchAd } from "@/components/PreWatchAd";
 import { post } from "@/lib/http";
 import type { PlaybackSession } from "@/lib/types";
 
@@ -24,6 +25,7 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
   const [title, setTitle] = useState("");
   const [poster, setPoster] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [adCompleted, setAdCompleted] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -92,6 +94,16 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
         <div className="skeleton mb-3 h-8 w-64 rounded" />
         <div className="skeleton aspect-video w-full rounded-xl" />
       </div>
+    );
+  }
+
+  if (!adCompleted) {
+    return (
+      <PreWatchAd
+        title={title || session.title || `${mediaType === "tv" ? "TV" : "Movie"} ${id}`}
+        poster={poster || session.poster}
+        onComplete={() => setAdCompleted(true)}
+      />
     );
   }
 
