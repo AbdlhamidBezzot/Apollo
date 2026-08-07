@@ -1,8 +1,8 @@
 """Playback routes.
 
 Resolves a TMDB title to a short-lived, signed stream URL via the active
-PlaybackProvider (vidsrc). No per-account concurrency cap: users may watch as
-many titles as they want.
+PlaybackProvider (vidsrc). Watching does not require an account: anyone can
+resolve and play any title. No per-account concurrency cap.
 """
 
 from typing import Annotated
@@ -16,8 +16,6 @@ from app.models import PlaybackCue
 from app.schemas import PlaybackCueOut, PlaybackCueUpdate, PlaybackResolveRequest, PlaybackSession
 from app.services.playback.base import PlaybackProvider, PlaybackResult, get_provider
 
-from ..deps import CurrentProfile
-
 router = APIRouter(prefix="/playback", tags=["playback"])
 
 DbDep = Annotated[Session, Depends(get_db)]
@@ -26,7 +24,6 @@ DbDep = Annotated[Session, Depends(get_db)]
 @router.post("/resolve", response_model=PlaybackSession)
 async def resolve(
     payload: PlaybackResolveRequest,
-    profile: CurrentProfile,
     db: DbDep,
     provider: PlaybackProvider = Depends(get_provider),
     _rl=Depends(rate_limited("playback", "30/minute")),

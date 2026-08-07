@@ -8,9 +8,8 @@ build:
 APP_ENV = "production"
 COOKIE_SAMESITE = "none"
 CORS_ORIGINS = "https://apollo-94zv.vercel.app"
-FRONTEND_URL = "https://apollo-94zv.vercel.app"
 # Attach secrets via `fly secrets set` (DATABASE_URL, REDIS_URL, TMDB_*,
-# GOOGLE_*, OAUTH_REDIRECT_URI, SECRET_KEY). Never commit them here.
+# SECRET_KEY). Never commit them here.
 SECRET_KEY = ""
 
 [[services]]

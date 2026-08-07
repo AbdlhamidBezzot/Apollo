@@ -18,7 +18,7 @@ Production Backend (Render / Railway / Fly.io)
    ├── PostgreSQL
    ├── Redis
    ├── TMDB API
-   └── Auth (JWT cookies + Google OAuth)
+   └── Auth (JWT cookies)
 ```
 
 ---
@@ -27,7 +27,7 @@ Production Backend (Render / Railway / Fly.io)
 
 - **CORS** is restrictive (no `*`) and credential-enabled. Frontend origins are read from
   `CORS_ORIGINS` (comma-separated, no wildcard allowed).
-- **Secrets** (`SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `TMDB_*`, `GOOGLE_*`, `OAUTH_REDIRECT_URI`,
+- **Secrets** (`SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `TMDB_*`,
   LLM keys) are injected via each host's environment — **never committed**. Only `.env.example`
   files are checked in.
 - **Config fails fast**: in `production`, `APP_ENV=production` refuses to boot with a default
@@ -43,14 +43,11 @@ Production Backend (Render / Railway / Fly.io)
 | `SECRET_KEY` | Server signing secret (used if no `JWT_SECRET`) | random 32+ chars |
 | `JWT_SECRET` | Optional override for JWT signing | random 32+ chars |
 | `CORS_ORIGINS` | Comma-separated allowed browser origins. **No `*`.** | `https://apollo-94zv.vercel.app` |
-| `FRONTEND_URL` | Absolute base URL for OAuth redirects | `https://apollo-94zv.vercel.app` |
 | `COOKIE_SAMESITE` | `lax` (dev) or `none` (prod, cross-site cookies) | `none` |
 | `DATABASE_URL` | PostgreSQL connection string (**never sqlite in prod**) | `postgresql+psycopg://user:pass@host:5432/db` |
 | `REDIS_URL` | Redis URL (fallback to in-memory if unreachable) | `redis://...:6379` |
 | `TMDB_API_KEY` / `TMDB_API_READ_ACCESS_TOKEN` | Required for real content | from the TMDB dashboard |
 | `TMDB_API_BASE_URL` | TMDB base | `https://api.themoviedb.org/3` |
-| `OAUTH_REDIRECT_URI` | Public callback URL on the API host | `https://api.<host>/api/v1/auth/google/callback` |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth | from Google Cloud Console |
 | `LLM_PROVIDER` / `GEMINI_API_KEY` / `DEEPSEEK_API_KEY` | CineBot LLM | optional |
 | `RATE_LIMIT_*` | Rate-limit specs | defaults provided |
 | `ACCESS_TOKEN_MINUTES` / `REFRESH_TOKEN_DAYS` | Token lifetimes | defaults |
@@ -96,11 +93,11 @@ Redis plugins; copy `DATABASE_URL`/`REDIS_URL`.
 ```bash
 cd backend
 fly launch --image-buffer  (or `fly apps create apollo-api`)
-fly secrets set SECRET_KEY="..." DATABASE_URL="..." REDIS_URL="..." TMDB_API_KEY="..." GOOGLE_CLIENT_ID="..." GOOGLE_CLIENT_SECRET="..." OAUTH_REDIRECT_URI="..." FRONTEND_URL="..." CORS_ORIGINS="..." COOKIE_SAMESITE=none
+fly secrets set SECRET_KEY="..." DATABASE_URL="..." REDIS_URL="..." TMDB_API_KEY="..." CORS_ORIGINS="..." COOKIE_SAMESITE=none
 fly deploy
 ```
 
-Make sure `FRONTEND_URL` matches your Vercel frontend and is included in `CORS_ORIGINS`.
+Make sure `CORS_ORIGINS` includes your Vercel frontend origin.
 
 ---
 
@@ -145,9 +142,8 @@ before loading content and render a clear error like *"Backend unreachable"* whe
   and also returned in the response body (stored in **localStorage**).
 - **SameSite:** set `COOKIE_SAMESITE=none` in production when the frontend and API are on
   different hosts (cross-site). `Secure` is forced automatically in production.
-- Google OAuth: set `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` and `OAUTH_REDIRECT_URI` (must be a
-  **public** URL on the API host). The frontend falls back to cookie-based refresh to hydrate
-  localStorage auth after OAuth.
+- Watching movies does **not** require an account. Sign-in is only needed for account features:
+  watch history, the "Continue Watching" row, and the CineBot chatbot.
 
 ## 10. CORS
 
@@ -187,7 +183,6 @@ before loading content and render a clear error like *"Backend unreachable"* whe
 | `CORS policy` blocked in browser to `localhost` proxy | `NEXT_PUBLIC_API_URL` unset on Vercel. Set it to the deployed API + redeploy. |
 | `Backend unreachable` on home page | API down or wrong `NEXT_PUBLIC_API_URL`. Check `GET {URL}/health`. |
 | `access_token` 401 loops | Clock skew or wrong `JWT_SECRET`. Set a fixed `JWT_SECRET` and match on both sides. |
-| Google OAuth loops | `OAUTH_REDIRECT_URI` must be the exact public callback; `FRONTEND_URL` must match `CORS_ORIGINS`. `COOKIE_SAMESITE=none`. |
 | Cookies not sent across sites | Ensure same-site **SameSite=None** + **Secure**; or rely on localStorage Bearer tokens (default). |
 | `_not-found` / 404 / Suspense errors building | Pages using `useSearchParams()` wrapped in `<Suspense>` (already done for Navbar/Watch/MovieNight). |
 | `No module named 'psycopg2'` | Provider injected a bare `postgresql://` URL. Already auto-coerced to psycopg3 (`postgresql+psycopg://`); this needs no action. If it persists, confirm `psycopg[binary]` installed and `DATABASE_URL` starts with `postgresql+psycopg://`. |
@@ -204,6 +199,6 @@ before loading content and render a clear error like *"Backend unreachable"* whe
 - [ ] `CORS_ORIGINS` contains `https://apollo-94zv.vercel.app`; no `*`.
 - [ ] `SECRET_KEY`/`JWT_SECRET` set (strong, random).
 - [ ] `COOKIE_SAMESITE=none`, `APP_ENV=production` on the API host.
-- [ ] Google OAuth end-to-end signs in.
+- [ ] Email sign-in/register round-trip works (guest can watch without an account).
 - [ ] `npm run build` completes with no errors.
 - [ ] `git grep -n "localhost"` matches only docs/dev defaults (`.env.example`, `Procfile`, README).

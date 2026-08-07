@@ -1,20 +1,25 @@
 import { API_URL, warnIfProductionPointsAtLocalhost } from "./api";
 
-const GENERIC_ERROR_MESSAGE = "Something went wrong. Please try again.";
+const GENERIC_ERROR_MESSAGE = "We couldn't load this page right now. Please try again in a moment.";
 
 function sanitizeApiErrorMessage(message: unknown): string {
   if (typeof message !== "string" || !message.trim()) return GENERIC_ERROR_MESSAGE;
-  // Only suppress messages that look like internal technical leaks (stack traces, raw secrets, etc.)
-  const looksTechnical = /(?:\btraceback\b|stack trace|\bat\s+\w+\s*\(|api[_ -]?key\s*=|secret\s*=|https?:\/\/\S+:\d+)/i;
-  return looksTechnical.test(message) ? GENERIC_ERROR_MESSAGE : message;
+  const looksTechnical =
+    /(?:\btraceback\b|stack trace|\bat\s+\w+\s*\(|api[_ -]?key\s*=|secret\s*=|https?:\/\/\S+:\d+|backend|vercel|next_public|tmdb|failed to fetch|econnrefused)/i;
+  return looksTechnical.test(message) ? GENERIC_ERROR_MESSAGE : message.trim();
 }
 
 export class ApiError extends Error {
   status: number;
+  technicalDetail: string;
+  url?: string;
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, url?: string) {
     super(sanitizeApiErrorMessage(message));
+    this.name = "ApiError";
     this.status = status;
+    this.technicalDetail = String(message || "");
+    this.url = url;
   }
 }
 
@@ -73,7 +78,6 @@ let refreshPromise: Promise<boolean> | null = null;
 
 /** Expose a direct one-shot refresh (used to hydrate tokens from httpOnly cookies). */
 export async function refreshSession(): Promise<boolean> {
-  // Guarantee there is an in-flight refresh to await.
   if (!refreshPromise) {
     refreshPromise = doRefresh().finally(() => {
       refreshPromise = null;
@@ -104,8 +108,6 @@ async function doRefresh(): Promise<boolean> {
   })
     .then(async (r) => {
       if (!r.ok) {
-        // Only a confirmed invalid session should sign the user out. A server
-        // restart or short network/CORS failure must not erase a valid login.
         if (r.status === 401 || r.status === 403) clearTokens();
         return false;
       }
@@ -119,16 +121,16 @@ async function doRefresh(): Promise<boolean> {
       return true;
     })
     .catch(() => {
-      // Preserve local tokens for a later retry when the API is reachable.
       return false;
     });
 }
 
 function canRetryAfter401(path: string): boolean {
   if (path === "/api/v1/auth/me") return true;
-  // Auth endpoints (refresh/logout/login/register) must not retry the refresh loop.
   return !path.startsWith("/api/v1/auth/");
 }
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function api<T>(path: string, init: RequestInit = {}, revalidate?: number): Promise<T> {
   warnIfProductionPointsAtLocalhost();
@@ -136,18 +138,44 @@ export async function api<T>(path: string, init: RequestInit = {}, revalidate?: 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(init.headers as Record<string, string> || {}),
+    ...((init.headers as Record<string, string>) || {}),
   };
 
+  const fullUrl = `${API_URL}${path}`;
+  const isReadMethod = !init.method || init.method.toUpperCase() === "GET" || init.method.toUpperCase() === "HEAD";
+
   const doFetch = () =>
-    fetch(`${API_URL}${path}`, {
+    fetch(fullUrl, {
       ...init,
       headers,
       credentials: "include",
       ...(revalidate ? { next: { revalidate } } : { cache: "no-store" }),
     });
 
-  let res = await doFetch();
+  let res: Response;
+  let attempt = 0;
+  const maxAttempts = isReadMethod ? 2 : 1; // Automatic single-retry with backoff for GET operations
+
+  while (true) {
+    try {
+      res = await doFetch();
+      // Retry transient server gateway/unavailable errors (502, 503, 504) once
+      if (isReadMethod && attempt < maxAttempts - 1 && (res.status === 502 || res.status === 503 || res.status === 504)) {
+        attempt++;
+        await sleep(350 * attempt);
+        continue;
+      }
+      break;
+    } catch (err) {
+      if (isReadMethod && attempt < maxAttempts - 1) {
+        attempt++;
+        await sleep(350 * attempt);
+        continue;
+      }
+      throw err;
+    }
+  }
+
   if (res.status === 401 && canRetryAfter401(path)) {
     if (await refreshTokens()) {
       const newToken = getAccessToken();
@@ -173,7 +201,8 @@ export async function api<T>(path: string, init: RequestInit = {}, revalidate?: 
     } catch {
       /* keep statusText */
     }
-    throw new ApiError(res.status, sanitizeApiErrorMessage(detail));
+    const rawDetailStr = typeof detail === "string" ? detail : JSON.stringify(detail);
+    throw new ApiError(res.status, rawDetailStr, fullUrl);
   }
 
   const data = (await res.json()) as T;
@@ -192,4 +221,5 @@ export const post = <T>(path: string, body?: unknown) =>
 export const put = <T>(path: string, body?: unknown) =>
   api<T>(path, { method: "PUT", body: body ? JSON.stringify(body) : undefined });
 export const del = <T>(path: string) => api<T>(path, { method: "DELETE" });
+
 

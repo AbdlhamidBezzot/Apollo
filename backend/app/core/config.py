@@ -36,9 +36,6 @@ class Settings(BaseSettings):
         "https://apollo-94zv.vercel.app"
     )
 
-    # Absolute frontend URL the API redirects to (e.g. Google OAuth callback).
-    frontend_url: str = ""
-
     database_url: str = "sqlite:///./apollo.db"
     redis_url: str = "redis://localhost:6379/0"
 
@@ -47,10 +44,6 @@ class Settings(BaseSettings):
     tmdb_api_base_url: str = "https://api.themoviedb.org/3"
 
     playback_provider: str = "vidsrc"
-
-    google_client_id: str = ""
-    google_client_secret: str = ""
-    oauth_redirect_uri: str = ""
 
     # Development (same-origin localhost) uses Lax. In production the Vercel
     # frontend and Render API are cross-site, so cookies are always SameSite=None
@@ -103,15 +96,6 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
-
-    @property
-    def frontend_origin(self) -> str:
-        """Base URL to redirect OAuth callbacks back to."""
-        if self.frontend_url:
-            return self.frontend_url.rstrip("/")
-        if self.cors_origin_list:
-            return self.cors_origin_list[0]
-        return "http://localhost:3000"
 
     @property
     def token_secret(self) -> str:

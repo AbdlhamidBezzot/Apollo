@@ -2,8 +2,10 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ErrorScreen } from "@/components/ErrorScreen";
 import { Player } from "@/components/Player";
 import { PreWatchAd } from "@/components/PreWatchAd";
+import { classifyError, logTechnicalDetail } from "@/lib/errors";
 import { post } from "@/lib/http";
 import type { PlaybackSession } from "@/lib/types";
 
@@ -68,23 +70,20 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
           });
           setSession(res);
         }
-      } catch (err: any) {
-        setError(err.message || "Could not start playback. Check the backend and your playback provider config.");
+      } catch (err: unknown) {
+        const issue = classifyError(err);
+        logTechnicalDetail(issue, { mediaType, id });
+        setError(issue.message);
       }
     })();
   }, [mediaType, id, searchParams]);
 
   if (error) {
     return (
-      <div className="mx-auto max-w-xl px-4 py-24 text-center">
-        <p className="mb-4 text-text-muted">{error}</p>
-        <button
-          onClick={() => router.push("/")}
-          className="rounded-full bg-brand px-6 py-2 text-sm font-bold text-white shadow-brand-glow"
-        >
-          Back to home
-        </button>
-      </div>
+      <ErrorScreen
+        message={error}
+        onRetry={() => router.refresh()}
+      />
     );
   }
 

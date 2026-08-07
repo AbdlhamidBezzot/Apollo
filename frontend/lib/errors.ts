@@ -14,120 +14,191 @@ export interface ApiIssue {
   code: ApiIssueCode;
   title: string;
   message: string;
-  /** Technical detail that is only ever logged in development. */
+  /** Technical detail that is logged for developers only. */
   detail: string;
+  status?: number;
+  url?: string;
+  stack?: string;
 }
+
+export const DEFAULT_USER_TITLE = "Something went wrong";
+export const DEFAULT_USER_MESSAGE = "We couldn't load this page right now. Please try again in a moment.";
+export const CONNECTION_USER_MESSAGE = "We couldn't connect right now. Please try again.";
 
 const DEFAULT_ISSUE: ApiIssue = {
   code: "unknown",
-  title: "Something went wrong",
-  message: "The service is temporarily unavailable. Please try again shortly.",
+  title: DEFAULT_USER_TITLE,
+  message: DEFAULT_USER_MESSAGE,
   detail: "",
 };
 
+const CONNECTION_ISSUE: ApiIssue = {
+  code: "backend_unreachable",
+  title: DEFAULT_USER_TITLE,
+  message: CONNECTION_USER_MESSAGE,
+  detail: "",
+};
+
+const TECHNICAL_PATTERNS = [
+  /backend/i,
+  /vercel/i,
+  /next_public/i,
+  /env/i,
+  /tmdb/i,
+  /failed to fetch/i,
+  /networkerror/i,
+  /load failed/i,
+  /econnrefused/i,
+  /timeout/i,
+  /aborted/i,
+  /500 internal server error/i,
+  /http:\/\//i,
+  /https:\/\//i,
+  /stack trace/i,
+  /traceback/i,
+];
+
+/** Check if a string contains technical or internal developer terminology. */
+export function isTechnicalMessage(msg: string): boolean {
+  if (!msg) return false;
+  return TECHNICAL_PATTERNS.some((pattern) => pattern.test(msg));
+}
+
+/** Sanitize any error message for end users. */
+export function sanitizeUserMessage(msg: string | undefined | null, defaultMsg = DEFAULT_USER_MESSAGE): string {
+  if (!msg || typeof msg !== "string" || !msg.trim()) return defaultMsg;
+  if (isTechnicalMessage(msg)) return defaultMsg;
+  return msg.trim();
+}
+
 export function classifyError(err: unknown): ApiIssue {
-  // Network-level failures: browser couldn't even reach the API.
   if (err instanceof TypeError) {
-    const msg = String(err.message);
-    if (/failed to fetch|networkerror|load failed/i.test(msg)) {
+    const msg = String(err.message || "");
+    if (/failed to fetch|networkerror|load failed|econnrefused/i.test(msg)) {
       return {
+        ...CONNECTION_ISSUE,
         code: "backend_unreachable",
-        title: "Backend unreachable",
-        message:
-          "We couldn't reach the Apollo API. Check that the backend is deployed and that NEXT_PUBLIC_API_URL points to it.",
         detail: msg,
+        stack: err.stack,
       };
     }
   }
 
-  // Explicit timeout from our fetch wrapper.
   if (err instanceof Error && /timeout|aborted/i.test(err.message)) {
     return {
+      ...CONNECTION_ISSUE,
       code: "timeout",
-      title: "Request timed out",
-      message: "The backend took too long to respond. Please try again in a moment.",
       detail: err.message,
+      stack: err.stack,
     };
   }
 
-  // A malformed API URL fails before any request is sent.
   if (err instanceof Error && /invalid url|not a valid url|failed to parse url/i.test(err.message)) {
     return {
+      ...CONNECTION_ISSUE,
       code: "invalid_api_url",
-      title: "Invalid API URL",
-      message: "The configured backend URL is invalid. Ask the administrator to check NEXT_PUBLIC_API_URL.",
       detail: err.message,
+      stack: err.stack,
     };
   }
 
   if (err instanceof ApiError) {
     const status = err.status;
+    const rawMsg = err.message || "";
+    const detail = err.technicalDetail || rawMsg || `API status ${status}`;
+
     if (status === 401) {
       return {
         code: "unauthorized",
         title: "Sign in required",
-        message: err.message || "You need to sign in to continue.",
-        detail: `API returned 401.`,
+        message: "Please sign in to continue.",
+        detail,
+        status,
+        url: err.url,
+        stack: err.stack,
       };
     }
     if (status === 403) {
       return {
         code: "auth_unavailable",
-        title: "Authentication service unavailable",
-        message: err.message || "The authentication service is unavailable. Please try again.",
-        detail: `API returned 403.`,
+        title: DEFAULT_USER_TITLE,
+        message: DEFAULT_USER_MESSAGE,
+        detail,
+        status,
+        url: err.url,
+        stack: err.stack,
       };
     }
-    if (status === 502) {
+    if (status === 502 || status === 503 || status === 504) {
       return {
         code: "missing_tmdb",
-        title: "Content service unavailable",
-        message:
-          err.message ||
-          "The content service is unavailable. Check that TMDB_API_KEY is configured on the backend.",
-        detail: `API returned 502 (bad gateway).`,
+        title: DEFAULT_USER_TITLE,
+        message: CONNECTION_USER_MESSAGE,
+        detail,
+        status,
+        url: err.url,
+        stack: err.stack,
       };
     }
     if (status >= 500) {
       return {
         code: "server_error",
-        title: "Backend error",
-        message: err.message || "The backend hit an error. Please try again shortly.",
-        detail: `API returned ${status}.`,
+        title: DEFAULT_USER_TITLE,
+        message: DEFAULT_USER_MESSAGE,
+        detail,
+        status,
+        url: err.url,
+        stack: err.stack,
       };
     }
     if (status === 429) {
       return {
         code: "server_error",
-        title: "Too many requests",
-        message: "You've been rate limited. Please wait a moment and try again.",
-        detail: "API returned 429.",
+        title: DEFAULT_USER_TITLE,
+        message: "We're receiving a high volume of requests. Please try again in a moment.",
+        detail,
+        status,
+        url: err.url,
+        stack: err.stack,
       };
     }
     return {
       code: "unknown",
-      title: "Request failed",
-      message: err.message || DEFAULT_ISSUE.message,
-      detail: `API returned ${status}.`,
+      title: DEFAULT_USER_TITLE,
+      message: sanitizeUserMessage(rawMsg),
+      detail,
+      status,
+      url: err.url,
+      stack: err.stack,
     };
   }
 
   if (err instanceof Error) {
+    const isNetwork = isTechnicalMessage(err.message);
     return {
       code: "unknown",
-      title: "Something went wrong",
-      message: err.message || DEFAULT_ISSUE.message,
+      title: DEFAULT_USER_TITLE,
+      message: isNetwork ? CONNECTION_USER_MESSAGE : sanitizeUserMessage(err.message),
       detail: err.message,
+      stack: err.stack,
     };
   }
 
   return DEFAULT_ISSUE;
 }
 
-/** Log technical details to the console only in development. */
+/** Log complete technical details to console/logs for developers only. */
 export function logTechnicalDetail(issue: ApiIssue, extra?: unknown): void {
-  if (process.env.NODE_ENV === "development") {
+  if (process.env.NODE_ENV === "development" || typeof window === "undefined") {
     // eslint-disable-next-line no-console
-    console.debug(`[Apollo:${issue.code}]`, issue.detail, extra ?? "");
+    console.error(
+      `[Apollo Error:${issue.code}]`,
+      issue.detail || issue.message,
+      issue.status ? `(Status: ${issue.status})` : "",
+      issue.url ? `(URL: ${issue.url})` : "",
+      extra ?? "",
+      issue.stack ? `\nStack: ${issue.stack}` : ""
+    );
   }
 }
+

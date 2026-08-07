@@ -87,6 +87,7 @@ export function PreWatchAd({
               </div>
             ) : (
               <button
+                type="button"
                 onClick={onComplete}
                 className="group flex items-center gap-2 rounded-full bg-gradient-to-r from-brand to-brand-soft px-5 py-2.5 text-xs font-bold text-white shadow-brand-glow transition-all hover:scale-105"
               >

@@ -36,11 +36,11 @@ backend/
       deps.py          # current user/profile, cookie helpers
       router.py
       routes/
-        auth.py        # register/login/logout/refresh, Google OAuth stub
+        auth.py        # register/login/logout/refresh
         content.py     # cached TMDB proxy: browse, search, detail, similar
         me.py          # profiles, preferences, watchlist, history, ratings
         chatbot.py     # CineBot endpoints (rate-limited)
-        playback.py    # resolve stream, per-account concurrency cap
+        playback.py    # resolve stream (no account required to watch)
     services/
       tmdb.py          # cached TMDB client (key never leaves the server)
       recommendations.py  # content-based ranking

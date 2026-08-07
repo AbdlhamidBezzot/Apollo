@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthContext";
+import { classifyError } from "@/lib/errors";
 import { post } from "@/lib/http";
 
 export default function LoginPage() {
@@ -34,8 +35,8 @@ export default function LoginPage() {
       }
       await refresh();
       router.push("/");
-    } catch (err: any) {
-      setError(err.message || "Something went wrong.");
+    } catch (err: unknown) {
+      setError(classifyError(err).message);
     } finally {
       setBusy(false);
     }

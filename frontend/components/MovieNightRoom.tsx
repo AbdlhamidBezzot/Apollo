@@ -5,7 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/AuthContext";
 import { posterUrl } from "@/lib/api";
+import { classifyError } from "@/lib/errors";
 import { get, post, put } from "@/lib/http";
+
 import type {
   Genre,
   MovieNightDecideResponse,
@@ -114,8 +116,8 @@ export function MovieNightRoomClient() {
       setIsHost(true);
       setJoined(true);
       localStorage.setItem(`apollo:room:${r.code}`, r.token);
-    } catch (err: any) {
-      setError(err.message || "Could not create a room. Are you signed in?");
+    } catch (err: unknown) {
+      setError(classifyError(err).message);
     } finally {
       setBusy(false);
     }
@@ -141,8 +143,8 @@ export function MovieNightRoomClient() {
       setIsHost(res.is_host);
       setJoined(true);
       localStorage.setItem(`apollo:room:${c}`, res.token);
-    } catch (err: any) {
-      setError(err.message || "Could not join that room. Check the code.");
+    } catch (err: unknown) {
+      setError(classifyError(err).message);
     } finally {
       setBusy(false);
     }
@@ -164,8 +166,8 @@ export function MovieNightRoomClient() {
         }
       );
       setRoom(d);
-    } catch (err: any) {
-      setError(err.message || "Could not save preferences.");
+    } catch (err: unknown) {
+      setError(classifyError(err).message);
     } finally {
       setBusy(false);
     }
@@ -184,8 +186,8 @@ export function MovieNightRoomClient() {
       setSuggestion(res);
       const enriched = await enrich(res.suggested_titles || []);
       setTitles(enriched);
-    } catch (err: any) {
-      setError(err.message || "Could not build a pick yet. Have everyone set preferences.");
+    } catch (err: unknown) {
+      setError(classifyError(err).message);
     } finally {
       setBusySuggest(false);
     }
@@ -204,8 +206,8 @@ export function MovieNightRoomClient() {
         sessionStorage.setItem("apollo:play", JSON.stringify(res.play_target));
         router.push(`/watch/${res.play_target.media_type}/${res.play_target.tmdb_id}`);
       }
-    } catch (err: any) {
-      setError(err.message || "Only the host can confirm the pick.");
+    } catch (err: unknown) {
+      setError(classifyError(err).message);
     } finally {
       setBusy(false);
     }

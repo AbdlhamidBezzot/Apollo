@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
+import { classifyError } from "@/lib/errors";
 import { get, post } from "@/lib/http";
 import type { MovieNightRoomInfo } from "@/lib/types";
 
@@ -80,8 +81,8 @@ export function MovieNightModal() {
         if (target.episode) qs.set("episode", String(target.episode));
       }
       router.push(`${base}?${qs.toString()}`);
-    } catch (err: any) {
-      setError(err.message || "Could not create the room.");
+    } catch (err: unknown) {
+      setError(classifyError(err).message);
     } finally {
       setBusy(false);
     }
@@ -106,8 +107,8 @@ export function MovieNightModal() {
         if (room.episode) qs.set("episode", String(room.episode));
       }
       router.push(`${base}?${qs.toString()}`);
-    } catch (err: any) {
-      setError(err.message || "Room not found. Check the code and try again.");
+    } catch (err: unknown) {
+      setError(classifyError(err).message);
     } finally {
       setBusy(false);
     }

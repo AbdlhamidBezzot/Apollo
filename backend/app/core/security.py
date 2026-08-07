@@ -6,9 +6,7 @@ Security rules honoured here:
 - tokens carried in httpOnly, secure cookies (see api/routes/auth.py)
 """
 
-import base64
 import hashlib
-import os
 import time
 from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
@@ -54,10 +52,6 @@ def decode_token(token: str, secret: str, expected_type: TokenType) -> dict[str,
     if claims.get("type") != expected_type:
         raise jwt.InvalidTokenError("wrong token type")
     return claims
-
-
-def generate_state_token() -> str:
-    return base64.urlsafe_b64encode(os.urandom(24)).decode("ascii")
 
 
 def verify_iso_expires(token: str) -> bool:

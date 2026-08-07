@@ -1,7 +1,9 @@
 // Server Component — do NOT add "use client" here.
 import { DetailViewClient } from "@/components/DetailViewClient";
+import { ErrorScreen } from "@/components/ErrorScreen";
 import { get } from "@/lib/http";
 import type { ContentListResponse, Title, TitleDetail } from "@/lib/types";
+
 
 export async function DetailView({ mediaType, id }: { mediaType: "movie" | "tv"; id: number }) {
   let item: TitleDetail | null = null;
@@ -20,10 +22,10 @@ export async function DetailView({ mediaType, id }: { mediaType: "movie" | "tv";
 
   if (!item) {
     return (
-      <div className="mx-auto max-w-xl px-4 py-24 text-center text-text-muted">
-        <h1 className="mb-2 text-2xl font-extrabold text-text-vivid">Title not found</h1>
-        <p>The backend may be offline or TMDB returned an error. Try again in a moment.</p>
-      </div>
+      <ErrorScreen
+        title="Title not found"
+        message="We couldn't load this title right now. Please try again in a moment."
+      />
     );
   }
 

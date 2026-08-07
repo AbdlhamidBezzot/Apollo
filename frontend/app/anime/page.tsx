@@ -39,18 +39,9 @@ export default async function AnimePage() {
   const [movies, series] = await Promise.all([fetchAnime("movie"), fetchAnime("tv")]);
 
   if (!movies.items.length && !series.items.length) {
-    return (
-      <FeedErrorState
-        issue={{
-          code: "missing_tmdb",
-          title: "Content service unavailable",
-          message:
-            "Apollo is online but the anime catalog returned no data. Make sure TMDB_API_KEY " +
-            "is configured on the deployed backend.",
-          detail: "Anime discovery lists returned empty/502.",
-        }}
-      />
-    );
+    const issue = classifyError(new Error("Anime catalog failed"));
+    logTechnicalDetail(issue, "Anime discovery lists returned empty/502");
+    return <FeedErrorState issue={issue} />;
   }
 
   return (

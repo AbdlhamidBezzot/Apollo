@@ -60,19 +60,9 @@ export default async function HomePage() {
   const allFailed = rows.every((r) => r.items.length === 0) && totalItems === 0;
 
   if (allFailed) {
-    // Backend is healthy but the upstream content service is failing (TMDB).
-    return (
-      <FeedErrorState
-        issue={{
-          code: "missing_tmdb",
-          title: "Content service unavailable",
-          message:
-            "Apollo is online but the content service returned no data. Make sure TMDB_API_KEY " +
-            "is configured on the deployed backend.",
-          detail: "All home lists returned empty/502.",
-        }}
-      />
-    );
+    const issue = classifyError(new Error("Content service failed"));
+    logTechnicalDetail(issue, "All home lists returned empty/502");
+    return <FeedErrorState issue={issue} />;
   }
 
   return (
