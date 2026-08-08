@@ -173,11 +173,17 @@ export function Player({ streamUrl, contentType, tmdbId, mediaType, title, poste
         // Guests get full playback but progress is NOT tracked server-side —
         // it only lives in localStorage. Signed-in users also write to the API.
         if (user) {
-          put("/api/v1/me/history", { tmdb_id: tmdbId, media_type: mediaType, progress_seconds: seconds, completed }).catch(() => { });
+          put("/api/v1/me/history", {
+            tmdb_id: tmdbId,
+            media_type: mediaType,
+            progress_seconds: seconds,
+            completed,
+            ...(mediaType === "tv" ? { season_number: seasonNum, episode_number: episodeNum } : {}),
+          }).catch(() => { });
         }
       }
     },
-    [tmdbId, mediaType, user]
+    [tmdbId, mediaType, user, seasonNum, episodeNum]
   );
 
   useEffect(() => {

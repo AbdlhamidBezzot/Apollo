@@ -10,6 +10,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.core.ratelimit import rate_limited
 from app.db import get_db
 from app.models import PlaybackCue
@@ -18,6 +19,7 @@ from app.services.playback.base import PlaybackProvider, PlaybackResult, get_pro
 
 router = APIRouter(prefix="/playback", tags=["playback"])
 
+settings = get_settings()
 DbDep = Annotated[Session, Depends(get_db)]
 
 
@@ -26,7 +28,7 @@ async def resolve(
     payload: PlaybackResolveRequest,
     db: DbDep,
     provider: PlaybackProvider = Depends(get_provider),
-    _rl=Depends(rate_limited("playback", "30/minute")),
+    _rl=Depends(rate_limited("playback", settings.rate_limit_playback)),
 ):
     if not await provider.availability(payload.tmdb_id, payload.media_type):
         raise HTTPException(status_code=404, detail="Title not available from the active provider")
@@ -66,7 +68,7 @@ async def get_cues(
     db: DbDep,
     season: int | None = None,
     episode: int | None = None,
-    _rl=Depends(rate_limited("content", "120/minute")),
+    _rl=Depends(rate_limited("content", settings.rate_limit_read)),
 ):
     cue = _cue_scope(db, tmdb_id, media_type, season, episode)
     if cue is None:
@@ -87,7 +89,7 @@ async def get_cues(
 async def upsert_cues(
     payload: PlaybackCueUpdate,
     db: DbDep,
-    _rl=Depends(rate_limited("playback", "30/minute")),
+    _rl=Depends(rate_limited("playback", settings.rate_limit_play)),
 ):
     cue = _cue_scope(db, payload.tmdb_id, payload.media_type, payload.season, payload.episode)
     if cue is None:

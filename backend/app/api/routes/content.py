@@ -1,12 +1,15 @@
 """Content routes â€” proxied, cached TMDB data. No keys are exposed here."""
 
+import json
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.core.ratelimit import rate_limited
+from app.core.cache import get_cache
+from app.core.config import get_settings
 from app.core.errors import sanitize_detail
+from app.core.ratelimit import rate_limited
 from app.db import get_db
 from app.models import EpisodeMetadata
 from app.schemas import ContentList, EpisodeMetadataUpdate
@@ -17,12 +20,59 @@ from ..deps import CurrentProfile
 
 router = APIRouter(prefix="/content", tags=["content"])
 
+settings = get_settings()
 DbDep = Annotated[Session, Depends(get_db)]
+EPISODE_METADATA_CACHE_TTL = 3600
+
+_rl_read = rate_limited("content", settings.rate_limit_read)
+_rl_search = rate_limited("content", settings.rate_limit_search)
+_rl_recommend = rate_limited("recommend", settings.rate_limit_search)
+_rl_me = rate_limited("me", settings.rate_limit_me)
+
+
+def _episode_metadata_cache_key(tmdb_id: int, season_number: int) -> str:
+    return f"db:episode-metadata:{tmdb_id}:season:{season_number}"
+
+
+def _episode_metadata_for_season(db: Session, tmdb_id: int, season_number: int) -> dict[int, dict]:
+    """Load shared episode metadata without caching profile-specific data."""
+    cache = get_cache()
+    cache_key = _episode_metadata_cache_key(tmdb_id, season_number)
+    raw = cache.get(cache_key)
+    if raw is not None:
+        try:
+            return {int(item["episode_number"]): item for item in json.loads(raw)}
+        except (TypeError, ValueError, KeyError):
+            pass
+
+    rows = (
+        db.query(EpisodeMetadata)
+        .filter(
+            EpisodeMetadata.tmdb_id == tmdb_id,
+            EpisodeMetadata.season_number == season_number,
+        )
+        .all()
+    )
+    items = [
+        {
+            "episode_number": row.episode_number,
+            "is_filler": row.is_filler,
+            "is_canon": row.is_canon,
+            "arc_name": row.arc_name,
+            "audio_languages": row.audio_languages or [],
+        }
+        for row in rows
+    ]
+    try:
+        cache.set(cache_key, json.dumps(items), EPISODE_METADATA_CACHE_TTL)
+    except (TypeError, ValueError):
+        pass
+    return {item["episode_number"]: item for item in items}
 
 
 @router.get("/trending", response_model=ContentList)
 async def trending(
-    time_window: Literal["day", "week"] = "week", page: int = 1, _rl=Depends(rate_limited("content", "120/minute"))
+    time_window: Literal["day", "week"] = "week", page: int = 1, _rl=Depends(_rl_read)
 ):
     try:
         data = await tmdb.trending(time_window, page)
@@ -33,7 +83,7 @@ async def trending(
 
 @router.get("/popular", response_model=ContentList)
 async def popular(
-    media_type: Literal["movie", "tv"] = "movie", page: int = 1, _rl=Depends(rate_limited("content", "120/minute"))
+    media_type: Literal["movie", "tv"] = "movie", page: int = 1, _rl=Depends(_rl_read)
 ):
     try:
         data = await tmdb.popular(media_type, page)
@@ -44,7 +94,7 @@ async def popular(
 
 @router.get("/top-rated", response_model=ContentList)
 async def top_rated(
-    media_type: Literal["movie", "tv"] = "movie", page: int = 1, _rl=Depends(rate_limited("content", "120/minute"))
+    media_type: Literal["movie", "tv"] = "movie", page: int = 1, _rl=Depends(_rl_read)
 ):
     try:
         data = await tmdb.top_rated(media_type, page)
@@ -67,7 +117,7 @@ async def discover(
     provider: str | None = Query(default=None),
     watch_region: str | None = Query(default="US"),
     monetization_types: str | None = Query(default=None),
-    _rl=Depends(rate_limited("content", "120/minute")),
+    _rl=Depends(_rl_read),
 ):
     try:
         data = await tmdb.discover(
@@ -93,7 +143,7 @@ async def discover(
 async def top_streaming(
     media_type: Literal["movie", "tv"] = "movie",
     watch_region: str = "US",
-    _rl=Depends(rate_limited("content", "120/minute")),
+    _rl=Depends(_rl_read),
 ):
     try:
         data = await tmdb.discover(
@@ -113,7 +163,7 @@ async def search(
     q: str,
     media_type: Literal["movie", "tv", "multi"] = "multi",
     page: int = 1,
-    _rl=Depends(rate_limited("content", "120/minute")),
+    _rl=Depends(_rl_search),
 ):
     if not q.strip():
         raise HTTPException(status_code=422, detail="query 'q' is required")
@@ -125,7 +175,7 @@ async def search(
 
 
 @router.get("/genres")
-async def genres(_rl=Depends(rate_limited("content", "120/minute"))):
+async def genres(_rl=Depends(_rl_read)):
     try:
         return await tmdb.genres()
     except TMDbError as exc:
@@ -134,10 +184,10 @@ async def genres(_rl=Depends(rate_limited("content", "120/minute"))):
 
 @router.get("/recommend", response_model=ContentList)
 async def recommend(
-    profile: CurrentProfile,
+profile: CurrentProfile,
     db: DbDep,
     limit: int = Query(12, ge=1, le=24),
-    _rl=Depends(rate_limited("me", "120/minute")),
+    _rl=Depends(_rl_recommend),
 ):
     try:
         results = await recommend_for_profile(db, profile.id, limit=limit)
@@ -147,7 +197,7 @@ async def recommend(
 
 
 @router.get("/{media_type}/{tmdb_id}")
-async def detail(media_type: Literal["movie", "tv"], tmdb_id: int, _rl=Depends(rate_limited("content", "120/minute"))):
+async def detail(media_type: Literal["movie", "tv"], tmdb_id: int, _rl=Depends(_rl_read)):
     try:
         item = await tmdb.detail(media_type, tmdb_id)
         credits = await tmdb.credits(media_type, tmdb_id)
@@ -164,36 +214,22 @@ async def season(
     tmdb_id: int,
     season_number: int,
     db: DbDep,
-    _rl=Depends(rate_limited("content", "120/minute")),
+    _rl=Depends(_rl_read),
 ):
     try:
         data = await tmdb.season_episodes(media_type, tmdb_id, season_number)
     except TMDbError as exc:
         raise HTTPException(status_code=502, detail=sanitize_detail(exc, 502))
 
-    meta_rows = (
-        db.query(EpisodeMetadata)
-        .filter(
-            EpisodeMetadata.tmdb_id == tmdb_id,
-            EpisodeMetadata.season_number == season_number,
-        )
-        .all()
-    )
-    meta_by_ep = {m.episode_number: m for m in meta_rows}
+    meta_by_ep = _episode_metadata_for_season(db, tmdb_id, season_number)
     for ep in data.get("episodes", []):
-        m = meta_by_ep.get(ep.get("episode_number"))
-        if m is not None:
-            ep["meta"] = {
-                "is_filler": m.is_filler,
-                "is_canon": m.is_canon,
-                "arc_name": m.arc_name,
-                "audio_languages": m.audio_languages or [],
-            }
+        if (meta := meta_by_ep.get(ep.get("episode_number"))) is not None:
+            ep["meta"] = {key: value for key, value in meta.items() if key != "episode_number"}
     return data
 
 
 @router.put("/episode-meta")
-async def upsert_episode_meta(payload: EpisodeMetadataUpdate, db: DbDep, _rl=Depends(rate_limited("me", "120/minute"))):
+async def upsert_episode_meta(payload: EpisodeMetadataUpdate, db: DbDep, _rl=Depends(_rl_me)):
     row = (
         db.query(EpisodeMetadata)
         .filter(
@@ -211,12 +247,13 @@ async def upsert_episode_meta(payload: EpisodeMetadataUpdate, db: DbDep, _rl=Dep
     row.arc_name = payload.arc_name
     row.audio_languages = payload.audio_languages
     db.commit()
+    get_cache().delete(_episode_metadata_cache_key(payload.tmdb_id, payload.season))
     return {"status": "ok"}
 
 
 @router.delete("/episode-meta")
 async def delete_episode_meta(
-    tmdb_id: int, season: int, episode: int, db: DbDep, _rl=Depends(rate_limited("me", "120/minute"))
+    tmdb_id: int, season: int, episode: int, db: DbDep, _rl=Depends(_rl_me)
 ):
     row = (
         db.query(EpisodeMetadata)
@@ -230,12 +267,13 @@ async def delete_episode_meta(
     if row is not None:
         db.delete(row)
         db.commit()
+    get_cache().delete(_episode_metadata_cache_key(tmdb_id, season))
     return {"status": "ok"}
 
 
 @router.get("/{media_type}/{tmdb_id}/similar", response_model=ContentList)
 async def similar(
-    media_type: Literal["movie", "tv"], tmdb_id: int, page: int = 1, _rl=Depends(rate_limited("content", "120/minute"))
+    media_type: Literal["movie", "tv"], tmdb_id: int, page: int = 1, _rl=Depends(_rl_read)
 ):
     try:
         data = await tmdb.similar(media_type, tmdb_id, page)

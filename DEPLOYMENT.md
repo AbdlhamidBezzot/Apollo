@@ -187,7 +187,7 @@ before loading content and render a clear error like *"Backend unreachable"* whe
 | `_not-found` / 404 / Suspense errors building | Pages using `useSearchParams()` wrapped in `<Suspense>` (already done for Navbar/Watch/MovieNight). |
 | `No module named 'psycopg2'` | Provider injected a bare `postgresql://` URL. Already auto-coerced to psycopg3 (`postgresql+psycopg://`); this needs no action. If it persists, confirm `psycopg[binary]` installed and `DATABASE_URL` starts with `postgresql+psycopg://`. |
 | TMDB empty feed | Backend has no `TMDB_API_KEY`/token. Check `/health` → `tmdb`. |
-| Rate limit (429) | `RATE_LIMIT_*` tightened; backend sees shared IP on proxy — set `TRUST_x_FORWARDED` or raise limits. |
+| Rate limit (429) | Limits are per authenticated user where possible and per IP otherwise; a `429` includes `Retry-After`, and the frontend auto-retries reads once (`Retry-After <= 5s`) then shows a friendly "slow down" message on any surface. If you genuinely hit it: raise the relevant `RATE_LIMIT_*` var or, behind a proxy (Render/Railway/nginx), set `RATE_LIMIT_TRUST_FORWARDED=true` so the real client IP is used instead of the shared proxy IP. |
 
 ---
 

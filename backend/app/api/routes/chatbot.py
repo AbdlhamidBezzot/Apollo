@@ -7,8 +7,9 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.core.ratelimit import rate_limited
+from app.core.config import get_settings
 from app.core.errors import sanitize_detail
+from app.core.ratelimit import rate_limited
 from app.db import get_db
 from app.schemas import ChatRequest, ChatResponse
 from app.services import chatbot
@@ -18,7 +19,11 @@ from ..deps import CurrentProfile
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
+settings = get_settings()
 DbDep = Annotated[Session, Depends(get_db)]
+_rl_chat = rate_limited("chat", settings.rate_limit_chat)
+_rl_chat_stream = rate_limited("chat", settings.rate_limit_chat_stream)
+_rl_play = rate_limited("play", settings.rate_limit_play)
 
 
 class AcceptRequest(BaseModel):
@@ -27,7 +32,7 @@ class AcceptRequest(BaseModel):
 
 
 @router.post("", response_model=ChatResponse)
-async def chat(payload: ChatRequest, profile: CurrentProfile, db: DbDep, _rl=Depends(rate_limited("chat", "20/hour"))):
+async def chat(payload: ChatRequest, profile: CurrentProfile, db: DbDep, _rl=Depends(_rl_chat)):
     try:
         result = await chatbot.handle_message(db, profile.id, payload.message, payload.session_id)
     except TMDbError as exc:
@@ -39,7 +44,7 @@ async def chat(payload: ChatRequest, profile: CurrentProfile, db: DbDep, _rl=Dep
 
 
 @router.post("/stream")
-async def chat_stream(payload: ChatRequest, profile: CurrentProfile, db: DbDep, _rl=Depends(rate_limited("chat", "60/hour"))):
+async def chat_stream(payload: ChatRequest, profile: CurrentProfile, db: DbDep, _rl=Depends(_rl_chat_stream)):
     async def safe_generator():
         import json as _json
         try:
@@ -56,7 +61,7 @@ async def chat_stream(payload: ChatRequest, profile: CurrentProfile, db: DbDep, 
 
 @router.post("/accept", response_model=ChatResponse)
 async def accept(
-    payload: AcceptRequest, profile: CurrentProfile, db: DbDep, _rl=Depends(rate_limited("play", "30/minute"))
+    payload: AcceptRequest, profile: CurrentProfile, db: DbDep, _rl=Depends(_rl_play)
 ):
     if payload.media_type not in ("movie", "tv"):
         raise HTTPException(status_code=422, detail="media_type must be movie or tv")

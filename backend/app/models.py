@@ -84,6 +84,8 @@ class WatchHistory(Base):
     watched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
     progress_seconds: Mapped[float] = mapped_column(Float, default=0.0)
     completed: Mapped[bool] = mapped_column(Boolean, default=False)
+    season_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    episode_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     profile: Mapped[Profile] = relationship(back_populates="watch_history")
 

@@ -13,7 +13,7 @@ A legal, TMDB-powered movie & series streaming/discovery platform with an AI com
 | Frontend | Next.js 15 (App Router) + React 19 + Tailwind CSS 3 |
 | Backend | Python 3.14 + FastAPI + SQLAlchemy 2 |
 | Database | SQLite by default (dev) / PostgreSQL (docker-compose) |
-| Cache & rate limiting | Redis when available, in-memory fallback otherwise |
+| Cache & rate limiting | Redis-backed (token-bucket; in-memory fallback for dev) |
 | Auth | JWT (access+refresh) in **httpOnly cookies**, bcrypt passwords |
 | Playback | Pluggable `PlaybackProvider` interface + vidsrc-embed.ru embed player |
 
@@ -31,7 +31,7 @@ backend/
       config.py        # env-driven settings
       security.py      # bcrypt + JWT helpers
       cache.py         # Redis with in-memory fallback
-      ratelimit.py     # per-surface rate limits (login/general/chat/playback)
+      ratelimit.py     # Redis token-bucket limits, per-user/per-IP, 429 + Retry-After
     api/
       deps.py          # current user/profile, cookie helpers
       router.py
@@ -106,11 +106,38 @@ Then set `DATABASE_URL` and `REDIS_URL` in `backend/.env` (see `.env.example`). 
 - All API keys are server-side only; the browser talks only to the FastAPI backend.
 - Passwords hashed with bcrypt; tokens are short-lived JWT in `httpOnly` cookies (`SameSite=lax`, `Secure` in production).
 - Every input is validated by Pydantic schemas; queries use SQLAlchemy (parameterized).
-- Rate limiting per surface — login (5/15m), general API (120/m), chat (20/h), playback (30/m) — with `429` + `Retry-After`.
+- Rate limiting is Redis-backed (shared across all backend instances) and burst-tolerant (token bucket). Limits are scoped to the authenticated user ID when available, otherwise the client IP — see "Rate limiting" below. Rejections return `429` + `Retry-After`; the frontend auto-retries short waits and otherwise shows a friendly "slow down" message.
 - Playback is unlimited per account (no concurrent-stream cap); abuse is mitigated by per-surface rate limiting.
 - TMDB responses cached (Redis or memory) so the quota isn't blown per page load.
 - External calls (TMDB) have timeouts and degrade to clean error states instead of crashing; the UI shows fallback messages.
 - `npm audit`: 0 vulnerabilities (deps pinned + overrides). Run `pip-audit`/`npm audit` in CI.
+
+### Rate limiting & 429 handling
+
+Limits are **Redis-backed token buckets** (burst-tolerant: a user can use the full
+quota instantly, then refills at `limit / window` per second) so they are **shared
+across backend instances** — in-memory fallback only applies in local dev/tests.
+
+Requests are scoped to the authenticated **user ID** when one can be identified
+(`request.state.user_id`, or the access JWT in the `Authorization` header / access
+cookie), otherwise to the **client IP**. This stops offices / carriers / NAT from
+collectively exhausting one per-IP cap.
+
+| Surface | Default limit | Notes |
+|---|---|---|
+| Browse/popular/detail/genres/season/similar | `120/minute` (`RATE_LIMIT_READ`) | cheap, Redis-cached reads |
+| Search + recommend | `60/minute` (`RATE_LIMIT_SEARCH`) | more expensive |
+| Profile/history/me writes | `60/minute` (`RATE_LIMIT_ME`) | progress auto-saves every ~15s |
+| Playback resolve + cue writes | `30/minute` (`RATE_LIMIT_PLAYBACK` / `_PLAY`) | provider resolution |
+| Chat + movie-night suggest | `20/hour`, stream `60/hour` (`RATE_LIMIT_CHAT[_STREAM]`) | LLM cost per call |
+| Register / login / refresh | `10/hour` / `5/15minute` / `30/minute` | brute-force guards |
+
+A rejected request returns **`429`** with a **`Retry-After`** header (seconds). The
+frontend `lib/http.ts` reads it and auto-retries a read request once when
+`Retry-After <= 5s`; otherwise `lib/errors.ts` classifies the error as
+`rate_limited` and shows a friendly "that was a little too fast" screen with a Try
+Again button — never a broken page / 500. New limits are tunable via the
+`RATE_LIMIT_*` variables in `backend/.env` / `render.yaml`.
 
 ## Tests
 

@@ -21,12 +21,16 @@ from ..deps import REFRESH_COOKIE, CurrentUser, clear_auth_cookies, set_auth_coo
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+_settings = get_settings()
 DbDep = Annotated[Session, Depends(get_db)]
+_rl_register = rate_limited("auth", _settings.rate_limit_register)
+_rl_login = rate_limited("login", _settings.rate_limit_login)
+_rl_refresh = rate_limited("refresh", _settings.rate_limit_refresh)
 
 
 @router.post("/register", response_model=TokenPair, status_code=201)
 async def register(
-    payload: RegisterRequest, db: DbDep, response: Response, _rl=Depends(rate_limited("auth", "10/hour"))
+    payload: RegisterRequest, db: DbDep, response: Response, _rl=Depends(_rl_register)
 ):
     settings = get_settings()
     if db.query(User).filter(User.email == payload.email).first():
@@ -52,7 +56,7 @@ async def register(
 
 
 @router.post("/login", response_model=TokenPair)
-async def login(payload: LoginRequest, db: DbDep, response: Response, _rl=Depends(rate_limited("login", "5/15minute"))):
+async def login(payload: LoginRequest, db: DbDep, response: Response, _rl=Depends(_rl_login)):
     settings = get_settings()
     user = db.query(User).filter(User.email == payload.email).first()
     if user is None:
@@ -66,7 +70,7 @@ async def login(payload: LoginRequest, db: DbDep, response: Response, _rl=Depend
 
 
 @router.post("/refresh", response_model=TokenPair)
-async def refresh(request: Request, db: DbDep, response: Response, _rl=Depends(rate_limited("auth", "30/minute"))):
+async def refresh(request: Request, db: DbDep, response: Response, _rl=Depends(_rl_refresh)):
     settings = get_settings()
     # Accept refresh token from cookie first (browser same-origin), then header (cross-origin dev / mobile).
     token = request.cookies.get(REFRESH_COOKIE)

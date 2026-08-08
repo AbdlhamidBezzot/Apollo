@@ -6,7 +6,8 @@ query columns (see models.py __table_args__).
 
 from collections.abc import Generator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
+from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from app.core.config import get_settings
@@ -40,3 +41,16 @@ def init_db() -> None:
     from app import models  # noqa: F401  (register models)
 
     Base.metadata.create_all(bind=engine)
+    _apply_migrations()
+
+
+def _apply_migrations() -> None:
+    """Idempotent ALTER TABLE migrations for columns added after initial deploy."""
+    with engine.begin() as conn:
+        for table, definitions in {
+            "watch_history": {"season_number": "INTEGER", "episode_number": "INTEGER"},
+        }.items():
+            for column, ddl in definitions.items():
+                existing = {col["name"] for col in sa_inspect(conn).get_columns(table)}
+                if column not in existing:
+                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}"))

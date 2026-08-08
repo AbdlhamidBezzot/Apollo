@@ -13,15 +13,27 @@ export class ApiError extends Error {
   status: number;
   technicalDetail: string;
   url?: string;
+  retryAfter?: number;
 
-  constructor(status: number, message: string, url?: string) {
+  constructor(status: number, message: string, url?: string, retryAfter?: number) {
     super(sanitizeApiErrorMessage(message));
     this.name = "ApiError";
     this.status = status;
     this.technicalDetail = String(message || "");
     this.url = url;
+    this.retryAfter = typeof retryAfter === "number" && Number.isFinite(retryAfter) ? Math.max(0, Math.round(retryAfter)) : undefined;
   }
 }
+
+function parseRetryAfter(value: string | null): number | undefined {
+  if (!value) return undefined;
+  const seconds = Number(value);
+  return Number.isFinite(seconds) ? seconds : undefined;
+}
+
+// How long the HTTP client will wait (max) before auto-retrying a rate-limited
+// read. Longer Retry-After values surface as a friendly 429 to the UI instead.
+const MAX_AUTO_RETRY_AFTER_S = 5;
 
 export function getAccessToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -155,10 +167,25 @@ export async function api<T>(path: string, init: RequestInit = {}, revalidate?: 
   let res: Response;
   let attempt = 0;
   const maxAttempts = isReadMethod ? 2 : 1; // Automatic single-retry with backoff for GET operations
+  let rateLimitRetried = false;
 
   while (true) {
     try {
       res = await doFetch();
+      // Rate-limit (429) comes with a Retry-After hint: for quick reads, back
+      // off and retry once instead of bouncing the user to an error screen.
+      if (
+        isReadMethod &&
+        res.status === 429 &&
+        !rateLimitRetried
+      ) {
+        const retryAfter = parseRetryAfter(res.headers.get("Retry-After"));
+        if (retryAfter !== undefined && retryAfter <= MAX_AUTO_RETRY_AFTER_S) {
+          rateLimitRetried = true;
+          await sleep(Math.max(400, retryAfter * 1000));
+          continue;
+        }
+      }
       // Retry transient server gateway/unavailable errors (502, 503, 504) once
       if (isReadMethod && attempt < maxAttempts - 1 && (res.status === 502 || res.status === 503 || res.status === 504)) {
         attempt++;
@@ -202,7 +229,7 @@ export async function api<T>(path: string, init: RequestInit = {}, revalidate?: 
       /* keep statusText */
     }
     const rawDetailStr = typeof detail === "string" ? detail : JSON.stringify(detail);
-    throw new ApiError(res.status, rawDetailStr, fullUrl);
+    throw new ApiError(res.status, rawDetailStr, fullUrl, parseRetryAfter(res.headers.get("Retry-After")));
   }
 
   const data = (await res.json()) as T;

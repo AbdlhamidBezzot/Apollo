@@ -81,6 +81,8 @@ class WatchHistoryUpdate(BaseModel):
     media_type: MediaType
     progress_seconds: float = Field(ge=0)
     completed: bool = False
+    season_number: int | None = None
+    episode_number: int | None = None
 
 
 class WatchHistoryOut(BaseModel):
@@ -92,6 +94,8 @@ class WatchHistoryOut(BaseModel):
     watched_at: datetime
     progress_seconds: float
     completed: bool
+    season_number: int | None = None
+    episode_number: int | None = None
 
 
 class RatingCreate(BaseModel):

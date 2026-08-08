@@ -6,6 +6,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.core.ratelimit import rate_limited
 from app.db import get_db
 from app.models import Preferences, Profile, Rating, WatchHistory, WatchlistItem
@@ -24,7 +25,9 @@ from ..deps import CurrentProfile, CurrentUser
 
 router = APIRouter(prefix="/me", tags=["me"])
 
+settings = get_settings()
 DbDep = Annotated[Session, Depends(get_db)]
+_rl_me = rate_limited("me", settings.rate_limit_me)
 
 
 # --- Profiles ---
@@ -35,7 +38,7 @@ async def list_profiles(user: CurrentUser, db: DbDep):
 
 @router.post("/profiles", response_model=ProfileOut, status_code=201)
 async def create_profile(
-    payload: ProfileCreate, user: CurrentUser, db: DbDep, _rl=Depends(rate_limited("me", "120/minute"))
+    payload: ProfileCreate, user: CurrentUser, db: DbDep, _rl=Depends(_rl_me)
 ):
     profile = Profile(user_id=user.id, display_name=payload.display_name, is_kids=payload.is_kids)
     db.add(profile)
@@ -132,7 +135,7 @@ async def list_history(profile: CurrentProfile, db: DbDep, limit: int = 50):
 
 
 @router.put("/history", response_model=WatchHistoryOut)
-async def update_history(payload: WatchHistoryUpdate, profile: CurrentProfile, db: DbDep):
+async def update_history(payload: WatchHistoryUpdate, profile: CurrentProfile, db: DbDep, _rl=Depends(_rl_me)):
     entry = (
         db.query(WatchHistory)
         .filter(
@@ -147,6 +150,8 @@ async def update_history(payload: WatchHistoryUpdate, profile: CurrentProfile, d
         db.add(entry)
     entry.progress_seconds = payload.progress_seconds
     entry.completed = payload.completed
+    entry.season_number = payload.season_number
+    entry.episode_number = payload.episode_number
     if entry.progress_seconds > 0 or payload.completed:
         entry.watched_at = datetime.now(UTC)
     db.commit()
@@ -155,7 +160,7 @@ async def update_history(payload: WatchHistoryUpdate, profile: CurrentProfile, d
 
 
 @router.delete("/history/{media_type}/{tmdb_id}", status_code=204)
-async def remove_history_entry(media_type: str, tmdb_id: int, profile: CurrentProfile, db: DbDep):
+async def remove_history_entry(media_type: str, tmdb_id: int, profile: CurrentProfile, db: DbDep, _rl=Depends(_rl_me)):
     entry = (
         db.query(WatchHistory)
         .filter(

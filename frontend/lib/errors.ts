@@ -7,6 +7,7 @@ export type ApiIssueCode =
   | "missing_tmdb"
   | "auth_unavailable"
   | "server_error"
+  | "rate_limited"
   | "unauthorized"
   | "unknown";
 
@@ -19,6 +20,8 @@ export interface ApiIssue {
   status?: number;
   url?: string;
   stack?: string;
+  /** Seconds the client should wait before retrying (from the Retry-After header). */
+  retryAfter?: number;
 }
 
 export const DEFAULT_USER_TITLE = "Something went wrong";
@@ -153,13 +156,14 @@ export function classifyError(err: unknown): ApiIssue {
     }
     if (status === 429) {
       return {
-        code: "server_error",
-        title: DEFAULT_USER_TITLE,
-        message: "We're receiving a high volume of requests. Please try again in a moment.",
+        code: "rate_limited",
+        title: "That was a little too fast",
+        message: "You're sending requests a bit quickly. Give it a moment, then try again.",
         detail,
         status,
         url: err.url,
         stack: err.stack,
+        retryAfter: err.retryAfter,
       };
     }
     return {

@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.core.ratelimit import rate_limited
 from app.db import get_db
 from app.schemas import (
@@ -28,6 +29,7 @@ from ..deps import CurrentProfile
 
 router = APIRouter(prefix="/movie-night-room", tags=["movie-night-room"])
 
+settings = get_settings()
 DbDep = Annotated[Session, Depends(get_db)]
 
 
@@ -40,7 +42,7 @@ class RoomCreateResponse(BaseModel):
 
 @router.post("", response_model=RoomCreateResponse, status_code=201)
 async def create_room(
-    profile: CurrentProfile, db: DbDep, _rl=Depends(rate_limited("me", "120/minute"))
+    profile: CurrentProfile, db: DbDep, _rl=Depends(rate_limited("me", settings.rate_limit_me))
 ):
     room = svc.create_room(db, profile)
     host = svc._host_participant(db, room)
@@ -48,7 +50,7 @@ async def create_room(
 
 
 @router.get("/{code}", response_model=MovieNightRoomDetail)
-async def room_status(code: str, db: DbDep, _rl=Depends(rate_limited("me", "120/minute"))):
+async def room_status(code: str, db: DbDep, _rl=Depends(rate_limited("me", settings.rate_limit_me))):
     try:
         room = svc.get_room(db, code)
         return svc._detail(db, room)
@@ -61,7 +63,7 @@ async def join_room(
     code: str,
     payload: MovieNightJoinRequest,
     db: DbDep,
-    _rl=Depends(rate_limited("me", "120/minute")),
+    _rl=Depends(rate_limited("me", settings.rate_limit_me)),
 ):
     try:
         detail, token, is_host = svc.join_room(db, code, profile=None, guest_name=payload.guest_name)
@@ -72,7 +74,7 @@ async def join_room(
 
 @router.post("/{code}/join/account", response_model=MovieNightJoinResponse)
 async def join_room_with_account(
-    code: str, profile: CurrentProfile, db: DbDep, _rl=Depends(rate_limited("me", "120/minute"))
+    code: str, profile: CurrentProfile, db: DbDep, _rl=Depends(rate_limited("me", settings.rate_limit_me))
 ):
     try:
         detail, token, is_host = svc.join_room(db, code, profile=profile)
@@ -85,9 +87,9 @@ async def join_room_with_account(
 async def set_preferences(
     code: str,
     payload: RoomPreferenceUpdate,
-    token: str,
+token: str,
     db: DbDep,
-    _rl=Depends(rate_limited("me", "120/minute")),
+    _rl=Depends(rate_limited("me", settings.rate_limit_me)),
 ):
     try:
         return svc.update_preferences(
@@ -105,7 +107,7 @@ async def leave_room(
     code: str,
     token: str,
     db: DbDep,
-    _rl=Depends(rate_limited("me", "120/minute")),
+    _rl=Depends(rate_limited("me", settings.rate_limit_me)),
 ):
     try:
         return svc.leave_room(db, code, token)
@@ -116,9 +118,9 @@ async def leave_room(
 @router.post("/{code}/suggest", response_model=MovieNightSuggestResponse)
 async def suggest(
     code: str,
-    token: str,
+token: str,
     db: DbDep,
-    _rl=Depends(rate_limited("chat", "20/hour")),
+    _rl=Depends(rate_limited("chat", settings.rate_limit_chat)),
 ):
     try:
         reply, titles = await svc.suggest_pick(db, code)
@@ -131,9 +133,9 @@ async def suggest(
 async def decide(
     code: str,
     payload: MovieNightDecideRequest,
-    token: str,
+token: str,
     db: DbDep,
-    _rl=Depends(rate_limited("play", "30/minute")),
+    _rl=Depends(rate_limited("play", settings.rate_limit_play)),
 ):
     try:
         result = await svc.decide_async(db, code, token, payload.tmdb_id, payload.media_type)

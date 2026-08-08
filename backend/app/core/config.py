@@ -56,8 +56,23 @@ class Settings(BaseSettings):
     jwt_refresh_token_expires_days: int | None = None
 
     rate_limit_login: str = "5/15minute"
+    rate_limit_register: str = "10/hour"
+    rate_limit_refresh: str = "30/minute"
     rate_limit_general: str = "120/minute"
     rate_limit_chat: str = "20/hour"
+    rate_limit_chat_stream: str = "60/hour"
+    # Cheap, Redis-cached reads (browse/popular/detail, etc.)
+    rate_limit_read: str = "120/minute"
+    # Search and recommender endpoints are more expensive but still per-user.
+    rate_limit_search: str = "60/minute"
+    # Personal data writes (profiles, history, preferences, episode meta).
+    rate_limit_me: str = "60/minute"
+    # Expensive/abuse-prone: playback resolution, chat accept/cues, movie-night decide.
+    rate_limit_play: str = "30/minute"
+    rate_limit_playback: str = "30/minute"
+    # Use X-Forwarded-For for the client IP only when the API sits behind a
+    # trustable proxy (Render, Railway, nginx). Keep off for direct exposure.
+    rate_limit_trust_forwarded: bool = False
 
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.5-flash"
@@ -67,7 +82,7 @@ class Settings(BaseSettings):
     llm_api_key: str = ""
 
     @model_validator(mode="after")
-    def _validate_no_wildcard_cors(self) -> "Settings":
+    def _validate_no_wildcard_cors(self) -> Settings:
         origins = {o.strip() for o in (self.cors_origins or "").split(",") if o.strip()}
         if "*" in origins:
             raise ValueError(
@@ -77,7 +92,7 @@ class Settings(BaseSettings):
         return self
 
     @model_validator(mode="after")
-    def _coerce_postgres_dialect(self) -> "Settings":
+    def _coerce_postgres_dialect(self) -> Settings:
         """Force every Postgres URL onto psycopg v3.
 
         PaaS providers (Render/Railway) inject connection strings like

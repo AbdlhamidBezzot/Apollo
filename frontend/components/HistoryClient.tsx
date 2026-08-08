@@ -15,10 +15,23 @@ interface HistoryEntry {
   watched_at: string;
   progress_seconds: number;
   completed: boolean;
+  season_number?: number | null;
+  episode_number?: number | null;
 }
 
 interface Resolved extends HistoryEntry {
   detail: Title | null;
+}
+
+function watchQuery(entry: HistoryEntry): string {
+  if (
+    entry.media_type !== "tv" ||
+    typeof entry.season_number !== "number" ||
+    typeof entry.episode_number !== "number"
+  ) {
+    return "";
+  }
+  return `?season=${entry.season_number}&episode=${entry.episode_number}`;
 }
 
 export function HistoryClient() {
@@ -92,7 +105,7 @@ export function HistoryClient() {
               : entry.detail?.runtime
                 ? Math.min(100, Math.round((entry.progress_seconds / (entry.detail.runtime * 60)) * 100))
                 : 0;
-            const href = `/watch/${entry.media_type}/${entry.tmdb_id}`;
+            const href = `/watch/${entry.media_type}/${entry.tmdb_id}${watchQuery(entry)}`;
             return (
               <Link
                 key={entry.id}

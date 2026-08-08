@@ -17,15 +17,8 @@ import httpx
 from app.core.cache import get_cache
 from app.core.config import get_settings
 
-_HEADERS_CACHE_TTL = {
-    "trending": 3600,
-    "popular": 3600,
-    "top_rated": 7200,
-    "discover": 1800,
-    "search": 600,
-    "detail": 86400,
-    "credits": 86400,
-}
+TMDB_CACHE_TTL = 86400
+
 
 
 class TMDbError(Exception):
@@ -105,7 +98,7 @@ class TMDBClient:
         return await _cached(
             f"trending/all/{time_window}",
             params,
-            _HEADERS_CACHE_TTL["trending"],
+            TMDB_CACHE_TTL,
             "trending",
             lambda: _tmdb_get(f"trending/all/{time_window}", params),
         )
@@ -154,7 +147,7 @@ class TMDBClient:
             await _cached(
                 f"discover/{media_type}",
                 params,
-                _HEADERS_CACHE_TTL["discover"],
+                TMDB_CACHE_TTL,
                 "discover",
                 lambda: _tmdb_get(f"discover/{media_type}", params),
             ),
@@ -167,7 +160,7 @@ class TMDBClient:
             await _cached(
                 f"{media_type}/popular",
                 {"page": page},
-                _HEADERS_CACHE_TTL["popular"],
+                TMDB_CACHE_TTL,
                 "popular",
                 lambda: _tmdb_get(f"{media_type}/popular", {"page": page}),
             ),
@@ -180,7 +173,7 @@ class TMDBClient:
             await _cached(
                 f"{media_type}/top_rated",
                 {"page": page},
-                _HEADERS_CACHE_TTL["top_rated"],
+                TMDB_CACHE_TTL,
                 "top_rated",
                 lambda: _tmdb_get(f"{media_type}/top_rated", {"page": page}),
             ),
@@ -191,7 +184,7 @@ class TMDBClient:
     async def search(query: str, media_type: str | None = None, page: int = 1) -> dict[str, Any]:
         path = f"search/{media_type}" if media_type in ("movie", "tv") else "search/multi"
         params = {"query": query, "page": page, "include_adult": "false"}
-        data = await _cached(path, params, _HEADERS_CACHE_TTL["search"], "search", lambda: _tmdb_get(path, params))
+        data = await _cached(path, params, TMDB_CACHE_TTL, "search", lambda: _tmdb_get(path, params))
         return _stamp_media_type(data, media_type)
 
     @staticmethod
@@ -200,7 +193,7 @@ class TMDBClient:
         return await _cached(
             f"{media_type}/{tmdb_id}",
             params,
-            _HEADERS_CACHE_TTL["detail"],
+            TMDB_CACHE_TTL,
             "detail",
             lambda: _tmdb_get(f"{media_type}/{tmdb_id}", params),
         )
@@ -211,7 +204,7 @@ class TMDBClient:
             await _cached(
                 f"{media_type}/{tmdb_id}/similar",
                 {"page": page},
-                _HEADERS_CACHE_TTL["detail"],
+                TMDB_CACHE_TTL,
                 "similar",
                 lambda: _tmdb_get(f"{media_type}/{tmdb_id}/similar", {"page": page}),
             ),
@@ -223,21 +216,21 @@ class TMDBClient:
         return await _cached(
             f"{media_type}/{tmdb_id}/credits",
             {},
-            _HEADERS_CACHE_TTL["credits"],
+            TMDB_CACHE_TTL,
             "credits",
             lambda: _tmdb_get(f"{media_type}/{tmdb_id}/credits", {}),
         )
 
     @staticmethod
     async def genres() -> dict[str, Any]:
-        return await _cached("genre/movie/list", {}, 86400, "genres", lambda: _tmdb_get("genre/movie/list", {}))
+        return await _cached("genre/movie/list", {}, TMDB_CACHE_TTL, "genres", lambda: _tmdb_get("genre/movie/list", {}))
 
     @staticmethod
     async def season_episodes(media_type: str, tmdb_id: int, season_number: int) -> dict[str, Any]:
         return await _cached(
             f"{media_type}/{tmdb_id}/season/{season_number}",
             {},
-            _HEADERS_CACHE_TTL["detail"],
+            TMDB_CACHE_TTL,
             "season",
             lambda: _tmdb_get(f"{media_type}/{tmdb_id}/season/{season_number}", {}),
         )
