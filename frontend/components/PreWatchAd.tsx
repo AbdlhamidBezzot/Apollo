@@ -9,22 +9,18 @@ interface PreWatchAdProps {
   title?: string;
   poster?: string | null;
   onComplete: () => void;
-  initialCountdown?: number; // total seconds (default 8)
-  skipDelay?: number; // seconds to wait before showing skip button (default 5)
+  initialCountdown?: number; // total seconds (default 10)
 }
 
 export function PreWatchAd({
   title,
   poster,
   onComplete,
-  initialCountdown = 8,
-  skipDelay = 5,
+  initialCountdown = 10,
 }: PreWatchAdProps) {
   const [timeLeft, setTimeLeft] = useState(initialCountdown);
   const onCompleteRef = useRef(onComplete);
   const completedRef = useRef(false);
-  const showSkipAt = initialCountdown - skipDelay; // e.g. 8 - 5 = 3 seconds remaining
-  const canSkip = timeLeft <= showSkipAt;
 
   useEffect(() => {
     onCompleteRef.current = onComplete;
@@ -93,27 +89,11 @@ export function PreWatchAd({
             </div>
           </div>
 
-          {/* Countdown Indicator & Skip Button */}
-          <div className="flex items-center gap-3">
-            {!canSkip ? (
-              <div className="flex items-center gap-2 rounded-full border border-white/10 bg-black/50 px-4 py-2 text-xs font-semibold text-text-muted">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand/30 text-brand-soft">
-                  {timeLeft}
-                </span>
-                <span>Skip available in {timeLeft - showSkipAt}s</span>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={onComplete}
-                className="group flex items-center gap-2 rounded-full bg-gradient-to-r from-brand to-brand-soft px-5 py-2.5 text-xs font-bold text-white shadow-brand-glow transition-all hover:scale-105"
-              >
-                <span>Skip Ad</span>
-                <span className="transition-transform group-hover:translate-x-0.5">
-                  &rarr;
-                </span>
-              </button>
-            )}
+          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-black/50 px-4 py-2 text-xs font-semibold text-text-muted">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand/30 text-brand-soft">
+              {timeLeft}
+            </span>
+            <span>Ad ends in {timeLeft}s</span>
           </div>
         </div>
 
