@@ -24,14 +24,12 @@ interface Resolved extends HistoryEntry {
 }
 
 function watchQuery(entry: HistoryEntry): string {
-  if (
-    entry.media_type !== "tv" ||
-    typeof entry.season_number !== "number" ||
-    typeof entry.episode_number !== "number"
-  ) {
+  if (entry.media_type !== "tv") {
     return "";
   }
-  return `?season=${entry.season_number}&episode=${entry.episode_number}`;
+  const s = typeof entry.season_number === "number" && entry.season_number > 0 ? entry.season_number : 1;
+  const e = typeof entry.episode_number === "number" && entry.episode_number > 0 ? entry.episode_number : 1;
+  return `?season=${s}&episode=${e}`;
 }
 
 export function HistoryClient() {

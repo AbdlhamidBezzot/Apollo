@@ -150,10 +150,13 @@ async def update_history(payload: WatchHistoryUpdate, profile: CurrentProfile, d
         db.add(entry)
     entry.progress_seconds = payload.progress_seconds
     entry.completed = payload.completed
-    entry.season_number = payload.season_number
-    entry.episode_number = payload.episode_number
-    if entry.progress_seconds > 0 or payload.completed:
-        entry.watched_at = datetime.now(UTC)
+    if payload.media_type == "tv":
+        entry.season_number = payload.season_number if payload.season_number is not None else (entry.season_number or 1)
+        entry.episode_number = payload.episode_number if payload.episode_number is not None else (entry.episode_number or 1)
+    else:
+        entry.season_number = payload.season_number
+        entry.episode_number = payload.episode_number
+    entry.watched_at = datetime.now(UTC)
     db.commit()
     db.refresh(entry)
     return entry

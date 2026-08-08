@@ -57,22 +57,36 @@ return { allowed, retry_after }
 
 class CacheClient:
     def __init__(self) -> None:
-        settings = get_settings()
         self._in_memory: dict[str, tuple[str, float]] = {}
         self._use_redis = False
+        self._redis: Any = None
+        self._last_redis_check = 0.0
         self._rl_lock = threading.Lock()
         self._rl_buckets: dict[str, tuple[float, float]] = {}
+        self._ensure_redis()
+
+    def _ensure_redis(self) -> bool:
+        if self._use_redis and self._redis is not None:
+            return True
+        now = time.time()
+        if now - self._last_redis_check < 5.0:
+            return False
+        self._last_redis_check = now
         try:
-            self._redis = redis_lib.Redis.from_url(
+            settings = get_settings()
+            client = redis_lib.Redis.from_url(
                 settings.redis_url,
                 socket_connect_timeout=1,
                 socket_timeout=1,
                 decode_responses=True,
             )
-            self._redis.ping()
+            client.ping()
+            self._redis = client
             self._use_redis = True
+            return True
         except Exception:
             self._use_redis = False
+            return False
 
     def rate_limit_take(self, key: str, capacity: int, refill_per_second: float, window: int) -> tuple[bool, int]:
         """Take one token from a Redis-backed token bucket (burst-tolerant).
@@ -81,7 +95,7 @@ class CacheClient:
         token bucket when Redis is unavailable (local dev / tests). Because the
         bucket lives in Redis it is shared across all backend instances.
         """
-        if self._use_redis:
+        if self._ensure_redis():
             try:
                 result = self._redis.eval(
                     _RATE_LIMIT_LUA,
@@ -94,8 +108,8 @@ class CacheClient:
                 )
                 return bool(result[0]), int(result[1])
             except Exception:
-                pass
-        return self._rate_limit_memory(key, capacity, refill_per_second)
+                self._use_redis = False
+        return self._rate_limit_memory(key, capacity, refill_per_second, window)
 
     def _rate_limit_memory(
         self, key: str, capacity: int, refill_per_second: float, window: int = 60
@@ -115,14 +129,14 @@ class CacheClient:
 
     @property
     def backend(self) -> str:
-        return "redis" if self._use_redis else "memory"
+        return "redis" if self._ensure_redis() else "memory"
 
     def get(self, key: str) -> str | None:
-        if self._use_redis:
+        if self._ensure_redis():
             try:
                 return self._redis.get(key)
             except Exception:
-                pass
+                self._use_redis = False
         entry = self._in_memory.get(key)
         if entry is None:
             return None
@@ -133,21 +147,21 @@ class CacheClient:
         return value
 
     def set(self, key: str, value: str, ttl: int) -> None:
-        if self._use_redis:
+        if self._ensure_redis():
             try:
                 self._redis.set(key, value, ex=ttl)
                 return
             except Exception:
-                pass
+                self._use_redis = False
         self._in_memory[key] = (value, time.monotonic() + ttl)
 
     def delete(self, key: str) -> None:
-        if self._use_redis:
+        if self._ensure_redis():
             try:
                 self._redis.delete(key)
                 return
             except Exception:
-                pass
+                self._use_redis = False
         self._in_memory.pop(key, None)
 
     def cached_json(self, key: str, ttl: int, loader: Callable[[], Any]) -> Any:

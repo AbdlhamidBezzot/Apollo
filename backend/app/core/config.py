@@ -55,21 +55,21 @@ class Settings(BaseSettings):
     jwt_access_token_expires_min: int | None = None
     jwt_refresh_token_expires_days: int | None = None
 
-    rate_limit_login: str = "5/15minute"
-    rate_limit_register: str = "10/hour"
-    rate_limit_refresh: str = "30/minute"
-    rate_limit_general: str = "120/minute"
-    rate_limit_chat: str = "20/hour"
-    rate_limit_chat_stream: str = "60/hour"
+    rate_limit_login: str = "15/15minute"
+    rate_limit_register: str = "20/hour"
+    rate_limit_refresh: str = "60/minute"
+    rate_limit_general: str = "300/minute"
+    rate_limit_chat: str = "60/hour"
+    rate_limit_chat_stream: str = "120/hour"
     # Cheap, Redis-cached reads (browse/popular/detail, etc.)
-    rate_limit_read: str = "120/minute"
+    rate_limit_read: str = "300/minute"
     # Search and recommender endpoints are more expensive but still per-user.
-    rate_limit_search: str = "60/minute"
+    rate_limit_search: str = "120/minute"
     # Personal data writes (profiles, history, preferences, episode meta).
-    rate_limit_me: str = "60/minute"
+    rate_limit_me: str = "180/minute"
     # Expensive/abuse-prone: playback resolution, chat accept/cues, movie-night decide.
-    rate_limit_play: str = "30/minute"
-    rate_limit_playback: str = "30/minute"
+    rate_limit_play: str = "60/minute"
+    rate_limit_playback: str = "60/minute"
     # Use X-Forwarded-For for the client IP only when the API sits behind a
     # trustable proxy (Render, Railway, nginx). Keep off for direct exposure.
     rate_limit_trust_forwarded: bool = False

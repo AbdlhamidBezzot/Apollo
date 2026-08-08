@@ -6,7 +6,7 @@ import { ErrorScreen } from "@/components/ErrorScreen";
 import { Player } from "@/components/Player";
 import { PreWatchAd } from "@/components/PreWatchAd";
 import { classifyError, logTechnicalDetail } from "@/lib/errors";
-import { post } from "@/lib/http";
+import { get, post } from "@/lib/http";
 import type { PlaybackSession } from "@/lib/types";
 
 interface PlayTarget {
@@ -44,9 +44,26 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
         /* ignore */
       }
 
-      const season = mediaType === "tv" ? Number(searchParams.get("season") || 1) : undefined;
-      const episode = mediaType === "tv" ? Number(searchParams.get("episode") || 1) : undefined;
       const hasExplicitEpisode = searchParams.get("season") !== null || searchParams.get("episode") !== null;
+      let season = mediaType === "tv" && hasExplicitEpisode ? Number(searchParams.get("season")) : undefined;
+      let episode = mediaType === "tv" && hasExplicitEpisode ? Number(searchParams.get("episode")) : undefined;
+
+      if (mediaType === "tv" && !hasExplicitEpisode) {
+        try {
+          const list = await get<
+            { tmdb_id: number; media_type: string; season_number?: number | null; episode_number?: number | null }[]
+          >("/api/v1/me/history");
+          const match = list.find((e) => e.media_type === "tv" && e.tmdb_id === id);
+          if (match && typeof match.season_number === "number" && typeof match.episode_number === "number") {
+            season = match.season_number;
+            episode = match.episode_number;
+          }
+        } catch {
+          /* ignore guest/unauthenticated */
+        }
+        if (!season) season = 1;
+        if (!episode) episode = 1;
+      }
 
       try {
         if (target && !hasExplicitEpisode) {

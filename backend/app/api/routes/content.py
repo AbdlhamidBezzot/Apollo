@@ -25,7 +25,7 @@ DbDep = Annotated[Session, Depends(get_db)]
 EPISODE_METADATA_CACHE_TTL = 3600
 
 _rl_read = rate_limited("content", settings.rate_limit_read)
-_rl_search = rate_limited("content", settings.rate_limit_search)
+_rl_search = rate_limited("search", settings.rate_limit_search)
 _rl_recommend = rate_limited("recommend", settings.rate_limit_search)
 _rl_me = rate_limited("me", settings.rate_limit_me)
 

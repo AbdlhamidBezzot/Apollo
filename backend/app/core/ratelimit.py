@@ -92,7 +92,11 @@ def rate_limited(key_prefix: str, spec: str):
     def limiter(request: Request) -> None:
         allowed, retry_after = _check(key_prefix, spec, _identity(request))
         if not allowed:
-            raise HTTPException(status_code=429, headers={"Retry-After": str(retry_after)})
+            raise HTTPException(
+                status_code=429,
+                detail="Rate limit exceeded. Please try again later.",
+                headers={"Retry-After": str(retry_after)},
+            )
 
     return limiter
 
@@ -101,7 +105,11 @@ def rate_limited_identity(key_prefix: str, spec: str, identity: str) -> None:
     """Apply a rate limit to a safely-scoped explicit identity (used inline)."""
     allowed, retry_after = _check(key_prefix, spec, identity)
     if not allowed:
-        raise HTTPException(status_code=429, headers={"Retry-After": str(retry_after)})
+        raise HTTPException(
+            status_code=429,
+            detail="Rate limit exceeded. Please try again later.",
+            headers={"Retry-After": str(retry_after)},
+        )
 
 
 def get_rate_limiter():

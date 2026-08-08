@@ -186,6 +186,12 @@ export function Player({ streamUrl, contentType, tmdbId, mediaType, title, poste
     [tmdbId, mediaType, user, seasonNum, episodeNum]
   );
 
+  // Immediately log/sync watch history when opening a title or switching episodes
+  useEffect(() => {
+    if (!user) return;
+    saveProgress(savedPos, false, true);
+  }, [user, tmdbId, mediaType, seasonNum, episodeNum, savedPos, saveProgress]);
+
   useEffect(() => {
     if (embed) return;
     const video = videoRef.current;
