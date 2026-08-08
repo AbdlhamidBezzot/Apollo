@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AdBanner } from "@/components/AdBanner";
 import { AD_SLOTS } from "@/lib/adsConfig";
@@ -21,21 +21,38 @@ export function PreWatchAd({
   skipDelay = 5,
 }: PreWatchAdProps) {
   const [timeLeft, setTimeLeft] = useState(initialCountdown);
+  const onCompleteRef = useRef(onComplete);
+  const completedRef = useRef(false);
   const showSkipAt = initialCountdown - skipDelay; // e.g. 8 - 5 = 3 seconds remaining
   const canSkip = timeLeft <= showSkipAt;
 
   useEffect(() => {
-    if (timeLeft <= 0) {
-      onComplete();
-      return;
-    }
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
-    }, 1000);
+  useEffect(() => {
+    completedRef.current = false;
+    const endsAt = Date.now() + initialCountdown * 1000;
 
-    return () => clearInterval(timer);
-  }, [timeLeft, onComplete]);
+    const complete = () => {
+      if (completedRef.current) return;
+      completedRef.current = true;
+      onCompleteRef.current();
+    };
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+      setTimeLeft(remaining);
+      if (remaining === 0) complete();
+    };
+
+    tick();
+    const timer = window.setInterval(tick, 250);
+    window.addEventListener("visibilitychange", tick);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("visibilitychange", tick);
+    };
+  }, [initialCountdown]);
 
   return (
     <div className="relative flex min-h-[85vh] flex-col items-center justify-center px-4 py-8 text-center">

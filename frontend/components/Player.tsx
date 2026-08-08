@@ -60,7 +60,7 @@ export function Player({ streamUrl, contentType, tmdbId, mediaType, title, poste
 
   const [seasons, setSeasons] = useState<{ season_number: number; name?: string }[]>([]);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
-  const [episodePickerOpen, setEpisodePickerOpen] = useState(true);
+  const [episodesLoading, setEpisodesLoading] = useState(false);
 
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -280,11 +280,16 @@ export function Player({ streamUrl, contentType, tmdbId, mediaType, title, poste
   useEffect(() => {
     if (mediaType !== "tv") return;
     let cancelled = false;
+    setEpisodesLoading(true);
+    setEpisodes([]);
     get<SeasonEpisodes>(`/api/v1/content/tv/${tmdbId}/season/${seasonNum}`)
       .then((d) => {
         if (!cancelled) setEpisodes((d.episodes || []).filter((e) => e.episode_number > 0));
       })
-      .catch(() => { });
+      .catch(() => { })
+      .finally(() => {
+        if (!cancelled) setEpisodesLoading(false);
+      });
     return () => {
       cancelled = true;
     };
@@ -521,7 +526,6 @@ export function Player({ streamUrl, contentType, tmdbId, mediaType, title, poste
       if (mediaType !== "tv" || busyResolve) return;
       setBusyResolve(true);
       setNextCard(false);
-      setEpisodePickerOpen(false);
       try {
         const res = await post<PlaybackSession>("/api/v1/playback/resolve", {
           tmdb_id: tmdbId,
@@ -640,14 +644,9 @@ export function Player({ streamUrl, contentType, tmdbId, mediaType, title, poste
               <p className="font-mono text-xs text-text-muted">
                 S{String(seasonNum).padStart(2, "0")} E{String(episodeNum).padStart(2, "0")}
               </p>
-              <button
-                onClick={() => setEpisodePickerOpen((v) => !v)}
-                aria-expanded={episodePickerOpen}
-                aria-label="Browse episodes"
-                className="rounded-full border border-white/10 px-2.5 py-0.5 text-[11px] font-semibold text-text-muted transition hover:border-brand/50 hover:text-text-vivid"
-              >
-                Episodes {episodes.length > 0 ? `· ${episodes.length}` : ""} ▾
-              </button>
+              <span className="rounded-full border border-white/10 px-2.5 py-0.5 text-[11px] font-semibold text-text-muted">
+                Episode guide {episodes.length > 0 ? `- ${episodes.length}` : ""}
+              </span>
             </div>
           ) : (
             <p className="font-mono text-xs text-text-muted">Playback source: {contentType}</p>
@@ -972,62 +971,46 @@ export function Player({ streamUrl, contentType, tmdbId, mediaType, title, poste
         </div>
       )}
 
-      {episodePickerOpen && mediaType === "tv" && episodes.length > 0 && (
-        <div className="glass mt-3 overflow-hidden rounded-2xl shadow-glass">
-          <div className="flex flex-wrap items-center gap-2 border-b border-white/10 px-4 py-2.5">
-            <p className="text-xs font-semibold text-text-vivid">Episodes</p>
+      {mediaType === "tv" && (
+        <section aria-label="Episode guide" className="glass mt-3 overflow-hidden rounded-2xl shadow-glass">
+          <div className="flex flex-wrap items-center gap-2 border-b border-white/10 px-4 py-3">
+            <div>
+              <p className="text-sm font-semibold text-text-vivid">Episodes</p>
+              <p className="text-[11px] text-text-muted">Choose an episode without leaving the player.</p>
+            </div>
             {seasons.length > 1 && (
-              <div className="ml-auto flex flex-wrap gap-1.5">
+              <div className="ml-auto flex max-w-full flex-wrap gap-1.5">
                 {seasons.map((s) => (
-                  <button
-                    key={s.season_number}
-                    onClick={() => setSeasonNum(s.season_number)}
-                    className={`rounded-full px-2.5 py-1 text-xs transition ${s.season_number === seasonNum
-                      ? "bg-brand text-white"
-                      : "border border-white/10 text-text-muted hover:border-brand/50"
-                      }`}
-                  >
+                  <button key={s.season_number} onClick={() => setSeasonNum(s.season_number)} className={`rounded-full px-2.5 py-1 text-xs transition ${s.season_number === seasonNum ? "bg-brand text-white" : "border border-white/10 text-text-muted hover:border-brand/50"}`}>
                     {s.name || `Season ${s.season_number}`}
                   </button>
                 ))}
               </div>
             )}
-            <button
-              onClick={() => setEpisodePickerOpen(false)}
-              aria-label="Close episode list"
-              className="rounded p-1 text-text-muted hover:text-text-vivid"
-            >
-              ✕
-            </button>
           </div>
-          <div className="thin-scroll max-h-72 overflow-y-auto p-2">
-            {episodes.length === 0 ? (
-              <p className="px-3 py-4 text-xs text-text-muted">Loading episodes…</p>
+          <div className="thin-scroll max-h-[28rem] overflow-y-auto p-2 sm:p-3">
+            {episodesLoading ? (
+              <p className="px-3 py-4 text-xs text-text-muted">Loading episodes...</p>
+            ) : episodes.length === 0 ? (
+              <p className="px-3 py-4 text-xs text-text-muted">Episodes are not available for this season yet.</p>
             ) : (
-              <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 md:grid-cols-4">
+              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                 {episodes.map((ep) => {
                   const current = ep.episode_number === episodeNum;
                   return (
-                    <button
-                      key={ep.episode_number}
-                      onClick={() => switchEpisode(seasonNum, ep.episode_number)}
-                      disabled={busyResolve || current}
-                      className={`rounded-lg px-3 py-2 text-left text-xs transition ${current
-                        ? "border border-brand/50 bg-brand/15 font-semibold text-brand-soft"
-                        : "border border-white/10 text-text-vivid hover:border-brand/50 hover:bg-white/5"
-                        } disabled:cursor-default`}
-                    >
-                      <span className="block font-mono text-[10px] text-text-muted">
-                        E{String(ep.episode_number).padStart(2, "0")}
+                    <button key={ep.episode_number} onClick={() => switchEpisode(seasonNum, ep.episode_number)} disabled={busyResolve || current} className={`min-h-16 rounded-xl px-3 py-2.5 text-left text-xs transition ${current ? "border border-brand/50 bg-brand/15 font-semibold text-brand-soft shadow-brand-glow" : "border border-white/10 text-text-vivid hover:border-brand/50 hover:bg-white/5"} disabled:cursor-default`}>
+                      <span className="flex items-center justify-between gap-2">
+                        <span className="font-mono text-[10px] text-text-muted">E{String(ep.episode_number).padStart(2, "0")}</span>
+                        {current && <span className="text-[10px] font-bold uppercase tracking-wide">Playing</span>}
                       </span>
-                      <span className="block truncate">{ep.name || `Episode ${ep.episode_number}`}</span>
+                      <span className="mt-1 block truncate text-sm">{ep.name || `Episode ${ep.episode_number}`}</span>
                     </button>
                   );
                 })}
               </div>
             )}
           </div>
-        </div>
+        </section>
       )}
 
       {roomCode && chatOpen && (
