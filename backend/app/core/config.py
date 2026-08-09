@@ -63,15 +63,15 @@ class Settings(BaseSettings):
     rate_limit_chat_stream: str = "120/hour"
     # Cheap, Redis-cached reads (browse/popular/detail, etc.)
     rate_limit_read: str = "600/minute"
-    # Search and recommender endpoints are more expensive but still per-user.
-    rate_limit_search: str = "300/minute"
+    # Search and recommender endpoints: generous but still protected (5+ RPS burst).
+    rate_limit_search: str = "600/minute"
     # Discover is more expensive than plain reads (multi-arg TMDB query, less cached).
     rate_limit_discover: str = "300/minute"
     # Personal data writes (profiles, history, preferences, episode meta).
     rate_limit_me: str = "180/minute"
-    # Expensive/abuse-prone: playback resolution, chat accept/cues, movie-night decide.
-    rate_limit_play: str = "60/minute"
-    rate_limit_playback: str = "60/minute"
+    # Moderate: playback resolution, chat accept/cues, movie-night decide.
+    rate_limit_play: str = "120/minute"
+    rate_limit_playback: str = "120/minute"
     # Use X-Forwarded-For for the client IP only when the API sits behind a
     # trustable proxy (Render, Railway, nginx). Keep off for direct exposure.
     rate_limit_trust_forwarded: bool = False

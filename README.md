@@ -128,12 +128,12 @@ collectively exhausting one per-IP cap.
 | Surface | Default limit | Notes |
 |---|---|---|
 | Browse/popular/detail/genres/season/similar | `600/minute` (`RATE_LIMIT_READ`) | cheap, Redis-cached reads |
-| Search + recommend | `300/minute` (`RATE_LIMIT_SEARCH`) | more expensive |
+| Search + recommend | `600/minute` (`RATE_LIMIT_SEARCH`) | more expensive |
 | Discover | `300/minute` (`RATE_LIMIT_DISCOVER`) | multi-arg TMDB query, less cached |
-| Profile/history/me writes | `60/minute` (`RATE_LIMIT_ME`) | progress auto-saves every ~15s |
-| Playback resolve + cue writes | `30/minute` (`RATE_LIMIT_PLAYBACK` / `_PLAY`) | provider resolution |
-| Chat + movie-night suggest | `20/hour`, stream `60/hour` (`RATE_LIMIT_CHAT[_STREAM]`) | LLM cost per call |
-| Register / login / refresh | `10/hour` / `5/15minute` / `30/minute` | brute-force guards |
+| Profile/history/me writes | `180/minute` (`RATE_LIMIT_ME`) | progress auto-saves every ~15s |
+| Playback resolve + cue writes | `120/minute` (`RATE_LIMIT_PLAYBACK` / `_PLAY`) | provider resolution |
+| Chat + movie-night suggest | `60/hour`, stream `120/hour` (`RATE_LIMIT_CHAT[_STREAM]`) | LLM cost per call |
+| Register / login / refresh | `20/hour` / `15/15minute` / `60/minute` | brute-force guards |
 
 A rejected request returns **`429`** with a **`Retry-After`** header (seconds). The
 frontend `lib/http.ts` reads it and auto-retries a read request once when

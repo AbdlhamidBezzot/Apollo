@@ -496,3 +496,141 @@ def test_require_redis_is_noop_outside_production():
         # Should return cleanly, no RuntimeError, and leave backend as memory.
         client.require_redis()
         assert client._use_redis is False
+
+
+# ---------------------------------------------------------------------------
+# Production strategy: default route limits (STRICT / GENEROUS / MODERATE)
+# ---------------------------------------------------------------------------
+
+def test_default_route_limits_match_strategy():
+    """Default limit specs must match the STRICT / GENEROUS / MODERATE strategy."""
+    from app.core.config import Settings
+
+    s = Settings(_env_file=None)
+
+    # STRICT — auth + LLM (abuse-prone / per-call cost)
+    assert parse_rate_spec(s.rate_limit_login) == (15, 900)
+    assert parse_rate_spec(s.rate_limit_register) == (20, 3600)
+    assert parse_rate_spec(s.rate_limit_refresh) == (60, 60)
+    assert parse_rate_spec(s.rate_limit_chat) == (60, 3600)
+    assert parse_rate_spec(s.rate_limit_chat_stream) == (120, 3600)
+
+    # GENEROUS — normal content browsing
+    assert parse_rate_spec(s.rate_limit_read) == (600, 60)
+
+    # GENEROUS but protected — search / discover
+    assert parse_rate_spec(s.rate_limit_search) == (600, 60)
+    assert parse_rate_spec(s.rate_limit_discover) == (300, 60)
+
+    # MODERATE — personal writes + playback/play
+    assert parse_rate_spec(s.rate_limit_me) == (180, 60)
+    assert parse_rate_spec(s.rate_limit_play) == (120, 60)
+    assert parse_rate_spec(s.rate_limit_playback) == (120, 60)
+
+
+def test_burst_capacity_equals_configured_limit():
+    """A token bucket allows an immediate burst equal to the configured limit."""
+    cache = get_cache()
+    key = f"rl:burst:{uuid.uuid4().hex}"
+    limit, window = parse_rate_spec("120/minute")
+    allowed = [cache.rate_limit_take(key, limit, limit / window, window) for _ in range(limit)]
+    assert all(ok for ok, _ in allowed)
+
+    denied, retry_after = cache.rate_limit_take(key, limit, limit / window, window)
+    assert denied is False
+    assert retry_after >= 1
+
+
+# ---------------------------------------------------------------------------
+# Authenticated per-user buckets (must NOT share one IP bucket)
+# ---------------------------------------------------------------------------
+
+def test_state_user_id_takes_precedence_over_bearer_token():
+    """request.state.user_id (set by the auth dependency) wins over a Bearer
+    token for a DIFFERENT user — requests from the same IP stay separated."""
+    settings = get_settings()
+    other_token = create_token("999", settings.token_secret, "access", 15)
+    limiter = rate_limited(f"teststate-{uuid.uuid4().hex}", "2/minute")
+
+    def _state_user(user_id: int):
+        req = _request(headers=[(b"authorization", f"Bearer {other_token}".encode())])
+        req.state.user_id = user_id
+        return req
+
+    limiter(_state_user(7))
+    limiter(_state_user(7))
+    with pytest.raises(HTTPException):
+        limiter(_state_user(7))  # u:7 bucket exhausted
+
+    # Token user 999 (no state override) still has a fresh bucket on the SAME IP.
+    token_user = _request(headers=[(b"authorization", f"Bearer {other_token}".encode())])
+    limiter(token_user)
+    limiter(token_user)
+    with pytest.raises(HTTPException):
+        limiter(token_user)
+
+
+def test_two_authenticated_users_same_ip_have_separate_buckets_via_token():
+    """Two authenticated users behind one public IP get distinct per-user buckets."""
+    settings = get_settings()
+    token_a = create_token("111", settings.token_secret, "access", 15)
+    token_b = create_token("222", settings.token_secret, "access", 15)
+    limiter = rate_limited(f"testusers-{uuid.uuid4().hex}", "2/minute")
+
+    req_a = _request("203.0.113.20", [(b"authorization", f"Bearer {token_a}".encode())])
+    req_b = _request("203.0.113.20", [(b"authorization", f"Bearer {token_b}".encode())])
+
+    limiter(req_a)
+    limiter(req_a)
+    with pytest.raises(HTTPException):
+        limiter(req_a)  # user A exhausted
+
+    # user B from the same NATed public IP is unaffected.
+    limiter(req_b)
+    limiter(req_b)
+    with pytest.raises(HTTPException):
+        limiter(req_b)
+
+
+# ---------------------------------------------------------------------------
+# Anonymous per-IP buckets (must still be rate limited by IP)
+# ---------------------------------------------------------------------------
+
+def test_anonymous_users_limited_per_ip():
+    """Anonymous users share the bucket only with their own client IP."""
+    limiter = rate_limited(f"testanon-{uuid.uuid4().hex}", "2/minute")
+    req_a = _request("198.51.100.1")
+    req_b = _request("198.51.100.2")
+
+    limiter(req_a)
+    limiter(req_a)
+    with pytest.raises(HTTPException):
+        limiter(req_a)
+
+    # A different anonymous IP is unaffected.
+    limiter(req_b)
+    limiter(req_b)
+    with pytest.raises(HTTPException):
+        limiter(req_b)
+
+
+# ---------------------------------------------------------------------------
+# Forwarded-IP security (trusted proxies preserved, untrusted ignored)
+# ---------------------------------------------------------------------------
+
+def test_request_ip_trusted_proxy_preserves_forwarded_identity(monkeypatch):
+    """Only a host listed in RATE_LIMIT_TRUSTED_PROXIES may supply X-Forwarded-For;
+    an untrusted socket's header is ignored and its own IP is used."""
+    import app.core.ratelimit as rl
+    from app.core.config import Settings
+
+    fake = Settings(_env_file=None, rate_limit_trust_forwarded=False, rate_limit_trusted_proxies="10.0.0.1")
+    monkeypatch.setattr(rl, "get_settings", lambda: fake)
+
+    # Trusted proxy at 10.0.0.1 forwards the real client IP.
+    req_trusted = Request(_scope("10.0.0.1", [(b"x-forwarded-for", b"198.51.100.77")]))
+    assert rl._request_ip(req_trusted) == "198.51.100.77"
+
+    # Untrusted socket 5.5.5.5 cannot spoof: its forwarded header is ignored.
+    req_untrusted = Request(_scope("5.5.5.5", [(b"x-forwarded-for", b"203.0.113.9")]))
+    assert rl._request_ip(req_untrusted) == "5.5.5.5"
