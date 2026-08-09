@@ -64,7 +64,7 @@ class Settings(BaseSettings):
     # Cheap, Redis-cached reads (browse/popular/detail, etc.)
     rate_limit_read: str = "3000/minute"
     # Search and recommender endpoints: generous but still protected (5+ RPS burst).
-    rate_limit_search: str = "600/minute"
+    rate_limit_search: str = "3000/minute"
     # Discover is more expensive than plain reads (multi-arg TMDB query, less cached).
     rate_limit_discover: str = "300/minute"
     # Personal data writes (profiles, history, preferences, episode meta).
