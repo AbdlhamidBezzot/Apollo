@@ -156,6 +156,18 @@ class Settings(BaseSettings):
             raise RuntimeError(
                 "Production DATABASE_URL must be PostgreSQL, not sqlite. Set DATABASE_URL."
             )
+        _localhost_redis = (
+            "redis://localhost",
+            "redis://127.0.0.1",
+            "rediss://localhost",
+            "rediss://127.0.0.1",
+        )
+        if any(self.redis_url.startswith(p) for p in _localhost_redis):
+            raise RuntimeError(
+                "Production REDIS_URL still points to localhost. "
+                "Set REDIS_URL to a real Redis instance (e.g. the Render Redis connection string). "
+                "Without a shared Redis, rate limiting runs per-process and is ineffective."
+            )
 
 
 @lru_cache

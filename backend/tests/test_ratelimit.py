@@ -260,3 +260,155 @@ def test_xreal_ip_used_when_trusted(monkeypatch):
     with pytest.raises(HTTPException):
         limiter(req)
 
+
+# ---------------------------------------------------------------------------
+# Redis backend selection tests
+# ---------------------------------------------------------------------------
+
+def test_cache_is_redis_configured_false_for_localhost():
+    """is_redis_configured() returns False for localhost URLs (dev/test defaults)."""
+    from app.core.cache import CacheClient, _LOCALHOST_REDIS_PREFIXES
+    from unittest.mock import patch
+
+    client = CacheClient.__new__(CacheClient)
+    client._in_memory = {}
+    client._use_redis = False
+    client._redis = None
+    client._last_redis_check = 0.0
+    client._last_redis_error = None
+    client._rl_lock = __import__("threading").Lock()
+    client._rl_buckets = {}
+
+    for prefix in _LOCALHOST_REDIS_PREFIXES:
+        url = f"{prefix}:6379/0"
+        with patch("app.core.cache.get_settings") as mock_settings:
+            mock_settings.return_value.redis_url = url
+            assert client.is_redis_configured() is False, f"Expected False for {url}"
+
+
+def test_cache_is_redis_configured_true_for_remote():
+    """is_redis_configured() returns True for non-localhost Redis URLs."""
+    from app.core.cache import CacheClient
+    from unittest.mock import patch
+
+    client = CacheClient.__new__(CacheClient)
+    client._in_memory = {}
+    client._use_redis = False
+    client._redis = None
+    client._last_redis_check = 0.0
+    client._last_redis_error = None
+    client._rl_lock = __import__("threading").Lock()
+    client._rl_buckets = {}
+
+    remote_urls = [
+        "redis://red-abc123.render.com:6379/0",
+        "rediss://my-redis.upstash.io:6380",
+        "redis://10.0.1.5:6379/0",  # private but non-localhost
+    ]
+    for url in remote_urls:
+        with patch("app.core.cache.get_settings") as mock_settings:
+            mock_settings.return_value.redis_url = url
+            assert client.is_redis_configured() is True, f"Expected True for {url}"
+
+
+def test_redis_connection_failure_populates_last_error():
+    """When Redis is unreachable, last_redis_error is set to a non-None string."""
+    from app.core.cache import CacheClient
+    from unittest.mock import patch
+
+    client = CacheClient.__new__(CacheClient)
+    client._in_memory = {}
+    client._use_redis = False
+    client._redis = None
+    client._last_redis_check = 0.0
+    client._last_redis_error = None
+    client._rl_lock = __import__("threading").Lock()
+    client._rl_buckets = {}
+
+    # Point at an unreachable Redis (port nobody listens on)
+    with patch("app.core.cache.get_settings") as mock_settings:
+        mock_settings.return_value.redis_url = "redis://127.0.0.1:19999/0"
+        result = client._ensure_redis()
+
+    assert result is False
+    assert client._use_redis is False
+    assert client._last_redis_error is not None
+    assert len(client._last_redis_error) > 0
+
+
+def test_redis_backend_selected_with_fake_redis():
+    """When _ensure_redis succeeds (fake connection), backend returns 'redis'."""
+    from app.core.cache import CacheClient
+    import time
+
+    class PingableRedis:
+        def ping(self):
+            return True
+
+    client = CacheClient.__new__(CacheClient)
+    client._in_memory = {}
+    client._redis = PingableRedis()
+    client._use_redis = True
+    client._last_redis_check = time.time()
+    client._last_redis_error = None
+    client._rl_lock = __import__("threading").Lock()
+    client._rl_buckets = {}
+
+    assert client.backend == "redis"
+
+
+def test_production_config_rejects_localhost_redis():
+    """ensure_production_ready() raises RuntimeError if REDIS_URL is localhost in production."""
+    from app.core.config import Settings
+
+    settings = Settings(
+        _env_file=None,
+        app_env="production",
+        secret_key="a-very-long-and-random-secret-key-for-production-use",
+        database_url="postgresql+psycopg://user:pass@host/db",
+        redis_url="redis://localhost:6379/0",
+        cors_origins="https://example.com",
+    )
+    with pytest.raises(RuntimeError, match="REDIS_URL still points to localhost"):
+        settings.ensure_production_ready()
+
+
+def test_production_config_accepts_remote_redis():
+    """ensure_production_ready() passes when REDIS_URL is a remote host."""
+    from app.core.config import Settings
+
+    settings = Settings(
+        _env_file=None,
+        app_env="production",
+        secret_key="a-very-long-and-random-secret-key-for-production-use",
+        database_url="postgresql+psycopg://user:pass@host/db",
+        redis_url="redis://red-xyz.render.com:6379/0",
+        cors_origins="https://example.com",
+    )
+    # Should not raise — remote Redis URL is acceptable
+    settings.ensure_production_ready()
+
+
+def test_redis_error_logged_not_silenced(caplog):
+    """Redis connection failures must appear in logs at ERROR level, not be swallowed."""
+    import logging
+    from app.core.cache import CacheClient
+    from unittest.mock import patch
+
+    client = CacheClient.__new__(CacheClient)
+    client._in_memory = {}
+    client._use_redis = False
+    client._redis = None
+    client._last_redis_check = 0.0
+    client._last_redis_error = None
+    client._rl_lock = __import__("threading").Lock()
+    client._rl_buckets = {}
+
+    with caplog.at_level(logging.ERROR, logger="app.cache"):
+        with patch("app.core.cache.get_settings") as mock_settings:
+            mock_settings.return_value.redis_url = "redis://127.0.0.1:19998/0"
+            client._ensure_redis()
+
+    error_records = [r for r in caplog.records if r.levelno >= logging.ERROR]
+    assert len(error_records) >= 1, "Expected at least one ERROR log for Redis connection failure"
+    assert any("Redis connection failed" in r.message for r in error_records)

@@ -1,5 +1,12 @@
-"""Redis-backed cache with automatic in-memory fallback for testing/local dev."""
+"""Redis-backed cache with automatic in-memory fallback for testing/local dev.
+
+Production note: if REDIS_URL is set but Redis is unreachable, all connection
+errors are logged as ERROR and rate limiting degrades to per-process in-memory
+buckets. This is intentionally visible — do not silently ignore Redis failures
+in production.
+"""
 import json
+import logging
 import math
 import threading
 import time
@@ -9,6 +16,15 @@ from typing import Any
 import redis as redis_lib
 
 from app.core.config import get_settings
+
+logger = logging.getLogger("app.cache")
+
+_LOCALHOST_REDIS_PREFIXES = (
+    "redis://localhost",
+    "redis://127.0.0.1",
+    "rediss://localhost",
+    "rediss://127.0.0.1",
+)
 
 # Atomic token-bucket (burst-tolerant) evaluator. Each call returns
 # {allowed, retry_after_seconds}. The token store is a {t, l} JSON blob under a
@@ -61,9 +77,23 @@ class CacheClient:
         self._use_redis = False
         self._redis: Any = None
         self._last_redis_check = 0.0
+        self._last_redis_error: str | None = None
         self._rl_lock = threading.Lock()
         self._rl_buckets: dict[str, tuple[float, float]] = {}
         self._ensure_redis()
+
+    @property
+    def last_redis_error(self) -> str | None:
+        """The last Redis connection error message, or None if connected."""
+        return self._last_redis_error
+
+    def is_redis_configured(self) -> bool:
+        """True if REDIS_URL points to something other than localhost defaults."""
+        try:
+            url = get_settings().redis_url
+            return bool(url) and not any(url.startswith(p) for p in _LOCALHOST_REDIS_PREFIXES)
+        except Exception:
+            return False
 
     def _ensure_redis(self) -> bool:
         if self._use_redis and self._redis is not None:
@@ -81,10 +111,24 @@ class CacheClient:
                 decode_responses=True,
             )
             client.ping()
+            if self._last_redis_error is not None:
+                # Recovered from a previous failure — log at INFO so it's visible
+                logger.info("Redis connection restored: url='%s'", settings.redis_url)
+            self._last_redis_error = None
             self._redis = client
             self._use_redis = True
             return True
-        except Exception:
+        except Exception as exc:
+            error_msg = f"{type(exc).__name__}: {exc}"
+            if self._last_redis_error != error_msg:
+                # Only log when the error changes — avoids log spam every 5s
+                logger.error(
+                    "Redis connection failed — falling back to in-memory rate limiting. "
+                    "url='%s' error='%s'",
+                    get_settings().redis_url,
+                    error_msg,
+                )
+            self._last_redis_error = error_msg
             self._use_redis = False
             return False
 
@@ -107,7 +151,13 @@ class CacheClient:
                     time.time(),
                 )
                 return bool(result[0]), int(result[1])
-            except Exception:
+            except Exception as exc:
+                logger.error(
+                    "Redis eval failed during rate_limit_take — falling back to memory. "
+                    "key='%s' error='%s'",
+                    key,
+                    exc,
+                )
                 self._use_redis = False
         return self._rate_limit_memory(key, capacity, refill_per_second, window)
 

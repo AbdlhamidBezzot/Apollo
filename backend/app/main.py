@@ -47,7 +47,21 @@ async def lifespan(_: FastAPI):
     settings.ensure_production_ready()
     init_db()
     get_rate_limiter()  # warm the rate limiter so cache fallback is resolved once
-    logger.info("Cache backend selected: %s", get_cache().backend)
+    cache = get_cache()
+    _backend = cache.backend
+    if _backend == "redis":
+        logger.info("Cache backend: redis (distributed rate limiting active)")
+    else:
+        _err = cache.last_redis_error or "Redis unreachable or REDIS_URL not configured"
+        if settings.is_production:
+            logger.critical(
+                "PRODUCTION ALERT: Cache backend is 'memory' — rate limiting is per-process "
+                "and NOT shared across instances. Redis connection failed: %s. "
+                "Set REDIS_URL in Render environment variables.",
+                _err,
+            )
+        else:
+            logger.warning("Cache backend: memory (Redis unavailable — ok for local dev)")
     if settings.tmdb_api_key or settings.tmdb_api_read_access_token:
         await _warm_home_feed()
     yield
@@ -100,8 +114,14 @@ async def _check_database() -> bool:
         return False
 
 
-async def _check_redis() -> bool:
-    return get_cache().backend == "redis"
+async def _check_redis() -> dict:
+    cache = get_cache()
+    connected = cache.backend == "redis"
+    result: dict = {"connected": connected}
+    if not connected:
+        result["error"] = cache.last_redis_error or "Redis unreachable or REDIS_URL not configured"
+        result["redis_url_configured"] = cache.is_redis_configured()
+    return result
 
 
 async def _check_tmdb() -> bool:
@@ -134,10 +154,11 @@ async def _check_tmdb() -> bool:
 
 @app.get("/health")
 async def health():
+    redis_status = await _check_redis()
     return {
         "status": "ok",
         "database": await _check_database(),
-        "redis": await _check_redis(),
+        "redis": redis_status,
         "tmdb": await _check_tmdb(),
         "version": app.version,
         "environment": settings.app_env,
