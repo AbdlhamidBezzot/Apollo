@@ -9,6 +9,8 @@ Rules:
 """
 
 import json
+import logging
+import time
 from collections.abc import Awaitable, Callable
 from typing import Any
 
@@ -18,7 +20,7 @@ from app.core.cache import get_cache
 from app.core.config import get_settings
 
 TMDB_CACHE_TTL = 86400
-
+logger = logging.getLogger("app.tmdb")
 
 
 class TMDbError(Exception):
@@ -46,14 +48,19 @@ async def _tmdb_get(path: str, params: dict[str, Any] | None = None) -> dict[str
     url = f"{settings.tmdb_api_base_url.rstrip('/')}/{path}"
     merged = {"language": "en-US", **(params or {})}
     merged.update(_auth_params())
+    start_time = time.monotonic()
     try:
         async with httpx.AsyncClient(timeout=8.0) as client:
             resp = await client.get(url, params=merged, headers=_auth_headers())
+            elapsed = time.monotonic() - start_time
+            logger.info("TMDB request success: path='%s' status=%d elapsed=%.3fs", path, resp.status_code, elapsed)
             resp.raise_for_status()
             return resp.json()
     except httpx.HTTPStatusError as exc:
+        logger.error("TMDB HTTP status error: path='%s' status=%d", path, exc.response.status_code)
         raise TMDbError(f"TMDB returned {exc.response.status_code} for {path}") from exc
     except httpx.HTTPError as exc:
+        logger.error("TMDB HTTP network error: path='%s' error='%s'", path, str(exc))
         raise TMDbError(f"TMDB unreachable: {exc}") from exc
 
 
@@ -69,9 +76,11 @@ async def _cached(
     cached = cache.get(key)
     if cached is not None:
         try:
+            logger.debug("TMDB cache HIT: namespace='%s' path='%s'", namespace, path)
             return json.loads(cached)
         except (ValueError, TypeError):
             pass
+    logger.info("TMDB cache MISS: namespace='%s' path='%s' fetching upstream", namespace, path)
     data = await loader()
     try:
         cache.set(key, json.dumps(data), ttl)

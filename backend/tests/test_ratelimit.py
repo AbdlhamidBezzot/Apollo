@@ -158,3 +158,105 @@ def test_forwarded_for_used_when_trusted(monkeypatch):
     limiter(req2)
     with pytest.raises(HTTPException):
         limiter(req2)
+
+
+def test_spoofed_xforwardedfor_ignored_without_trusted_flag(monkeypatch):
+    """When rate_limit_trust_forwarded=False and no trusted_proxies, the
+    X-Forwarded-For header MUST be ignored. All requests collapse to the
+    actual client IP in the socket, preventing header-spoofing attacks."""
+    import app.core.ratelimit as rl
+    from app.core.config import Settings
+
+    # Default: trust_forwarded=False, trusted_proxies=""
+    fake_settings = Settings(_env_file=None, rate_limit_trust_forwarded=False, rate_limit_trusted_proxies="")
+    monkeypatch.setattr(rl, "get_settings", lambda: fake_settings)
+
+    limiter = rate_limited(f"testspoof-{uuid.uuid4().hex}", "2/minute")
+
+    # Attacker sends a different spoofed IP in X-Forwarded-For from the SAME socket
+    req_a = Request(_scope("1.2.3.4", [(b"x-forwarded-for", b"9.9.9.9")]))
+    req_b = Request(_scope("1.2.3.4", [(b"x-forwarded-for", b"8.8.8.8")]))
+
+    # Both should consume from the SAME bucket (client socket "1.2.3.4")
+    limiter(req_a)
+    limiter(req_b)  # fills the capacity=2 bucket
+    with pytest.raises(HTTPException):
+        # Third request (still from "1.2.3.4") must be blocked regardless of spoofed header
+        Request(_scope("1.2.3.4", [(b"x-forwarded-for", b"7.7.7.7")]))
+        limiter(Request(_scope("1.2.3.4", [(b"x-forwarded-for", b"7.7.7.7")])))
+
+
+def test_trusted_proxies_list_enables_forwarded_for(monkeypatch):
+    """When the connecting host matches rate_limit_trusted_proxies, X-Forwarded-For
+    is honoured and different clients get distinct buckets."""
+    import app.core.ratelimit as rl
+    from app.core.config import Settings
+
+    # Trust only 10.0.0.1 (internal proxy)
+    fake_settings = Settings(
+        _env_file=None,
+        rate_limit_trust_forwarded=False,
+        rate_limit_trusted_proxies="10.0.0.1",
+    )
+    monkeypatch.setattr(rl, "get_settings", lambda: fake_settings)
+
+    limiter = rate_limited(f"testproxylist-{uuid.uuid4().hex}", "2/minute")
+
+    # Both requests arrive through the trusted proxy at 10.0.0.1
+    req_client_a = Request(_scope("10.0.0.1", [(b"x-forwarded-for", b"203.0.113.10")]))
+    req_client_b = Request(_scope("10.0.0.1", [(b"x-forwarded-for", b"203.0.113.11")]))
+
+    limiter(req_client_a)
+    limiter(req_client_a)
+    with pytest.raises(HTTPException):
+        limiter(req_client_a)  # client A exhausted
+
+    # client B has a separate bucket — should still pass
+    limiter(req_client_b)
+    limiter(req_client_b)
+    with pytest.raises(HTTPException):
+        limiter(req_client_b)
+
+
+def test_untrusted_proxy_cannot_spoof_via_trusted_proxies_list(monkeypatch):
+    """A host NOT in rate_limit_trusted_proxies cannot spoof via X-Forwarded-For.
+    Its requests collapse to the connecting socket IP."""
+    import app.core.ratelimit as rl
+    from app.core.config import Settings
+
+    fake_settings = Settings(
+        _env_file=None,
+        rate_limit_trust_forwarded=False,
+        rate_limit_trusted_proxies="10.0.0.1",
+    )
+    monkeypatch.setattr(rl, "get_settings", lambda: fake_settings)
+
+    limiter = rate_limited(f"testuntrusted-{uuid.uuid4().hex}", "2/minute")
+
+    # Attacker at 5.5.5.5 claims to be at various IPs via X-Forwarded-For
+    req1 = Request(_scope("5.5.5.5", [(b"x-forwarded-for", b"203.0.113.99")]))
+    req2 = Request(_scope("5.5.5.5", [(b"x-forwarded-for", b"198.51.100.1")]))
+
+    limiter(req1)
+    limiter(req2)  # Both consume from the "5.5.5.5" bucket
+    with pytest.raises(HTTPException):
+        limiter(Request(_scope("5.5.5.5", [(b"x-forwarded-for", b"1.1.1.1")])))
+
+
+def test_xreal_ip_used_when_trusted(monkeypatch):
+    """When proxied through a trusted host, X-Real-IP is used if X-Forwarded-For
+    is absent."""
+    import app.core.ratelimit as rl
+    from app.core.config import Settings
+
+    fake_settings = Settings(_env_file=None, rate_limit_trust_forwarded=True)
+    monkeypatch.setattr(rl, "get_settings", lambda: fake_settings)
+
+    limiter = rate_limited(f"testrealip-{uuid.uuid4().hex}", "2/minute")
+
+    req = Request(_scope(headers=[(b"x-real-ip", b"203.0.113.55")]))
+    limiter(req)
+    limiter(req)
+    with pytest.raises(HTTPException):
+        limiter(req)
+

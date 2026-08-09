@@ -24,9 +24,17 @@ settings = get_settings()
 DbDep = Annotated[Session, Depends(get_db)]
 EPISODE_METADATA_CACHE_TTL = 3600
 
-_rl_read = rate_limited("content", settings.rate_limit_read)
-_rl_search = rate_limited("search", settings.rate_limit_search)
-_rl_recommend = rate_limited("recommend", settings.rate_limit_search)
+_rl_trending = rate_limited("content:trending", settings.rate_limit_read)
+_rl_popular = rate_limited("content:popular", settings.rate_limit_read)
+_rl_top_rated = rate_limited("content:top_rated", settings.rate_limit_read)
+_rl_discover = rate_limited("content:discover", settings.rate_limit_read)
+_rl_top_streaming = rate_limited("content:top_streaming", settings.rate_limit_read)
+_rl_search = rate_limited("content:search", settings.rate_limit_search)
+_rl_genres = rate_limited("content:genres", settings.rate_limit_read)
+_rl_recommend = rate_limited("content:recommend", settings.rate_limit_search)
+_rl_detail = rate_limited("content:detail", settings.rate_limit_read)
+_rl_season = rate_limited("content:season", settings.rate_limit_read)
+_rl_similar = rate_limited("content:similar", settings.rate_limit_read)
 _rl_me = rate_limited("me", settings.rate_limit_me)
 
 
@@ -72,7 +80,7 @@ def _episode_metadata_for_season(db: Session, tmdb_id: int, season_number: int) 
 
 @router.get("/trending", response_model=ContentList)
 async def trending(
-    time_window: Literal["day", "week"] = "week", page: int = 1, _rl=Depends(_rl_read)
+    time_window: Literal["day", "week"] = "week", page: int = 1, _rl=Depends(_rl_trending)
 ):
     try:
         data = await tmdb.trending(time_window, page)
@@ -83,7 +91,7 @@ async def trending(
 
 @router.get("/popular", response_model=ContentList)
 async def popular(
-    media_type: Literal["movie", "tv"] = "movie", page: int = 1, _rl=Depends(_rl_read)
+    media_type: Literal["movie", "tv"] = "movie", page: int = 1, _rl=Depends(_rl_popular)
 ):
     try:
         data = await tmdb.popular(media_type, page)
@@ -94,7 +102,7 @@ async def popular(
 
 @router.get("/top-rated", response_model=ContentList)
 async def top_rated(
-    media_type: Literal["movie", "tv"] = "movie", page: int = 1, _rl=Depends(_rl_read)
+    media_type: Literal["movie", "tv"] = "movie", page: int = 1, _rl=Depends(_rl_top_rated)
 ):
     try:
         data = await tmdb.top_rated(media_type, page)
@@ -117,7 +125,7 @@ async def discover(
     provider: str | None = Query(default=None),
     watch_region: str | None = Query(default="US"),
     monetization_types: str | None = Query(default=None),
-    _rl=Depends(_rl_read),
+    _rl=Depends(_rl_discover),
 ):
     try:
         data = await tmdb.discover(
@@ -143,7 +151,7 @@ async def discover(
 async def top_streaming(
     media_type: Literal["movie", "tv"] = "movie",
     watch_region: str = "US",
-    _rl=Depends(_rl_read),
+    _rl=Depends(_rl_top_streaming),
 ):
     try:
         data = await tmdb.discover(
@@ -175,7 +183,7 @@ async def search(
 
 
 @router.get("/genres")
-async def genres(_rl=Depends(_rl_read)):
+async def genres(_rl=Depends(_rl_genres)):
     try:
         return await tmdb.genres()
     except TMDbError as exc:
@@ -197,7 +205,7 @@ profile: CurrentProfile,
 
 
 @router.get("/{media_type}/{tmdb_id}")
-async def detail(media_type: Literal["movie", "tv"], tmdb_id: int, _rl=Depends(_rl_read)):
+async def detail(media_type: Literal["movie", "tv"], tmdb_id: int, _rl=Depends(_rl_detail)):
     try:
         item = await tmdb.detail(media_type, tmdb_id)
         credits = await tmdb.credits(media_type, tmdb_id)
@@ -214,7 +222,7 @@ async def season(
     tmdb_id: int,
     season_number: int,
     db: DbDep,
-    _rl=Depends(_rl_read),
+    _rl=Depends(_rl_season),
 ):
     try:
         data = await tmdb.season_episodes(media_type, tmdb_id, season_number)
@@ -273,7 +281,7 @@ async def delete_episode_meta(
 
 @router.get("/{media_type}/{tmdb_id}/similar", response_model=ContentList)
 async def similar(
-    media_type: Literal["movie", "tv"], tmdb_id: int, page: int = 1, _rl=Depends(_rl_read)
+    media_type: Literal["movie", "tv"], tmdb_id: int, page: int = 1, _rl=Depends(_rl_similar)
 ):
     try:
         data = await tmdb.similar(media_type, tmdb_id, page)

@@ -73,6 +73,8 @@ class Settings(BaseSettings):
     # Use X-Forwarded-For for the client IP only when the API sits behind a
     # trustable proxy (Render, Railway, nginx). Keep off for direct exposure.
     rate_limit_trust_forwarded: bool = False
+    # Comma-separated list of trusted proxy IPs/CIDRs (or '*' to trust all proxies).
+    rate_limit_trusted_proxies: str = ""
 
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.5-flash"

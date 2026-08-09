@@ -12,6 +12,8 @@ NAT users from collectively exhausting a per-IP cap.
 Returns HTTP 429 with a Retry-After header so clients can back off correctly.
 """
 
+import ipaddress
+import logging
 import re
 
 from fastapi import HTTPException, Request
@@ -21,6 +23,7 @@ from app.core.config import get_settings
 from app.core.security import decode_token
 
 ACCESS_COOKIE = "apollo_access"
+logger = logging.getLogger("app.ratelimit")
 
 
 def parse_rate_spec(spec: str) -> tuple[int, int]:
@@ -42,13 +45,51 @@ def _extract_access_token(request: Request) -> str | None:
     return request.cookies.get(ACCESS_COOKIE)
 
 
+def _is_trusted_proxy(host: str, trusted_proxies: str) -> bool:
+    """Return True if host matches any entry in the comma-separated trusted_proxies
+    string. Entries can be plain IPs or CIDR ranges (e.g. 10.0.0.0/8). '*' matches all."""
+    entries = [p.strip() for p in trusted_proxies.split(",") if p.strip()]
+    if "*" in entries:
+        return True
+    try:
+        addr = ipaddress.ip_address(host)
+    except ValueError:
+        return host in entries  # not a parseable IP, exact match only
+    for entry in entries:
+        try:
+            if "/" in entry:
+                if addr in ipaddress.ip_network(entry, strict=False):
+                    return True
+            else:
+                if addr == ipaddress.ip_address(entry):
+                    return True
+        except ValueError:
+            if host == entry:
+                return True
+    return False
+
+
 def _request_ip(request: Request) -> str:
     settings = get_settings()
+    client_host = request.client.host if request.client else "unknown"
+
+    is_trusted = False
     if settings.rate_limit_trust_forwarded:
+        is_trusted = True
+    elif settings.rate_limit_trusted_proxies:
+        is_trusted = _is_trusted_proxy(client_host, settings.rate_limit_trusted_proxies)
+
+    if is_trusted:
         forwarded = request.headers.get("x-forwarded-for", "")
         if forwarded:
-            return forwarded.split(",")[0].strip() or "unknown"
-    return request.client.host if request.client else "unknown"
+            client_ip = forwarded.split(",")[0].strip()
+            if client_ip:
+                return client_ip
+        real_ip = request.headers.get("x-real-ip", "").strip()
+        if real_ip:
+            return real_ip
+
+    return client_host
 
 
 def _identity(request: Request) -> str:
@@ -90,8 +131,19 @@ def rate_limited(key_prefix: str, spec: str):
     """
 
     def limiter(request: Request) -> None:
-        allowed, retry_after = _check(key_prefix, spec, _identity(request))
+        identity = _identity(request)
+        allowed, retry_after = _check(key_prefix, spec, identity)
         if not allowed:
+            _cache = get_cache()
+            _backend = "redis" if getattr(_cache, "_use_redis", False) else "memory"
+            logger.warning(
+                "Rate limit exceeded: prefix='%s' path='%s' identity='%s' retry_after=%ds backend='%s'",
+                key_prefix,
+                request.url.path if request.url else "",
+                identity,
+                retry_after,
+                _backend,
+            )
             raise HTTPException(
                 status_code=429,
                 detail="Rate limit exceeded. Please try again later.",
@@ -105,6 +157,15 @@ def rate_limited_identity(key_prefix: str, spec: str, identity: str) -> None:
     """Apply a rate limit to a safely-scoped explicit identity (used inline)."""
     allowed, retry_after = _check(key_prefix, spec, identity)
     if not allowed:
+        _cache = get_cache()
+        _backend = "redis" if getattr(_cache, "_use_redis", False) else "memory"
+        logger.warning(
+            "Rate limit exceeded (identity): prefix='%s' identity='%s' retry_after=%ds backend='%s'",
+            key_prefix,
+            identity,
+            retry_after,
+            _backend,
+        )
         raise HTTPException(
             status_code=429,
             detail="Rate limit exceeded. Please try again later.",
