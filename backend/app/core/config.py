@@ -62,7 +62,7 @@ class Settings(BaseSettings):
     rate_limit_chat: str = "60/hour"
     rate_limit_chat_stream: str = "120/hour"
     # Cheap, Redis-cached reads (browse/popular/detail, etc.)
-    rate_limit_read: str = "600/minute"
+    rate_limit_read: str = "3000/minute"
     # Search and recommender endpoints: generous but still protected (5+ RPS burst).
     rate_limit_search: str = "600/minute"
     # Discover is more expensive than plain reads (multi-arg TMDB query, less cached).

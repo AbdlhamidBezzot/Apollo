@@ -516,7 +516,7 @@ def test_default_route_limits_match_strategy():
     assert parse_rate_spec(s.rate_limit_chat_stream) == (120, 3600)
 
     # GENEROUS — normal content browsing
-    assert parse_rate_spec(s.rate_limit_read) == (600, 60)
+    assert parse_rate_spec(s.rate_limit_read) == (3000, 60)
 
     # GENEROUS but protected — search / discover
     assert parse_rate_spec(s.rate_limit_search) == (600, 60)
