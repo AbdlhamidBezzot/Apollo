@@ -8,13 +8,12 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Request
+import httpx
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from starlette.exceptions import HTTPException as StarletteHTTPException
-
-import httpx
 from sqlalchemy import text
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.router import api_router
 from app.core.cache import get_cache
@@ -46,11 +45,12 @@ async def _warm_home_feed() -> None:
 async def lifespan(_: FastAPI):
     settings.ensure_production_ready()
     init_db()
-    get_rate_limiter()  # warm the rate limiter so cache fallback is resolved once
     cache = get_cache()
+    cache.require_redis()  # production: fail fast if Redis is unavailable (no silent memory fallback)
+    get_rate_limiter()  # warm the rate limiter so cache fallback is resolved once
     _backend = cache.backend
     if _backend == "redis":
-        logger.info("Cache backend: redis (distributed rate limiting active)")
+        logger.info("Cache backend: redis (distributed rate limiting active, TMDB/episode cache shared)")
     else:
         _err = cache.last_redis_error or "Redis unreachable or REDIS_URL not configured"
         if settings.is_production:

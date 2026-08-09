@@ -84,7 +84,9 @@ npm run dev                                           # http://localhost:3000
 docker compose up -d postgres redis
 ```
 
-Then set `DATABASE_URL` and `REDIS_URL` in `backend/.env` (see `.env.example`). Without Redis the app falls back to an in-memory cache/rate limiter.
+Then set `DATABASE_URL` and `REDIS_URL` in `backend/.env` (see `.env.example`). Without Redis,
+local dev falls back to an in-memory cache/rate limiter; **production requires Redis** and fails
+fast at boot if it is unreachable.
 
 ## Adding real data
 

@@ -267,8 +267,9 @@ def test_xreal_ip_used_when_trusted(monkeypatch):
 
 def test_cache_is_redis_configured_false_for_localhost():
     """is_redis_configured() returns False for localhost URLs (dev/test defaults)."""
-    from app.core.cache import CacheClient, _LOCALHOST_REDIS_PREFIXES
     from unittest.mock import patch
+
+    from app.core.cache import _LOCALHOST_REDIS_PREFIXES, CacheClient
 
     client = CacheClient.__new__(CacheClient)
     client._in_memory = {}
@@ -288,8 +289,9 @@ def test_cache_is_redis_configured_false_for_localhost():
 
 def test_cache_is_redis_configured_true_for_remote():
     """is_redis_configured() returns True for non-localhost Redis URLs."""
-    from app.core.cache import CacheClient
     from unittest.mock import patch
+
+    from app.core.cache import CacheClient
 
     client = CacheClient.__new__(CacheClient)
     client._in_memory = {}
@@ -313,8 +315,9 @@ def test_cache_is_redis_configured_true_for_remote():
 
 def test_redis_connection_failure_populates_last_error():
     """When Redis is unreachable, last_redis_error is set to a non-None string."""
-    from app.core.cache import CacheClient
     from unittest.mock import patch
+
+    from app.core.cache import CacheClient
 
     client = CacheClient.__new__(CacheClient)
     client._in_memory = {}
@@ -338,8 +341,9 @@ def test_redis_connection_failure_populates_last_error():
 
 def test_redis_backend_selected_with_fake_redis():
     """When _ensure_redis succeeds (fake connection), backend returns 'redis'."""
-    from app.core.cache import CacheClient
     import time
+
+    from app.core.cache import CacheClient
 
     class PingableRedis:
         def ping(self):
@@ -392,8 +396,9 @@ def test_production_config_accepts_remote_redis():
 def test_redis_error_logged_not_silenced(caplog):
     """Redis connection failures must appear in logs at ERROR level, not be swallowed."""
     import logging
-    from app.core.cache import CacheClient
     from unittest.mock import patch
+
+    from app.core.cache import CacheClient
 
     client = CacheClient.__new__(CacheClient)
     client._in_memory = {}
@@ -404,11 +409,90 @@ def test_redis_error_logged_not_silenced(caplog):
     client._rl_lock = __import__("threading").Lock()
     client._rl_buckets = {}
 
-    with caplog.at_level(logging.ERROR, logger="app.cache"):
-        with patch("app.core.cache.get_settings") as mock_settings:
-            mock_settings.return_value.redis_url = "redis://127.0.0.1:19998/0"
-            client._ensure_redis()
+    with caplog.at_level(logging.ERROR, logger="app.cache"), patch("app.core.cache.get_settings") as mock_settings:
+        mock_settings.return_value.redis_url = "redis://127.0.0.1:19998/0"
+        client._ensure_redis()
 
     error_records = [r for r in caplog.records if r.levelno >= logging.ERROR]
     assert len(error_records) >= 1, "Expected at least one ERROR log for Redis connection failure"
     assert any("Redis connection failed" in r.message for r in error_records)
+
+
+def test_redis_logs_never_leak_credentials(caplog):
+    """Redis URLs with embedded passwords must be redacted in logs."""
+    import logging
+    from unittest.mock import patch
+
+    from app.core.cache import CacheClient, _sanitize_redis_url
+
+    assert _sanitize_redis_url("redis://:s3cr3t@red-abcd.render.com:6379/0") == \
+        "redis://red-abcd.render.com:6379/0", "password must be stripped from sanitized URL"
+
+    client = CacheClient.__new__(CacheClient)
+    client._in_memory = {}
+    client._use_redis = False
+    client._redis = None
+    client._last_redis_check = 0.0
+    client._last_redis_error = None
+    client._rl_lock = __import__("threading").Lock()
+    client._rl_buckets = {}
+
+    url_with_pass = "redis://:s3cr3t@127.0.0.1:19997/0"
+    with caplog.at_level(logging.ERROR, logger="app.cache"), patch("app.core.cache.get_settings") as mock_settings:
+        mock_settings.return_value.redis_url = url_with_pass
+        client._ensure_redis()
+
+    joined = "\n".join(r.message for r in caplog.records)
+    assert "s3cr3t" not in joined, "Redis password leaked into logs"
+    assert "Redis connection failed" in joined
+
+
+def test_require_redis_raises_in_production_when_unreachable():
+    """Production + unreachable Redis must fail fast instead of silently degrading."""
+    import logging
+    from unittest import mock
+
+    from app.core.cache import CacheClient
+
+    client = CacheClient.__new__(CacheClient)
+    client._in_memory = {}
+    client._use_redis = False
+    client._redis = None
+    client._last_redis_check = 0.0
+    client._last_redis_error = None
+    client._rl_lock = __import__("threading").Lock()
+    client._rl_buckets = {}
+    client._ensure_redis = lambda: False  # simulate unreachable Redis
+    client._last_redis_error = "SomeError: connection refused"
+
+    prod_settings = mock.Mock(is_production=True)
+    with (
+        mock.patch("app.core.cache.get_settings", return_value=prod_settings),
+        mock.patch.object(logging.getLogger("app.cache"), "critical") as mock_critical,
+        pytest.raises(RuntimeError, match="Redis is REQUIRED in production"),
+    ):
+        client.require_redis()
+        assert mock_critical.called, "expected a critical log on production Redis failure"
+
+
+def test_require_redis_is_noop_outside_production():
+    """In dev/test the memory fallback stays allowed: require_redis must not raise."""
+    from unittest import mock
+
+    from app.core.cache import CacheClient
+
+    client = CacheClient.__new__(CacheClient)
+    client._in_memory = {}
+    client._use_redis = False
+    client._redis = None
+    client._last_redis_check = 0.0
+    client._last_redis_error = None
+    client._rl_lock = __import__("threading").Lock()
+    client._rl_buckets = {}
+    client._ensure_redis = lambda: False
+
+    dev_settings = mock.Mock(is_production=False)
+    with mock.patch("app.core.cache.get_settings", return_value=dev_settings):
+        # Should return cleanly, no RuntimeError, and leave backend as memory.
+        client.require_redis()
+        assert client._use_redis is False

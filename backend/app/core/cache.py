@@ -1,9 +1,9 @@
 """Redis-backed cache with automatic in-memory fallback for testing/local dev.
 
 Production note: if REDIS_URL is set but Redis is unreachable, all connection
-errors are logged as ERROR and rate limiting degrades to per-process in-memory
-buckets. This is intentionally visible — do not silently ignore Redis failures
-in production.
+errors are logged as ERROR. In production the app fails fast (see
+CacheClient.require_redis) rather than degrading to per-process in-memory
+buckets, which would silently break distributed rate limiting.
 """
 import json
 import logging
@@ -12,6 +12,7 @@ import threading
 import time
 from collections.abc import Callable
 from typing import Any
+from urllib.parse import urlsplit, urlunsplit
 
 import redis as redis_lib
 
@@ -25,6 +26,25 @@ _LOCALHOST_REDIS_PREFIXES = (
     "rediss://localhost",
     "rediss://127.0.0.1",
 )
+
+def _sanitize_redis_url(url: str) -> str:
+    """Return a log-safe version of a Redis URL with the password redacted.
+
+    Redis URLs may embed credentials (redis://user:PASSWORD@host:port). Those
+    must never appear in logs, error pages, or health responses, so we strip the
+    userinfo password before anywhere the URL could be emitted.
+    """
+    try:
+        parts = urlsplit(url)
+        if not parts.hostname:
+            return url
+        host = parts.hostname
+        if parts.port:
+            host = f"{host}:{parts.port}"
+        return urlunsplit((parts.scheme, host, parts.path, parts.query, parts.fragment))
+    except ValueError:
+        return "<invalid-redis-url>"
+
 
 # Atomic token-bucket (burst-tolerant) evaluator. Each call returns
 # {allowed, retry_after_seconds}. The token store is a {t, l} JSON blob under a
@@ -108,12 +128,15 @@ class CacheClient:
                 settings.redis_url,
                 socket_connect_timeout=1,
                 socket_timeout=1,
-                decode_responses=True,
+decode_responses=True,
             )
             client.ping()
             if self._last_redis_error is not None:
                 # Recovered from a previous failure — log at INFO so it's visible
-                logger.info("Redis connection restored: url='%s'", settings.redis_url)
+                logger.info(
+                    "Redis connection restored: url='%s'",
+                    _sanitize_redis_url(settings.redis_url),
+                )
             self._last_redis_error = None
             self._redis = client
             self._use_redis = True
@@ -125,12 +148,36 @@ class CacheClient:
                 logger.error(
                     "Redis connection failed — falling back to in-memory rate limiting. "
                     "url='%s' error='%s'",
-                    get_settings().redis_url,
+                    _sanitize_redis_url(get_settings().redis_url),
                     error_msg,
                 )
             self._last_redis_error = error_msg
             self._use_redis = False
             return False
+
+    def require_redis(self) -> None:
+        """Fail fast instead of silently degrading to memory in production.
+
+        Emits a clear error (no URL, no credentials) when Redis is required but
+        not configured or unreachable. Called from the app lifespan in production.
+        """
+        settings = get_settings()
+        if not settings.is_production:
+            return
+        if self._ensure_redis():
+            return
+        err = self._last_redis_error or "Redis unreachable"
+        logger.critical(
+            "Redis is REQUIRED in production but is unavailable (%s). "
+            "Rate limiting and caching must be shared across instances; "
+            "falling back to per-process memory is disabled. "
+            "Check the REDIS_URL environment variable (Render Redis connection string).",
+            err,
+        )
+        raise RuntimeError(
+            "Redis is REQUIRED in production but is unavailable. "
+            "Check REDIS_URL (no localhost) and confirm the Render Redis instance is reachable."
+        )
 
     def rate_limit_take(self, key: str, capacity: int, refill_per_second: float, window: int) -> tuple[bool, int]:
         """Take one token from a Redis-backed token bucket (burst-tolerant).

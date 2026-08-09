@@ -45,7 +45,7 @@ Production Backend (Render / Railway / Fly.io)
 | `CORS_ORIGINS` | Comma-separated allowed browser origins. **No `*`.** | `https://apollo-94zv.vercel.app` |
 | `COOKIE_SAMESITE` | `lax` (dev) or `none` (prod, cross-site cookies) | `none` |
 | `DATABASE_URL` | PostgreSQL connection string (**never sqlite in prod**) | `postgresql+psycopg://user:pass@host:5432/db` |
-| `REDIS_URL` | Redis URL (fallback to in-memory if unreachable) | `redis://...:6379` |
+| `REDIS_URL` | Redis URL (**required in production** — app fails fast if unreachable) | `redis://...:6379` |
 | `TMDB_API_KEY` / `TMDB_API_READ_ACCESS_TOKEN` | Required for real content | from the TMDB dashboard |
 | `TMDB_API_BASE_URL` | TMDB base | `https://api.themoviedb.org/3` |
 | `LLM_PROVIDER` / `GEMINI_API_KEY` / `DEEPSEEK_API_KEY` | CineBot LLM | optional |
@@ -126,9 +126,13 @@ before loading content and render a clear error like *"Backend unreachable"* whe
 
 ## 7. Redis
 
-- Optional; used for cache + rate limiting. If `REDIS_URL` is unreachable the app falls back to
-  an in-memory implementation (fine for single instance).
-- Production on multi-instance deploys: **use Redis** so rate limits/cache are shared.
+- Used for cache + rate limiting. On multi-instance deploys Redis keeps rate limits/cache shared
+  across all workers (Render runs `--workers 2`).
+- **Production is fail-fast**: if `REDIS_URL` is unreachable at boot the app refuses to start rather
+  than silently degrading to per-process memory. `GET /health` reports `redis.connected` and the
+  startup log prints the active backend (`Cache backend: redis ...`).
+- In dev, if `REDIS_URL` is unreachable the app falls back to an in-memory implementation (fine for a
+  single instance). Redis credentials embedded in `REDIS_URL` are never logged.
 
 ## 8. TMDB
 
