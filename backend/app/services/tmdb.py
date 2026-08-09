@@ -18,6 +18,7 @@ import httpx
 
 from app.core.cache import get_cache
 from app.core.config import get_settings
+from app.core.diagnostics import measure
 
 TMDB_CACHE_TTL = 86400
 logger = logging.getLogger("app.tmdb")
@@ -73,7 +74,8 @@ async def _cached(
 ) -> dict[str, Any]:
     cache = get_cache()
     key = f"tmdb:{namespace}:{path}:{json.dumps(params, sort_keys=True)}"
-    cached = cache.get(key)
+    with measure("cache_get"):
+        cached = cache.get(key)
     if cached is not None:
         try:
             logger.debug("TMDB cache HIT: namespace='%s' path='%s'", namespace, path)
@@ -81,9 +83,11 @@ async def _cached(
         except (ValueError, TypeError):
             pass
     logger.info("TMDB cache MISS: namespace='%s' path='%s' fetching upstream", namespace, path)
-    data = await loader()
+    with measure("tmdb"):
+        data = await loader()
     try:
-        cache.set(key, json.dumps(data), ttl)
+        with measure("cache_set"):
+            cache.set(key, json.dumps(data), ttl)
     except (TypeError, ValueError):
         pass
     return data
@@ -232,7 +236,9 @@ class TMDBClient:
 
     @staticmethod
     async def genres() -> dict[str, Any]:
-        return await _cached("genre/movie/list", {}, TMDB_CACHE_TTL, "genres", lambda: _tmdb_get("genre/movie/list", {}))
+        return await _cached(
+            "genre/movie/list", {}, TMDB_CACHE_TTL, "genres", lambda: _tmdb_get("genre/movie/list", {})
+        )
 
     @staticmethod
     async def season_episodes(media_type: str, tmdb_id: int, season_number: int) -> dict[str, Any]:

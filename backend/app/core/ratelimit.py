@@ -15,11 +15,13 @@ Returns HTTP 429 with a Retry-After header so clients can back off correctly.
 import ipaddress
 import logging
 import re
+import time
 
 from fastapi import HTTPException, Request
 
 from app.core.cache import get_cache
 from app.core.config import get_settings
+from app.core.diagnostics import add
 from app.core.security import decode_token
 
 ACCESS_COOKIE = "apollo_access"
@@ -112,14 +114,17 @@ def _identity(request: Request) -> str:
 
 def _check(key_prefix: str, spec: str, identity: str) -> tuple[bool, int]:
     limit, window = parse_rate_spec(spec)
-    # Token bucket: allow an immediate burst of `limit` then refill at
-    # limit / window (e.g. 2 req/s for a 120/min read endpoint).
-    return get_cache().rate_limit_take(
+    # Time the Redis EVAL that powers the token bucket (runs in the sync
+    # dependency / threadpool, so it does not block the event loop).
+    started = time.perf_counter()
+    result = get_cache().rate_limit_take(
         f"rl:{key_prefix}:{identity}",
         capacity=max(int(limit), 1),
         refill_per_second=max(limit / window, 0.0),
         window=max(window, 1),
     )
+    add("ratelimit", time.perf_counter() - started)
+    return result
 
 
 def rate_limited(key_prefix: str, spec: str):

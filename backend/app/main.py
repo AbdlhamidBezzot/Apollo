@@ -18,6 +18,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.api.router import api_router
 from app.core.cache import get_cache
 from app.core.config import get_settings
+from app.core.diagnostics import DiagnosticsMiddleware
 from app.core.errors import sanitize_detail
 from app.core.ratelimit import get_rate_limiter
 from app.db import engine, init_db
@@ -81,6 +82,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Outermost so request total time + per-stage breakdown cover everything,
+# including CORS, routing, rate limiting, caching and serialization.
+app.add_middleware(DiagnosticsMiddleware)
 
 app.include_router(api_router)
 
