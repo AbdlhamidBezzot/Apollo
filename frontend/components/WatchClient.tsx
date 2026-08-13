@@ -127,6 +127,7 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
     <Player
       streamUrl={session.stream_url}
       contentType={session.content_type}
+      provider={session.provider}
       tmdbId={id}
       mediaType={mediaType}
       title={title || `${mediaType === "tv" ? "TV" : "Movie"} ${id}`}

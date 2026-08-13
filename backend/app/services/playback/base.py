@@ -39,19 +39,27 @@ class PlaybackProvider(ABC):
         return True
 
 
+def get_provider_registry() -> dict[str, type[PlaybackProvider]]:
+    from . import cinemaos, videasy, vidsrc
+
+    return {
+        "cinemaos": cinemaos.CinemaOSPlaybackProvider,
+        "videasy": videasy.VideasyPlaybackProvider,
+        # Legacy provider kept for backward compatibility.
+        "vidsrc": vidsrc.VidsrcPlaybackProvider,
+    }
+
+
+def available_providers() -> list[str]:
+    """Names of every registered playback provider (for the player switcher)."""
+    return list(get_provider_registry().keys())
+
+
 def get_provider(name: str | None = None) -> PlaybackProvider:
     from app.core.config import get_settings
 
-    from . import cinemaos, vidsrc
-
     selected = (name or get_settings().playback_provider or "cinemaos").lower()
-    registry = {
-        "cinemaos": cinemaos.CinemaOSPlaybackProvider,
-        # Legacy providers kept for backward compatibility.
-        "vidsrc": vidsrc.VidsrcPlaybackProvider,
-        "videasy": vidsrc.VidsrcPlaybackProvider,
-    }
-    provider_cls = registry.get(selected)
+    provider_cls = get_provider_registry().get(selected)
     if provider_cls is None:
         raise ValueError(f"Unknown playback provider: {selected}")
     return provider_cls()

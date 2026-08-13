@@ -91,7 +91,17 @@ fast at boot if it is unreachable.
 ## Adding real data
 
 1. **TMDB** — get a key at https://www.themoviedb.org/settings/api, set `TMDB_API_KEY` (or the read-access token) in `backend/.env`. TMDB is metadata-only by law/terms; the app never streams from TMDB.
-2. **Playback** — the app streams via the **vidsrc-embed.ru** embed player. It uses the same TMDB IDs the app already has, so no ID mapping or keys are needed. Set `PLAYBACK_PROVIDER=vidsrc` in `backend/.env` (the default). Movies resolve to `https://vidsrc-embed.ru/embed/movie/{id}`, series/episodes to `https://vidsrc-embed.ru/embed/tv/{id}/{season}-{episode}` (season/episode via the season/episode query on the watch URL). The embed reports playback progress back to the app for watch-history and resume positioning.
+2. **Playback** — the app streams via a pluggable set of **embed players**. Available providers:
+   `videasy` (https://player.videasy.net), `cinemaos` (https://cinemaos.tech), and the legacy
+   `vidsrc` (https://vidsrc-embed.ru). Set the default with `PLAYBACK_PROVIDER=cinemaos` (or
+   `videasy`/`vidsrc`) in `backend/.env`; the default is `vidsrc`. Movies resolve to
+   `https://player.videasy.net/movie/{id}` (VIDEASY), `https://cinemaos.tech/player/{id}` (CinemaOS);
+   TV/episodes append `/{season}/{episode}` (VIDEASY) or `/season/episode` (CinemaOS). The embed
+   reports playback progress back to the app for watch-history and resume positioning.
+3. **Player switcher** — on the watch page the player header shows a source toggle (VIDEASY /
+   CinemaOS / …) so each viewer can pick their preferred provider. The choice is remembered in
+   `localStorage` (`apollo:provider`); providers are listed by `GET /api/v1/playback/providers`,
+   and `POST /api/v1/playback/resolve` accepts an optional `provider` field.
 3. Add `TMDB_API_KEY` and restart the backend. The home page rows, browse, search, and the chatbot will start working.
 
 ## Verified flows

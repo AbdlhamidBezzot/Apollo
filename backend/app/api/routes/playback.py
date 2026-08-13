@@ -15,7 +15,7 @@ from app.core.ratelimit import rate_limited
 from app.db import get_db
 from app.models import PlaybackCue
 from app.schemas import PlaybackCueOut, PlaybackCueUpdate, PlaybackResolveRequest, PlaybackSession
-from app.services.playback.base import PlaybackProvider, PlaybackResult, get_provider
+from app.services.playback.base import PlaybackResult, available_providers, get_provider
 
 router = APIRouter(prefix="/playback", tags=["playback"])
 
@@ -23,13 +23,21 @@ settings = get_settings()
 DbDep = Annotated[Session, Depends(get_db)]
 
 
+@router.get("/providers", response_model=list[str])
+async def list_providers(
+    _rl=Depends(rate_limited("content", settings.rate_limit_read)),
+):
+    """Names of every registered playback provider (for the player switcher)."""
+    return available_providers()
+
+
 @router.post("/resolve", response_model=PlaybackSession)
 async def resolve(
     payload: PlaybackResolveRequest,
     db: DbDep,
-    provider: PlaybackProvider = Depends(get_provider),
     _rl=Depends(rate_limited("playback", settings.rate_limit_playback)),
 ):
+    provider = get_provider(payload.provider)
     if not await provider.availability(payload.tmdb_id, payload.media_type):
         raise HTTPException(status_code=404, detail="Title not available from the active provider")
 

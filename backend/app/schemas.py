@@ -141,6 +141,7 @@ class PlaybackResolveRequest(BaseModel):
     media_type: MediaType
     season: int | None = None
     episode: int | None = None
+    provider: str | None = None
 
 
 # --- Content (TMDB passthrough) ---

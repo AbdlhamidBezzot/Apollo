@@ -143,6 +143,44 @@ def test_playback_resolve_vidsrc():
         assert data["stream_url"] == "https://vidsrc-embed.ru/embed/movie/550"
 
 
+def test_playback_resolve_videasy():
+    with get_client() as client:
+        client.post(
+            "/api/v1/auth/register",
+            json={"email": "videasy@example.com", "password": "password123", "name": "Videasy"},
+        )
+        r = client.post(
+            "/api/v1/playback/resolve",
+            json={"tmdb_id": 299534, "media_type": "movie", "provider": "videasy"},
+        )
+        assert r.status_code == 200, r.text
+        data = r.json()
+        assert data["provider"] == "videasy"
+        assert data["content_type"] == "text/html"
+        assert data["stream_url"] == "https://player.videasy.net/movie/299534"
+
+
+def test_playback_resolve_cinemaos_tv_with_provider():
+    with get_client() as client:
+        r = client.post(
+            "/api/v1/playback/resolve",
+            json={"tmdb_id": 1399, "media_type": "tv", "season": 1, "episode": 1, "provider": "cinemaos"},
+        )
+        assert r.status_code == 200, r.text
+        data = r.json()
+        assert data["provider"] == "cinemaos"
+        assert data["stream_url"] == "https://cinemaos.tech/player/1399/1/1"
+
+
+def test_playback_providers_endpoint():
+    with get_client() as client:
+        r = client.get("/api/v1/playback/providers")
+        assert r.status_code == 200, r.text
+        names = r.json()
+        assert "videasy" in names
+        assert "cinemaos" in names
+
+
 async def test_playback_resolve_vidsrc_tv():
     from app.services.playback.base import get_provider
 

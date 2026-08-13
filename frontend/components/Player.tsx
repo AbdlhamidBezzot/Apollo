@@ -11,6 +11,7 @@ import type { Episode, PlaybackCue, SeasonEpisodes, TitleDetail } from "@/lib/ty
 interface PlayerProps {
   streamUrl: string;
   contentType: string;
+  provider?: string | null;
   tmdbId: number;
   mediaType: "movie" | "tv";
   title: string;
@@ -28,9 +29,18 @@ interface PlaybackSession {
 }
 
 const PROGRESS_KEY = "apollo:progress";
+const PROVIDER_KEY = "apollo:provider";
 const IDLE_HIDE_MS = 3000;
 const NEXT_CARD_SECONDS = 15;
 const NEXT_AUTO_MS = 10000;
+
+const PROVIDER_LABELS: Record<string, string> = {
+  videasy: "VIDEASY",
+  cinemaos: "CinemaOS",
+  vidsrc: "Vidsrc",
+};
+
+const providerLabel = (p: string) => PROVIDER_LABELS[p] ?? p.charAt(0).toUpperCase() + p.slice(1);
 
 const isEmbed = (contentType: string) => contentType === "text/html";
 
@@ -43,7 +53,7 @@ function fmtTime(seconds: number): string {
   return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
 }
 
-export function Player({ streamUrl, contentType, tmdbId, mediaType, title, poster, season, episode, roomCode }: PlayerProps) {
+export function Player({ streamUrl, contentType, provider: providerProp, tmdbId, mediaType, title, poster, season, episode, roomCode }: PlayerProps) {
   const { user } = useAuth();
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -57,6 +67,9 @@ export function Player({ streamUrl, contentType, tmdbId, mediaType, title, poste
   const [seasonNum, setSeasonNum] = useState(season ?? 1);
   const [episodeNum, setEpisodeNum] = useState(episode ?? 1);
   const [busyResolve, setBusyResolve] = useState(false);
+
+  const [providers, setProviders] = useState<string[]>(["videasy", "cinemaos"]);
+  const [provider, setProvider] = useState<string>(providerProp || "cinemaos");
 
   const [seasons, setSeasons] = useState<{ season_number: number; name?: string }[]>([]);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
@@ -544,6 +557,7 @@ export function Player({ streamUrl, contentType, tmdbId, mediaType, title, poste
           media_type: "tv",
           season: targetSeason,
           episode: targetEpisode,
+          provider,
         });
         setSrc(res.stream_url);
         setSeasonNum(targetSeason);
@@ -565,13 +579,72 @@ export function Player({ streamUrl, contentType, tmdbId, mediaType, title, poste
         announce("Could not load that episode");
       }
     },
-    [mediaType, busyResolve, tmdbId, announce, pokeControls, syncState]
+    [mediaType, busyResolve, tmdbId, announce, pokeControls, syncState, provider]
   );
 
   const playNextEpisode = useCallback(async () => {
     if (mediaType !== "tv" || busyResolve) return;
     await switchEpisode(seasonNum, episodeNum + 1);
   }, [mediaType, busyResolve, seasonNum, episodeNum, switchEpisode]);
+
+  const changeProvider = useCallback(
+    async (target: string) => {
+      if (busyResolve || target === provider) return;
+      setBusyResolve(true);
+      try {
+        const res = await post<PlaybackSession>("/api/v1/playback/resolve", {
+          tmdb_id: tmdbId,
+          media_type: mediaType,
+          season: seasonNum,
+          episode: episodeNum,
+          provider: target,
+        });
+        setSrc(res.stream_url);
+        setProvider(target);
+        embedGotRealProgress.current = false;
+        try {
+          localStorage.setItem(PROVIDER_KEY, target);
+        } catch {
+          /* ignore */
+        }
+        announce(`Source: ${providerLabel(target)}`);
+      } catch {
+        announce("Could not load that source");
+      } finally {
+        setBusyResolve(false);
+      }
+    },
+    [busyResolve, provider, tmdbId, mediaType, seasonNum, episodeNum, announce]
+  );
+
+  // Load the registered providers and apply the user's stored preference once.
+  useEffect(() => {
+    let cancelled = false;
+    get<string[]>("/api/v1/playback/providers")
+      .then((list) => {
+        if (cancelled) return;
+        if (list.length) setProviders(list);
+        let pref: string | null = null;
+        try {
+          pref = localStorage.getItem(PROVIDER_KEY);
+        } catch {
+          /* ignore */
+        }
+        const current = providerProp || "cinemaos";
+        if (pref && pref !== current && list.includes(pref)) {
+          changeProvider(pref);
+        } else if (!list.includes(current)) {
+          changeProvider(list[0]);
+        }
+      })
+      .catch(() => {
+        /* fall back to the built-in list */
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (embed || mediaType !== "tv") return;
@@ -665,6 +738,23 @@ export function Player({ streamUrl, contentType, tmdbId, mediaType, title, poste
           )}
         </div>
         <div className="flex items-center gap-2">
+          {providers.length > 1 && (
+            <div className="flex items-center gap-0.5 rounded-full border border-white/10 bg-black/20 p-1" role="group" aria-label="Playback source">
+              {providers.map((p) => (
+                <button
+                  key={p}
+                  onClick={() => changeProvider(p)}
+                  disabled={busyResolve || p === provider}
+                  title={p === provider ? "Active source" : `Switch to ${providerLabel(p)}`}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold transition disabled:cursor-default ${
+                    p === provider ? "bg-brand text-white" : "text-text-muted hover:text-text-vivid"
+                  }`}
+                >
+                  {providerLabel(p)}
+                </button>
+              ))}
+            </div>
+          )}
           {roomCode && room.connected && (
             <button
               onClick={() => setChatOpen((v) => !v)}
