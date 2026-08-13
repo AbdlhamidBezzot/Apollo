@@ -786,7 +786,21 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
             className="aspect-video w-full"
           />
-
+          {(provider === "videasy" || provider === "vidsrc") && !isFullscreen && (
+            <button
+              onClick={fullscreen}
+              aria-label="Fullscreen"
+              title="Fullscreen"
+              className="absolute bottom-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white shadow-glass backdrop-blur transition hover:bg-brand"
+            >
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3" />
+                <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
+                <path d="M3 16v3a2 2 0 0 0 2 2h3" />
+                <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+              </svg>
+            </button>
+          )}
         </div>
       ) : (
         <div
