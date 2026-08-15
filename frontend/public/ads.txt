@@ -1,9 +1,1 @@
-# Google AdSense Publisher Authorization File for Apollo
-# 
-# INSTRUCTIONS:
-# Replace "pub-XXXXXXXXXXXXXXXX" below with your actual 16-digit AdSense Publisher ID.
-# You can find your Publisher ID in your Google AdSense Dashboard -> Account -> Settings -> Account Information.
-#
-# Example: google.com, pub-1234567890123456, DIRECT, f08c47fec0942fa0
-
 google.com, pub-2898195354340118, DIRECT, f08c47fec0942fa0
