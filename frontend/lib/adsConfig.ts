@@ -4,7 +4,7 @@
 
 // Default AdSense Publisher ID. Swap 'ca-pub-XXXXXXXXXXXXXXXX' or set NEXT_PUBLIC_ADSENSE_PUB_ID in .env.local
 export const ADSENSE_PUB_ID =
-  process.env.NEXT_PUBLIC_ADSENSE_PUB_ID || "ca-pub-XXXXXXXXXXXXXXXX";
+  process.env.NEXT_PUBLIC_ADSENSE_PUB_ID || "ca-pub-2898195354340118";
 
 // Centralized Ad Slot IDs for various placements across Apollo.
 // Replace placeholder values with real slot IDs from your Google AdSense Dashboard.

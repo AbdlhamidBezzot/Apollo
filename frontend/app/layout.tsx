@@ -12,12 +12,21 @@ import { Analytics } from "@vercel/analytics/next"
 export const metadata: Metadata = {
   title: "Apollo - Movies & Series",
   description: "Legal movie & series discovery, with an AI companion that plans your movie night.",
+  other: {
+    "google-adsense-account": "ca-pub-2898195354340118",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
       <head>
+        <meta name="google-adsense-account" content="ca-pub-2898195354340118" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2898195354340118"
+          crossOrigin="anonymous"
+        ></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
