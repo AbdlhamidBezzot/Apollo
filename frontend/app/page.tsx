@@ -3,7 +3,7 @@ import { ContinueWatchingRow } from "@/components/ContinueWatchingRow";
 import { FeedErrorState } from "@/components/FeedErrorState";
 import { HeroBillboard } from "@/components/HeroBillboard";
 import { MovieRow } from "@/components/MovieRow";
-import { DiscoveryHub, ProviderMarquee, Top10Carousel } from "@/components/HomeEnhancements";
+import { DiscoveryHub, EditorsPickSpotlight, FeaturedEditorialSection, HomeIntroBanner, ProviderMarquee, Top10Carousel } from "@/components/HomeEnhancements";
 import { RecommendationsRow } from "@/components/RecommendationsRow";
 import { SignInNotice } from "@/components/SignInNotice";
 import { API_URL } from "@/lib/api";
@@ -69,10 +69,18 @@ export default async function HomePage() {
     <div className="space-y-12 pb-4">
       {trending.items.length > 0 && <HeroBillboard slides={trending.items} />}
 
+      <HomeIntroBanner />
+
       <Top10Carousel items={topStreaming.items.length ? topStreaming.items : trending.items} />
+
+      <EditorsPickSpotlight />
+
       <DiscoveryHub />
       <ProviderMarquee />
       <SignInNotice />
+
+      <FeaturedEditorialSection />
+
       <ContinueWatchingRow />
 
       <AdBanner slotId={AD_SLOTS.homeRow1} format="horizontal" />

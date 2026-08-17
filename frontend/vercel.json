@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/publish-batch",
+      "schedule": "0 10 */3 * *"
+    }
+  ]
+}

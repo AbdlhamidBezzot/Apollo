@@ -53,7 +53,10 @@ async function enrich(suggestions: SuggestedTitle[]): Promise<EnrichedSuggestion
 
 function StatusPill({ ready }: { ready: boolean }) {
   return ready ? (
-    <span className="rounded-full bg-badge-rating/15 px-2 py-0.5 text-[11px] font-bold text-badge-rating">✓ prefs in</span>
+    <span className="flex items-center gap-1 rounded-full bg-badge-rating/15 px-2 py-0.5 text-[11px] font-bold text-badge-rating">
+      <svg className="h-3 w-3 text-badge-rating" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+      prefs in
+    </span>
   ) : (
     <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] text-text-muted">waiting…</span>
   );
@@ -468,7 +471,10 @@ export function MovieNightRoomClient() {
                     <p className="truncate text-sm font-semibold text-text-vivid">{s.title}</p>
                     <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-text-muted">
                       {typeof s.vote_average === "number" && s.vote_average > 0 ? (
-                        <span className="rounded bg-badge-rating/15 px-1.5 font-bold text-badge-rating">★ {s.vote_average.toFixed(1)}</span>
+                        <span className="flex items-center gap-1 rounded bg-badge-rating/15 px-1.5 font-bold text-badge-rating">
+                          <svg className="h-3 w-3 fill-yellow-400 text-yellow-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                          {s.vote_average.toFixed(1)}
+                        </span>
                       ) : null}
                       <span className="uppercase">{s.media_type}</span>
                     </div>
@@ -479,9 +485,10 @@ export function MovieNightRoomClient() {
                   <button
                     onClick={() => playPick(s)}
                     disabled={busy}
-                    className="block w-full border-t border-white/10 px-3 py-2 text-left text-xs font-bold text-brand-soft transition hover:bg-white/5 disabled:opacity-40"
+                    className="flex w-full items-center gap-1.5 border-t border-white/10 px-3 py-2 text-left text-xs font-bold text-brand-soft transition hover:bg-white/5 disabled:opacity-40"
                   >
-                    ▶ Confirm & launch for the room
+                    <svg className="h-3.5 w-3.5 fill-current text-brand-soft" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    Confirm & launch for the room
                   </button>
                 )}
               </div>

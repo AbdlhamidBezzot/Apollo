@@ -266,7 +266,7 @@ export function DetailTabs({ mediaType, tmdbId, number_of_seasons, trailerKey, c
                         )}
                         <div className="absolute inset-0 flex items-center justify-center bg-white/0 opacity-0 transition duration-300 group-hover:bg-black/30 group-hover:opacity-100">
                           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand text-white shadow-brand-glow">
-                            ▶
+                            <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                           </span>
                         </div>
                       </div>

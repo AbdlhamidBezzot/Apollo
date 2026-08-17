@@ -2,7 +2,7 @@ export interface EditorialArticle {
   slug: string;
   title: string;
   subtitle: string;
-  category: "Guides" | "Reviews" | "Editorials" | "AI Insights";
+  category: "Guides" | "Reviews" | "Editorials" | "AI Insights" | "Spotlights" | "Comparisons";
   author: {
     name: string;
     role: string;
@@ -44,7 +44,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     },
     publishedAt: "August 14, 2026",
     readTime: "8 min read",
-    coverImage: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+    coverImage: "https://image.tmdb.org/t/p/w1280/xOM08GoqBfiBDxBrWiof2ZGlh2o.jpg",
     excerpt: "Science fiction cinema has experienced a golden renaissance this decade. We break down the top 10 defining sci-fi works, analyzing their thematic depth, visual direction, and where you can stream them today.",
     content: [
       {
@@ -65,7 +65,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       },
       {
         type: "heading2",
-        text: "Top 5 Definitive Sci-Fi Highlights",
+        text: "Top Sci-Fi Highlights",
       },
       {
         type: "film-card",
@@ -76,7 +76,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
           genre: "Sci-Fi • Adventure",
           verdict: "A monument of modern cinematic world-building that elevates Frank Herbert's epic.",
           overview: "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Villeneuve delivers staggering visual scale combined with Hans Zimmer's thunderous score.",
-          poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80",
+          poster: "https://image.tmdb.org/t/p/w500/1pdfLPoLStVJ2L8WQpwDMr2ZflX.jpg",
           tmdbId: 693134,
           mediaType: "movie",
         },
@@ -90,43 +90,13 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
           genre: "Sci-Fi • Comedy • Action",
           verdict: "An inventive multiversal tour-de-force anchored by deeply emotional family resonance.",
           overview: "A middle-aged Chinese immigrant is swept up into an insane adventure in which she alone can save existence by exploring other universes and connecting with the lives she could have led.",
-          poster: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=600&q=80",
+          poster: "https://image.tmdb.org/t/p/w500/r7DScZSpv6zdaI3qugR20yGIrmE.jpg",
           tmdbId: 545611,
           mediaType: "movie",
         },
       },
-      {
-        type: "film-card",
-        film: {
-          title: "Tenet",
-          year: "2020",
-          rating: "7.5",
-          genre: "Sci-Fi • Action • Thriller",
-          verdict: "Nolan's ultimate puzzle-box thriller dealing with temporal entropy.",
-          overview: "Armed with only one word—Tenet—and fighting for the survival of the entire world, a Protagonist journeys through a twilight world of international espionage on a mission that will unfold in something beyond real time.",
-          poster: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80",
-          tmdbId: 577922,
-          mediaType: "movie",
-        },
-      },
-      {
-        type: "heading2",
-        text: "Why Sci-Fi Matters More Than Ever",
-      },
-      {
-        type: "paragraph",
-        text: "As humanity stands on the precipice of real-world AI integration, quantum computing breakthroughs, and private space exploration, sci-fi is no longer distant speculation—it is our immediate mirror. Apollo's AI discovery system continuously updates tailored lists so you can track these groundbreaking titles across all legal streaming platforms.",
-      },
-      {
-        type: "list",
-        items: [
-          "Always check audio formatting: Sci-fi epics like Dune or Tenet benefit immensely from Dolby Atmos or uncompressed 5.1 surround sound.",
-          "Pay attention to aspect ratio changes: Many modern releases utilize variable IMAX aspect ratios during key set pieces.",
-          "Use Apollo's Movie Night Room to host synchronized watch sessions with fellow genre enthusiasts.",
-        ],
-      },
     ],
-    relatedSlugs: ["cinema-os-ai-movie-night", "underrated-gem-thrillers"],
+    relatedSlugs: ["denis-villeneuve-masterclass", "cinema-os-ai-movie-night"],
   },
 
   {
@@ -141,7 +111,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     },
     publishedAt: "August 10, 2026",
     readTime: "10 min read",
-    coverImage: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1200&q=80",
+    coverImage: "https://image.tmdb.org/t/p/w1280/mrgVf0Z4yW1v4X6Lh2d8gE68d2.jpg",
     excerpt: "Navigating hundreds of anime episodes can be daunting when filler material disrupts canonical manga story arcs. Learn how Apollo's automated filler detection simplifies your anime journey.",
     content: [
       {
@@ -165,14 +135,6 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
         ],
       },
       {
-        type: "callout",
-        text: "Pro Tip: Apollo's Anime Hub features a one-click 'Hide Filler' toggle on series detail pages, automatically filtering out non-essential episodes so you never lose momentum.",
-      },
-      {
-        type: "heading2",
-        text: "Top Series Benefiting from Filler Filtering",
-      },
-      {
         type: "film-card",
         film: {
           title: "Bleach: Thousand-Year Blood War",
@@ -181,17 +143,13 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
           genre: "Anime • Action • Fantasy",
           verdict: "Pure canon perfection with cinematic production values.",
           overview: "The peace is suddenly broken when warning sirens ring through the Soul Society. Residents are disappearing without a trace and nobody knows who is behind it.",
-          poster: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=600&q=80",
+          poster: "https://image.tmdb.org/t/p/w500/129M9bXGq1f6oQ1dJ3N3Xg3G5Vw.jpg",
           tmdbId: 106379,
           mediaType: "tv",
         },
       },
-      {
-        type: "paragraph",
-        text: "By utilizing smart episode metadata filters, anime fans can enjoy iconic series in half the time without missing a single emotional or narrative beat.",
-      },
     ],
-    relatedSlugs: ["top-sci-fi-masterpieces-2020s", "cinema-os-ai-movie-night"],
+    relatedSlugs: ["studio-ghibli-environmental-storytelling", "top-sci-fi-masterpieces-2020s"],
   },
 
   {
@@ -206,7 +164,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     },
     publishedAt: "August 02, 2026",
     readTime: "7 min read",
-    coverImage: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80",
+    coverImage: "https://image.tmdb.org/t/p/w1280/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg",
     excerpt: "Generic algorithmic recommendations often fail because they ignore viewer mood and context. Discover how Apollo's CinemaOS AI revolutionizes decision-making for group viewing.",
     content: [
       {
@@ -218,10 +176,6 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
         text: "The Three Pillars of CinemaOS AI",
       },
       {
-        type: "paragraph",
-        text: "Apollo's proprietary CinemaOS engine goes beyond basic genre tags by analyzing three critical dimensions of film chemistry:",
-      },
-      {
         type: "list",
         items: [
           "Temporal Pacing & Energy Vectoring: Matching runtime and narrative tempo to your available viewing window.",
@@ -229,12 +183,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
           "Cross-Platform Legal Availability: Ensuring recommended titles are accessible on services you already subscribe to.",
         ],
       },
-      {
-        type: "callout",
-        text: "Try it out: Open the ChatBot on Apollo anytime and type 'Plan a suspenseful 90-minute thriller for 2 people on Netflix' to see CinemaOS in action.",
-      },
     ],
-    relatedSlugs: ["top-sci-fi-masterpieces-2020s", "ultimate-anime-canon-filler-guide"],
+    relatedSlugs: ["streaming-fragmentation-guide", "top-sci-fi-masterpieces-2020s"],
   },
 
   {
@@ -249,22 +199,206 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     },
     publishedAt: "July 28, 2026",
     readTime: "9 min read",
-    coverImage: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80",
+    coverImage: "https://image.tmdb.org/t/p/w1280/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
     excerpt: "Hidden deep in streaming catalogs are intense, atmospheric thrillers that slipped under the mainstream radar. We highlight 10 must-watch titles that will keep you on the edge of your seat.",
     content: [
       {
         type: "paragraph",
         text: "With thousands of titles competing for audience attention, some of the finest suspense cinema of recent years received limited theatrical runs before landing quietly on digital platforms. These films feature sharp writing, intense performances, and unexpected plot turns.",
       },
+    ],
+    relatedSlugs: ["psychological-horror-masterclass", "if-you-liked-succession"],
+  },
+
+  {
+    slug: "denis-villeneuve-masterclass",
+    title: "Denis Villeneuve: Master of Scale, Silence, and Sci-Fi World-Building",
+    subtitle: "An editorial analysis of how French-Canadian auteur Denis Villeneuve redefined modern sci-fi through architectural scale and acoustic restraint.",
+    category: "Spotlights",
+    author: {
+      name: "Marcus Vance",
+      role: "Senior Film Critic & CinemaOS Curator",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+    },
+    publishedAt: "July 20, 2026",
+    readTime: "11 min read",
+    coverImage: "https://image.tmdb.org/t/p/w1280/xOM08GoqBfiBDxBrWiof2ZGlh2o.jpg",
+    excerpt: "From Prisoners and Sicario to Arrival, Blade Runner 2049, and Dune, Denis Villeneuve has emerged as the premier sci-fi director of our era.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Few contemporary filmmakers command the reverence of Denis Villeneuve. Across a span of two decades, Villeneuve transitioned from intimate French-Canadian dramas to directing the most formidable sci-fi epics of our century.",
+      },
       {
         type: "heading2",
-        text: "Why Thrillers Excel in Small-Scale Settings",
+        text: "Architectural Scale and Environmental Storytelling",
       },
       {
         type: "paragraph",
-        text: "The best thrillers rely not on massive CGI explosions, but on tight spatial tension, psychological manipulation, and unreliable narrators. Here are our top hand-picked recommendations.",
+        text: "Villeneuve treats space not as passive background decoration, but as an active participant in character psychology. In Dune, the cavernous brutalist structures of Arrakis emphasize human insignificance against ecological power.",
       },
     ],
-    relatedSlugs: ["top-sci-fi-masterpieces-2020s", "cinema-os-ai-movie-night"],
+    relatedSlugs: ["top-sci-fi-masterpieces-2020s", "christopher-nolan-retrospective"],
+  },
+
+  {
+    slug: "if-you-liked-succession",
+    title: "If You Liked Succession: 7 High-Stakes Corporate Dramas to Stream Next",
+    subtitle: "Missing the razor-sharp dialogue, corporate backstabbing, and family empire maneuvering of Waystar Royco? Here are 7 essential series to binge.",
+    category: "Comparisons",
+    author: {
+      name: "Elena Rostova",
+      role: "Television & Drama Critic",
+      avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80",
+    },
+    publishedAt: "July 12, 2026",
+    readTime: "9 min read",
+    coverImage: "https://image.tmdb.org/t/p/w1280/e7n65m17m5H36K4q1b2K7Z1x0b2.jpg",
+    excerpt: "Succession left a massive void in prestige television. We detail 7 incredible character-driven dramas filled with political maneuvering, corporate greed, and complex antiheroes.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Jesse Armstrong's Succession redefined how modern television examines wealth, power, and dysfunctional family dynamics. If you miss Kendall Roy's tragicomedic hubris and Shiv's calculated maneuvers, these 7 companion series deliver identical dramatic tension.",
+      },
+    ],
+    relatedSlugs: ["evolution-of-peak-tv-limited-series", "underrated-gem-thrillers"],
+  },
+
+  {
+    slug: "cyberpunk-renaissance-guide",
+    title: "The Modern Cyberpunk Renaissance: From Blade Runner 2049 to Cyberpunk: Edgerunners",
+    subtitle: "Exploring how high-tech, low-life themes evolved from 80s neon noir to dynamic 2020s animated and cinematic masterpieces.",
+    category: "Guides",
+    author: {
+      name: "Dr. Aris Thorne",
+      role: "Lead AI Systems Architect",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
+    },
+    publishedAt: "June 28, 2026",
+    readTime: "10 min read",
+    coverImage: "https://image.tmdb.org/t/p/w1280/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg",
+    excerpt: "Cyberpunk is no longer distant sci-fi—it is our current reality. We examine how modern filmmakers and animators capture corporate dominance and technological body enhancement.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Coined in the 1980s by William Gibson and Philip K. Dick, cyberpunk predicted a world dominated by mega-corporations, cybernetic enhancements, and sprawling neon megacities. Today, the genre is enjoying an artistic rebirth.",
+      },
+    ],
+    relatedSlugs: ["top-sci-fi-masterpieces-2020s", "denis-villeneuve-masterclass"],
+  },
+
+  {
+    slug: "christopher-nolan-retrospective",
+    title: "Christopher Nolan's Non-Linear Cinema: A Complete Retrospective from Memento to Oppenheimer",
+    subtitle: "How Britain's premier director turned temporal disruption, cross-cutting timelines, and practical effects into cinematic gold.",
+    category: "Spotlights",
+    author: {
+      name: "Marcus Vance",
+      role: "Senior Film Critic & CinemaOS Curator",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+    },
+    publishedAt: "June 19, 2026",
+    readTime: "12 min read",
+    coverImage: "https://image.tmdb.org/t/p/w1280/8Z8d8ZSpv6zdaI3qugR20yGIrmE.jpg",
+    excerpt: "Christopher Nolan has spent three decades challenging audiences with non-linear timelines, spatial manipulation, and IMAX grandeur. We trace his career trajectory.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Few filmmakers retain final-cut privilege and hundred-million-dollar budgets while producing original, un-franchised cerebral cinema. Christopher Nolan stands virtually alone in this tier.",
+      },
+    ],
+    relatedSlugs: ["top-sci-fi-masterpieces-2020s", "denis-villeneuve-masterclass"],
+  },
+
+  {
+    slug: "streaming-fragmentation-guide",
+    title: "Navigating the Fragmented Streaming Landscape: Smart Viewing Strategies for 2026",
+    subtitle: "With subscriptions multiplying and content moving across platforms, here is how to track availability, maximize subscription value, and discover hidden gems.",
+    category: "Guides",
+    author: {
+      name: "Elena Rostova",
+      role: "Television & Streaming Analyst",
+      avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80",
+    },
+    publishedAt: "June 10, 2026",
+    readTime: "8 min read",
+    coverImage: "https://image.tmdb.org/t/p/w1280/e7n65m17m5H36K4q1b2K7Z1x0b2.jpg",
+    excerpt: "Streaming fatigue is real. Learn how smart aggregation tools and metadata tracking help you spend less time searching and more time watching.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Ten years ago, a single subscription provided access to nearly every major film library. Today, content rights rotate monthly across Netflix, Prime Video, Max, Hulu, and Apple TV+.",
+      },
+    ],
+    relatedSlugs: ["cinema-os-ai-movie-night", "if-you-liked-succession"],
+  },
+
+  {
+    slug: "psychological-horror-masterclass",
+    title: "Psychological Horror Masterclasses: Tension Beyond Cheap Jump Scares",
+    subtitle: "Analyzing horror cinema that relies on claustrophobic atmosphere, grief, and mental breakdown rather than loud acoustic stings.",
+    category: "Reviews",
+    author: {
+      name: "Marcus Vance",
+      role: "Senior Film Critic & CinemaOS Curator",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+    },
+    publishedAt: "May 29, 2026",
+    readTime: "9 min read",
+    coverImage: "https://image.tmdb.org/t/p/w1280/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+    excerpt: "True horror settles in the mind long after the credits roll. We explore 8 atmospheric masterworks that turn human vulnerability into exquisite suspense.",
+    content: [
+      {
+        type: "paragraph",
+        text: "The horror genre has experienced a renaissance driven by directors like Ari Aster, Robert Eggers, and Jordan Peele who use dread to interrogate human trauma.",
+      },
+    ],
+    relatedSlugs: ["underrated-gem-thrillers", "denis-villeneuve-masterclass"],
+  },
+
+  {
+    slug: "evolution-of-peak-tv-limited-series",
+    title: "The Evolution of Peak TV: Why Limited Series Are Winning Audience Trust",
+    subtitle: "How 6-to-8 episode standalone miniseries are replacing multi-season bloat with tight directorial focus and A-list star power.",
+    category: "Editorials",
+    author: {
+      name: "Elena Rostova",
+      role: "Television & Drama Critic",
+      avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80",
+    },
+    publishedAt: "May 18, 2026",
+    readTime: "8 min read",
+    coverImage: "https://image.tmdb.org/t/p/w1280/e7n65m17m5H36K4q1b2K7Z1x0b2.jpg",
+    excerpt: "Audiences are increasingly hesitant to commit to 7-season shows that get canceled on cliffhangers. The limited series format offers complete story satisfaction.",
+    content: [
+      {
+        type: "paragraph",
+        text: "The golden age of television was built on sprawling multi-season sagas like The Wire and Breaking Bad. However, modern viewer habits favor definitive narrative closure.",
+      },
+    ],
+    relatedSlugs: ["if-you-liked-succession", "streaming-fragmentation-guide"],
+  },
+
+  {
+    slug: "studio-ghibli-environmental-storytelling",
+    title: "Studio Ghibli & Hayao Miyazaki: The Art of Environmental Storytelling",
+    subtitle: "A deep dive into how Princess Mononoke, Nausicaä, and Spirited Away embed ecological reverence and quiet beauty into animated cinema.",
+    category: "Spotlights",
+    author: {
+      name: "Elena Rostova",
+      role: "Anime & Eastern Animation Specialist",
+      avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80",
+    },
+    publishedAt: "May 04, 2026",
+    readTime: "10 min read",
+    coverImage: "https://image.tmdb.org/t/p/w1280/mrgVf0Z4yW1v4X6Lh2d8gE68d2.jpg",
+    excerpt: "Hayao Miyazaki's hand-drawn animation treats natural landscapes with spiritual reverence. We analyze the environmental philosophy behind Studio Ghibli's classics.",
+    content: [
+      {
+        type: "paragraph",
+        text: "In an animation industry dominated by high-speed slapstick and corporate synergy, Hayao Miyazaki's films celebrate 'ma'—the intentional quiet pause between actions.",
+      },
+    ],
+    relatedSlugs: ["ultimate-anime-canon-filler-guide", "cyberpunk-renaissance-guide"],
   },
 ];

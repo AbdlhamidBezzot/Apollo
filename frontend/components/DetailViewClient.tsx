@@ -7,6 +7,7 @@ import { DetailTabs } from "@/components/DetailTabs";
 import { MovieNightButton } from "@/components/MovieNightButton";
 import { TitleActions } from "@/components/TitleActions";
 import { backdropUrl, posterUrl, releaseYear, titleName } from "@/lib/api";
+import { getEditorialTake } from "@/lib/editorial-generator";
 import type { Title, TitleDetail } from "@/lib/types";
 
 export function DetailViewClient({
@@ -95,13 +96,19 @@ export function DetailViewClient({
             <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-text-muted">
               {rating ? (
                 <span className="flex items-center gap-1 font-bold text-badge-rating">
-                  ★ {rating} <span className="text-xs font-normal text-text-muted">/ 10</span>
+                  <svg className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> {rating} <span className="text-xs font-normal text-text-muted">/ 10</span>
                 </span>
               ) : null}
-              {runtime ? <span className="font-mono text-xs text-white/80">⏱ {runtime}</span> : null}
+              {runtime ? (
+                <span className="flex items-center gap-1 font-mono text-xs text-white/80">
+                  <svg className="h-3.5 w-3.5 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  {runtime}
+                </span>
+              ) : null}
               {mediaType === "tv" && item.number_of_seasons ? (
-                <span className="font-mono text-xs text-white/80">
-                  📺 {item.number_of_seasons} season{item.number_of_seasons > 1 ? "s" : ""}
+                <span className="flex items-center gap-1 font-mono text-xs text-white/80">
+                  <svg className="h-3.5 w-3.5 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                  {item.number_of_seasons} season{item.number_of_seasons > 1 ? "s" : ""}
                 </span>
               ) : null}
               {item.status ? (
@@ -124,32 +131,35 @@ export function DetailViewClient({
             ) : null}
 
             {/* Apollo Editorial Take */}
-            <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand/20 text-xs font-bold text-brand-soft">
-                  ★
-                </span>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-brand-soft">
-                  Apollo Editorial Take
-                </h3>
-              </div>
-              <p className="text-xs sm:text-sm leading-relaxed text-text-vivid/90">
-                {item.vote_average && item.vote_average > 7.5
-                  ? `An exceptional release in its genre. High-grade direction paired with remarkable emotional resonance makes "${titleName(item)}" a highly recommended highlight for your movie night schedule.`
-                  : `A compelling entry featuring standout set pieces and distinctive thematic design. Best suited for fans seeking immersive story arcs in ${genres || "cinema"}.`}
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
-                <span className="glass rounded-md px-2 py-0.5 text-text-muted">
-                  🎯 Pacing: <strong className="text-white">Balanced</strong>
-                </span>
-                <span className="glass rounded-md px-2 py-0.5 text-text-muted">
-                  🎬 CinemaOS Verdict: <strong className="text-brand-soft">Recommended</strong>
-                </span>
-                <span className="glass rounded-md px-2 py-0.5 text-text-muted">
-                  🎧 Soundscape: <strong className="text-white">High Dynamic Range</strong>
-                </span>
-              </div>
-            </div>
+            {(() => {
+              const take = getEditorialTake(item);
+              return (
+                <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6 shadow-glass">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand/20 text-xs font-bold text-brand-soft">
+                      A
+                    </span>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-brand-soft">
+                      Apollo Film Analysis & Editorial Take
+                    </h3>
+                  </div>
+                  <p className="text-xs sm:text-sm leading-relaxed text-text-vivid/90">
+                    {take.text}
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2 text-[11px]">
+                    <span className="glass rounded-lg px-2.5 py-1 text-text-muted">
+                      Target Audience: <strong className="text-white font-semibold">{take.audience}</strong>
+                    </span>
+                    <span className="glass rounded-lg px-2.5 py-1 text-text-muted">
+                      Pacing & Tone: <strong className="text-brand-soft font-semibold">{take.pacing}</strong>
+                    </span>
+                    <span className="glass rounded-lg px-2.5 py-1 text-text-muted">
+                      CinemaOS Context: <strong className="text-white font-semibold">{take.tone}</strong>
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Action Buttons */}
             <div className="mt-8 flex flex-wrap items-center gap-4">

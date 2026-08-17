@@ -89,7 +89,10 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
           <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
             <span className="rounded-md bg-accent-emerald/90 px-2 py-0.5 font-bold text-black">{match}% Match</span>
             {item.vote_average ? (
-              <span className="glass rounded-md px-2 py-0.5 font-bold text-badge-rating">★ {item.vote_average.toFixed(1)}</span>
+              <span className="glass flex items-center gap-1 rounded-md px-2 py-0.5 font-bold text-badge-rating">
+                <svg className="h-3 w-3 fill-yellow-400 text-yellow-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                {item.vote_average.toFixed(1)}
+              </span>
             ) : null}
             {releaseYear(item) && <span className="font-mono text-text-muted">{releaseYear(item)}</span>}
             <span className="glass rounded-md px-2 py-0.5 font-mono text-[11px] uppercase text-text-muted">
@@ -133,18 +136,24 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
                 setTrailerOpen(true);
               }}
               disabled={!trailerKey && !castOpen}
-              className="glass rounded-full px-5 py-2.5 text-sm font-semibold text-text-vivid transition hover:bg-white/10 disabled:opacity-50"
+              className="glass flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold text-text-vivid transition hover:bg-white/10 disabled:opacity-50"
             >
-              🎬 Trailer
+              <svg className="h-4 w-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Trailer
             </button>
             <button
               onClick={() => {
                 loadDetail();
                 setCastOpen(true);
               }}
-              className="glass rounded-full px-5 py-2.5 text-sm font-semibold text-text-vivid transition hover:bg-white/10"
+              className="glass flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold text-text-vivid transition hover:bg-white/10"
             >
-              🎭 Cast
+              <svg className="h-4 w-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              Cast
             </button>
           </div>
         </div>
