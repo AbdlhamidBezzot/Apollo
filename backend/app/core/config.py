@@ -85,6 +85,13 @@ class Settings(BaseSettings):
     llm_provider: str = "gemini"
     llm_api_key: str = ""
 
+    # Optional: set RESEND_API_KEY to forward contact submissions by email.
+    # Get a free key at https://resend.com (100 emails/day on the free tier).
+    resend_api_key: str = ""
+    # The inbox address that receives forwarded submissions.
+    contact_notify_email: str = "support@apollo-stream.com"
+
+
     @model_validator(mode="after")
     def _validate_no_wildcard_cors(self) -> Settings:
         origins = {o.strip() for o in (self.cors_origins or "").split(",") if o.strip()}

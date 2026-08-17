@@ -256,3 +256,24 @@ class MovieNightDecideResponse(BaseModel):
     reply: str
     action: Literal["none", "play"] = "play"
     play_target: dict[str, Any] | None = None
+
+
+# --- Contact & Support ---
+class ContactSubmissionCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    email: EmailStr
+    subject: str = Field(default="general", max_length=64)
+    message: str = Field(min_length=10, max_length=4000)
+
+
+class ContactSubmissionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    email: EmailStr
+    subject: str
+    message: str
+    status: str
+    submitted_at: datetime
+

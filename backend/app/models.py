@@ -241,3 +241,18 @@ class RoomSuggestion(Base):
     presented_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     room: Mapped[MovieNightRoom] = relationship(back_populates="suggestions")
+
+
+class ContactSubmission(Base):
+    """Contact & Support form submissions stored for admin review."""
+
+    __tablename__ = "contact_submissions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    email: Mapped[str] = mapped_column(String(320), nullable=False, index=True)
+    subject: Mapped[str] = mapped_column(String(64), default="general")
+    message: Mapped[str] = mapped_column(String(4000), nullable=False)
+    # open | resolved
+    status: Mapped[str] = mapped_column(String(32), default="open")
+    submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)

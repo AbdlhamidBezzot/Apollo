@@ -2,19 +2,54 @@
 
 import { useState } from "react";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+type FormState = {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+};
+
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
-  const [formData, setFormData] = useState({
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [formData, setFormData] = useState<FormState>({
     name: "",
     email: "",
     subject: "general",
     message: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) return;
-    setSubmitted(true);
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(
+          data?.detail ?? `Submission failed (${res.status}). Please try again.`
+        );
+      }
+
+      setSubmitted(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -22,7 +57,7 @@ export default function ContactPage() {
       <div className="mx-auto max-w-4xl space-y-10">
         <header className="text-center">
           <span className="font-mono text-xs font-bold uppercase tracking-wider text-brand-soft">Get in Touch</span>
-          <h1 className="mt-2 text-3xl font-extrabold text-text-vivid sm:text-4xl">Contact & Support</h1>
+          <h1 className="mt-2 text-3xl font-extrabold text-text-vivid sm:text-4xl">Contact &amp; Support</h1>
           <p className="mt-2 text-sm text-text-muted">
             Have questions, feedback, or DMCA copyright inquiries? Send us a message and our team will get back to you promptly.
           </p>
@@ -40,7 +75,7 @@ export default function ContactPage() {
             </div>
 
             <div className="glass rounded-3xl p-6 shadow-glass space-y-4">
-              <h2 className="text-lg font-bold text-text-vivid">DMCA & Legal</h2>
+              <h2 className="text-lg font-bold text-text-vivid">DMCA &amp; Legal</h2>
               <p className="text-xs text-text-muted">
                 For copyright infringement notices or legal correspondence under the DMCA.
               </p>
@@ -53,7 +88,9 @@ export default function ContactPage() {
             {submitted ? (
               <div className="py-12 text-center space-y-4">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand/20 text-brand-soft">
-                  <svg className="h-8 w-8 text-brand-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  <svg className="h-8 w-8 text-brand-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
+                  </svg>
                 </div>
                 <h3 className="text-2xl font-bold text-text-vivid">Message Received!</h3>
                 <p className="text-sm text-text-muted">
@@ -114,7 +151,7 @@ export default function ContactPage() {
                   >
                     <option value="general">General Support</option>
                     <option value="dmca">DMCA / Copyright Takedown</option>
-                    <option value="editorial">Editorial & Review Feedback</option>
+                    <option value="editorial">Editorial &amp; Review Feedback</option>
                     <option value="bug">Report a Bug / Issue</option>
                   </select>
                 </div>
@@ -134,11 +171,28 @@ export default function ContactPage() {
                   />
                 </div>
 
+                {error && (
+                  <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-xs text-red-400">
+                    {error}
+                  </p>
+                )}
+
                 <button
+                  id="contact-submit-btn"
                   type="submit"
-                  className="w-full rounded-full bg-brand py-3 text-sm font-bold text-white shadow-brand-glow hover:bg-brand-soft"
+                  disabled={loading}
+                  className="w-full rounded-full bg-brand py-3 text-sm font-bold text-white shadow-brand-glow hover:bg-brand-soft disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Submit Inquiry
+                  {loading ? (
+                    <>
+                      <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" strokeLinecap="round"/>
+                      </svg>
+                      Sending…
+                    </>
+                  ) : (
+                    "Submit Inquiry"
+                  )}
                 </button>
               </form>
             )}
