@@ -123,6 +123,34 @@ export function DetailViewClient({
               </p>
             ) : null}
 
+            {/* Apollo Editorial Take */}
+            <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand/20 text-xs font-bold text-brand-soft">
+                  ★
+                </span>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-brand-soft">
+                  Apollo Editorial Take
+                </h3>
+              </div>
+              <p className="text-xs sm:text-sm leading-relaxed text-text-vivid/90">
+                {item.vote_average && item.vote_average > 7.5
+                  ? `An exceptional release in its genre. High-grade direction paired with remarkable emotional resonance makes "${titleName(item)}" a highly recommended highlight for your movie night schedule.`
+                  : `A compelling entry featuring standout set pieces and distinctive thematic design. Best suited for fans seeking immersive story arcs in ${genres || "cinema"}.`}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
+                <span className="glass rounded-md px-2 py-0.5 text-text-muted">
+                  🎯 Pacing: <strong className="text-white">Balanced</strong>
+                </span>
+                <span className="glass rounded-md px-2 py-0.5 text-text-muted">
+                  🎬 CinemaOS Verdict: <strong className="text-brand-soft">Recommended</strong>
+                </span>
+                <span className="glass rounded-md px-2 py-0.5 text-text-muted">
+                  🎧 Soundscape: <strong className="text-white">High Dynamic Range</strong>
+                </span>
+              </div>
+            </div>
+
             {/* Action Buttons */}
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Link

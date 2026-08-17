@@ -65,6 +65,12 @@ const ICONS: Record<string, ReactElement> = {
       <path d="M3.5 20a5.5 5.5 0 0 1 11 0M16 5.5a3.2 3.2 0 0 1 0 6.2M17 14.5a5 5 0 0 1 3.5 5.5" />
     </>
   ),
+  editorial: (
+    <>
+      <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+      <path d="M8 7h8M8 11h8M8 15h5" />
+    </>
+  ),
   close: <path d="M6 6l12 12M18 6L6 18" />,
 };
 
@@ -92,6 +98,7 @@ const DOCK_TOP = [
   { href: "/browse?media_type=tv", label: "TV Shows", icon: "series", base: "/browse", media: "tv" },
   { href: "/browse", label: "Browse", icon: "browse", base: "/browse", media: "all" },
   { href: "/anime", label: "Anime Hub", icon: "anime", base: "/anime", media: null },
+  { href: "/editorial", label: "Editorial", icon: "editorial", base: "/editorial", media: null },
   { href: "/my-list", label: "Watchlist", icon: "watchlist", base: "/my-list", media: null },
 ];
 
