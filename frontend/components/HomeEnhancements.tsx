@@ -166,7 +166,7 @@ export function EditorsPickSpotlight() {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-12 items-center">
           <div className="relative aspect-[2/3] w-48 shrink-0 overflow-hidden rounded-2xl border border-white/15 shadow-brand-glow mx-auto md:col-span-3">
             <Image
-              src="https://image.tmdb.org/t/p/w500/1pdfLPoLStVJ2L8WQpwDMr2ZflX.jpg"
+              src="https://image.tmdb.org/t/p/w500/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg"
               alt="Dune: Part Two"
               fill
               className="object-cover"

@@ -44,7 +44,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     },
     publishedAt: "August 14, 2026",
     readTime: "8 min read",
-    coverImage: "https://image.tmdb.org/t/p/w1280/xOM08GoqBfiBDxBrWiof2ZGlh2o.jpg",
+    coverImage: "https://image.tmdb.org/t/p/w1280/eZ239CUp1d6OryZEBPnO2n87gMG.jpg",
     excerpt: "Science fiction cinema has experienced a golden renaissance this decade. We break down the top 10 defining sci-fi works, analyzing their thematic depth, visual direction, and where you can stream them today.",
     content: [
       {
@@ -76,7 +76,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
           genre: "Sci-Fi • Adventure",
           verdict: "A monument of modern cinematic world-building that elevates Frank Herbert's epic.",
           overview: "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Villeneuve delivers staggering visual scale combined with Hans Zimmer's thunderous score.",
-          poster: "https://image.tmdb.org/t/p/w500/1pdfLPoLStVJ2L8WQpwDMr2ZflX.jpg",
+          poster: "https://image.tmdb.org/t/p/w500/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg",
           tmdbId: 693134,
           mediaType: "movie",
         },
@@ -90,7 +90,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
           genre: "Sci-Fi • Comedy • Action",
           verdict: "An inventive multiversal tour-de-force anchored by deeply emotional family resonance.",
           overview: "A middle-aged Chinese immigrant is swept up into an insane adventure in which she alone can save existence by exploring other universes and connecting with the lives she could have led.",
-          poster: "https://image.tmdb.org/t/p/w500/r7DScZSpv6zdaI3qugR20yGIrmE.jpg",
+          poster: "https://image.tmdb.org/t/p/w500/u68AjlvlutfEIcpmbYpKcdi09ut.jpg",
           tmdbId: 545611,
           mediaType: "movie",
         },
@@ -111,7 +111,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     },
     publishedAt: "August 10, 2026",
     readTime: "10 min read",
-    coverImage: "https://image.tmdb.org/t/p/w1280/mrgVf0Z4yW1v4X6Lh2d8gE68d2.jpg",
+    coverImage: "https://image.tmdb.org/t/p/w1280/3GQKYh6Trm8pxd2AypovoYQf4Ay.jpg",
     excerpt: "Navigating hundreds of anime episodes can be daunting when filler material disrupts canonical manga story arcs. Learn how Apollo's automated filler detection simplifies your anime journey.",
     content: [
       {
@@ -137,14 +137,14 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       {
         type: "film-card",
         film: {
-          title: "Bleach: Thousand-Year Blood War",
-          year: "2022",
-          rating: "9.0",
+          title: "Demon Slayer: Kimetsu no Yaiba",
+          year: "2019",
+          rating: "8.6",
           genre: "Anime • Action • Fantasy",
-          verdict: "Pure canon perfection with cinematic production values.",
-          overview: "The peace is suddenly broken when warning sirens ring through the Soul Society. Residents are disappearing without a trace and nobody knows who is behind it.",
-          poster: "https://image.tmdb.org/t/p/w500/129M9bXGq1f6oQ1dJ3N3Xg3G5Vw.jpg",
-          tmdbId: 106379,
+          verdict: "Pure canon perfection with cinematic Ufotable production values.",
+          overview: "A young boy named Tanjiro becomes a demon slayer after his family is slaughtered and his sister Nezuko is turned into a demon.",
+          poster: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg",
+          tmdbId: 85937,
           mediaType: "tv",
         },
       },
@@ -164,7 +164,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     },
     publishedAt: "August 02, 2026",
     readTime: "7 min read",
-    coverImage: "https://image.tmdb.org/t/p/w1280/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg",
+    coverImage: "https://image.tmdb.org/t/p/w1280/gNdLJU9TxrpGx4dkZidjys3fyy0.jpg",
     excerpt: "Generic algorithmic recommendations often fail because they ignore viewer mood and context. Discover how Apollo's CinemaOS AI revolutionizes decision-making for group viewing.",
     content: [
       {
@@ -199,7 +199,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     },
     publishedAt: "July 28, 2026",
     readTime: "9 min read",
-    coverImage: "https://image.tmdb.org/t/p/w1280/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+    coverImage: "https://image.tmdb.org/t/p/w1280/bdI6U1mT0kCdTJ6TWtiFxQ42GSn.jpg",
     excerpt: "Hidden deep in streaming catalogs are intense, atmospheric thrillers that slipped under the mainstream radar. We highlight 10 must-watch titles that will keep you on the edge of your seat.",
     content: [
       {
@@ -222,7 +222,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     },
     publishedAt: "July 20, 2026",
     readTime: "11 min read",
-    coverImage: "https://image.tmdb.org/t/p/w1280/xOM08GoqBfiBDxBrWiof2ZGlh2o.jpg",
+    coverImage: "https://image.tmdb.org/t/p/w1280/eZ239CUp1d6OryZEBPnO2n87gMG.jpg",
     excerpt: "From Prisoners and Sicario to Arrival, Blade Runner 2049, and Dune, Denis Villeneuve has emerged as the premier sci-fi director of our era.",
     content: [
       {
@@ -253,7 +253,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     },
     publishedAt: "July 12, 2026",
     readTime: "9 min read",
-    coverImage: "https://image.tmdb.org/t/p/w1280/e7n65m17m5H36K4q1b2K7Z1x0b2.jpg",
+    coverImage: "https://image.tmdb.org/t/p/w1280/bcdUYUFk8GdpZJPiSAas9UeocLH.jpg",
     excerpt: "Succession left a massive void in prestige television. We detail 7 incredible character-driven dramas filled with political maneuvering, corporate greed, and complex antiheroes.",
     content: [
       {
@@ -276,7 +276,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     },
     publishedAt: "June 28, 2026",
     readTime: "10 min read",
-    coverImage: "https://image.tmdb.org/t/p/w1280/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg",
+    coverImage: "https://image.tmdb.org/t/p/w1280/gNdLJU9TxrpGx4dkZidjys3fyy0.jpg",
     excerpt: "Cyberpunk is no longer distant sci-fi—it is our current reality. We examine how modern filmmakers and animators capture corporate dominance and technological body enhancement.",
     content: [
       {
@@ -299,7 +299,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     },
     publishedAt: "June 19, 2026",
     readTime: "12 min read",
-    coverImage: "https://image.tmdb.org/t/p/w1280/8Z8d8ZSpv6zdaI3qugR20yGIrmE.jpg",
+    coverImage: "https://image.tmdb.org/t/p/w1280/neeNHeXjMF5fXoCJRsOmkNGC7q.jpg",
     excerpt: "Christopher Nolan has spent three decades challenging audiences with non-linear timelines, spatial manipulation, and IMAX grandeur. We trace his career trajectory.",
     content: [
       {
@@ -322,7 +322,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     },
     publishedAt: "June 10, 2026",
     readTime: "8 min read",
-    coverImage: "https://image.tmdb.org/t/p/w1280/e7n65m17m5H36K4q1b2K7Z1x0b2.jpg",
+    coverImage: "https://image.tmdb.org/t/p/w1280/mQOUyqDybTqxl73hO5LujCZsM1o.jpg",
     excerpt: "Streaming fatigue is real. Learn how smart aggregation tools and metadata tracking help you spend less time searching and more time watching.",
     content: [
       {
@@ -345,7 +345,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     },
     publishedAt: "May 29, 2026",
     readTime: "9 min read",
-    coverImage: "https://image.tmdb.org/t/p/w1280/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+    coverImage: "https://image.tmdb.org/t/p/w1280/cfT29Im5VDvjE0RpyKOSdCKZal7.jpg",
     excerpt: "True horror settles in the mind long after the credits roll. We explore 8 atmospheric masterworks that turn human vulnerability into exquisite suspense.",
     content: [
       {
@@ -368,7 +368,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     },
     publishedAt: "May 18, 2026",
     readTime: "8 min read",
-    coverImage: "https://image.tmdb.org/t/p/w1280/e7n65m17m5H36K4q1b2K7Z1x0b2.jpg",
+    coverImage: "https://image.tmdb.org/t/p/w1280/bwSmgmd90hCWwqOKQYTEraeOZhJ.jpg",
     excerpt: "Audiences are increasingly hesitant to commit to 7-season shows that get canceled on cliffhangers. The limited series format offers complete story satisfaction.",
     content: [
       {
@@ -391,7 +391,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     },
     publishedAt: "May 04, 2026",
     readTime: "10 min read",
-    coverImage: "https://image.tmdb.org/t/p/w1280/mrgVf0Z4yW1v4X6Lh2d8gE68d2.jpg",
+    coverImage: "https://image.tmdb.org/t/p/w1280/dyJvKsNs2KP8qQnAXbRwDjblViy.jpg",
     excerpt: "Hayao Miyazaki's hand-drawn animation treats natural landscapes with spiritual reverence. We analyze the environmental philosophy behind Studio Ghibli's classics.",
     content: [
       {
