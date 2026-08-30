@@ -1,34 +1,57 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
-import { ADSENSE_PUB_ID, AD_SLOTS, isAdExcluded, pushAdSense } from "@/lib/adsConfig";
+import { useEffect, useRef } from "react";
+import { ADSTERRA_UNITS, isAdExcluded } from "@/lib/adsConfig";
+
+type AdsterraUnit = keyof typeof ADSTERRA_UNITS;
 
 interface AdBannerProps {
-  slotId?: string;
-  format?: "auto" | "fluid" | "rectangle" | "horizontal";
-  responsive?: boolean;
+  /** Which Adsterra unit to render */
+  unit?: AdsterraUnit;
   className?: string;
   label?: string;
 }
 
 export function AdBanner({
-  slotId = AD_SLOTS.homeRow1,
-  format = "auto",
-  responsive = true,
+  unit = "leaderboard728x90",
   className = "",
   label = "ADVERTISEMENT",
 }: AdBannerProps) {
   const pathname = usePathname();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const injectedRef = useRef(false);
 
-  // Trigger AdSense script initialization on component mount
+  const config = ADSTERRA_UNITS[unit];
+
   useEffect(() => {
-    if (!isAdExcluded(pathname)) {
-      pushAdSense();
-    }
-  }, [pathname]);
+    if (isAdExcluded(pathname)) return;
+    if (injectedRef.current) return;
+    injectedRef.current = true;
 
-  // Exclude ads entirely on specified restricted routes
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Build the Adsterra IFRAME SYNC snippet dynamically
+    const optionsScript = document.createElement("script");
+    optionsScript.text = `
+      atOptions = {
+        'key' : '${config.key}',
+        'format' : 'iframe',
+        'height' : ${config.height},
+        'width' : ${config.width},
+        'params' : {}
+      };
+    `;
+
+    const invokeScript = document.createElement("script");
+    invokeScript.src = `https://www.highrevenueformat.com/${config.key}/invoke.js`;
+    invokeScript.async = false;
+
+    container.appendChild(optionsScript);
+    container.appendChild(invokeScript);
+  }, [pathname, config]);
+
   if (isAdExcluded(pathname)) {
     return null;
   }
@@ -42,15 +65,11 @@ export function AdBanner({
         <span className="opacity-40">Apollo Ads</span>
       </div>
 
-      <div className="flex min-h-[90px] w-full items-center justify-center p-3 text-center">
-        <ins
-          className="adsbygoogle"
-          style={{ display: "block", width: "100%", overflow: "hidden" }}
-          data-ad-client={ADSENSE_PUB_ID}
-          data-ad-slot={slotId}
-          data-ad-format={format}
-          data-full-width-responsive={responsive ? "true" : "false"}
-        />
+      <div
+        className="flex w-full items-center justify-center p-3"
+        style={{ minHeight: config.height + 24 }}
+      >
+        <div ref={containerRef} />
       </div>
     </div>
   );

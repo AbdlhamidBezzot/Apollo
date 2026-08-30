@@ -1,5 +1,4 @@
 import { AdBanner } from "@/components/AdBanner";
-import { ContinueWatchingRow } from "@/components/ContinueWatchingRow";
 import { FeedErrorState } from "@/components/FeedErrorState";
 import { HeroBillboard } from "@/components/HeroBillboard";
 import { MovieRow } from "@/components/MovieRow";
@@ -7,7 +6,7 @@ import { DiscoveryHub, EditorsPickSpotlight, FeaturedEditorialSection, HomeIntro
 import { RecommendationsRow } from "@/components/RecommendationsRow";
 import { SignInNotice } from "@/components/SignInNotice";
 import { API_URL } from "@/lib/api";
-import { AD_SLOTS } from "@/lib/adsConfig";
+import { ContinueWatchingRow } from "@/components/ContinueWatchingRow";
 import { classifyError, logTechnicalDetail } from "@/lib/errors";
 import { checkBackendHealth } from "@/lib/health";
 import { get } from "@/lib/http";
@@ -83,14 +82,14 @@ export default async function HomePage() {
 
       <ContinueWatchingRow />
 
-      <AdBanner slotId={AD_SLOTS.homeRow1} format="horizontal" />
+      <AdBanner unit="leaderboard728x90" />
 
       <RecommendationsRow />
 
       {rows.map((row, idx) => (
         <div key={row.title} className="space-y-12">
           <MovieRow title={row.title} items={row.items} seeAllHref={row.seeAllHref} />
-          {idx === 1 && <AdBanner slotId={AD_SLOTS.homeRow2} format="horizontal" />}
+          {idx === 1 && <AdBanner unit="leaderboard728x90" />}
         </div>
       ))}
     </div>

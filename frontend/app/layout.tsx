@@ -12,21 +12,16 @@ import { Analytics } from "@vercel/analytics/next"
 export const metadata: Metadata = {
   title: "Apollo - Movies & Series",
   description: "Legal movie & series discovery, with an AI companion that plans your movie night.",
-  other: {
-    "google-adsense-account": "ca-pub-2898195354340118",
-  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
       <head>
-        <meta name="google-adsense-account" content="ca-pub-2898195354340118" />
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2898195354340118"
-          crossOrigin="anonymous"
-        ></script>
+        {/* Adsterra: Popunder */}
+        <script src="https://pl31098602.profitableratecpmnetwork.com/25/ea/fd/25eafdc0d5b5c73fff96db5f26b3fd80.js" />
+        {/* Adsterra: SocialBar */}
+        <script src="https://pl31098603.profitableratecpmnetwork.com/a7/af/9d/a7af9dd53724b72f361ecca2360aad8a.js" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

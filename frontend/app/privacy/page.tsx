@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Privacy Policy | Apollo",
   description:
-    "Apollo's Privacy Policy explains how we collect, use, and safeguard your data, including Google AdSense cookies, analytics, and user privacy rights.",
+    "Apollo's Privacy Policy explains how we collect, use, and safeguard your data, including advertising cookies, analytics, and user privacy rights.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -43,16 +43,16 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section className="space-y-3 border-t border-white/10 pt-6">
-            <h2 className="text-xl font-bold text-text-vivid">4. Google DoubleClick DART Cookie & Google AdSense</h2>
+            <h2 className="text-xl font-bold text-text-vivid">4. Adsterra Advertising &amp; Cookies</h2>
             <p>
-              Google is one of a third-party vendor on our site. It also uses cookies, known as DART cookies, to serve ads to our site visitors based upon their visit to our site and other sites on the internet. However, visitors may choose to decline the use of DART cookies by visiting the Google ad and content network Privacy Policy at the following URL: <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer" className="text-brand-soft hover:underline">https://policies.google.com/technologies/ads</a>.
+              Apollo partners with Adsterra to serve advertisements. Adsterra and its network partners may use cookies, web beacons, and similar technologies to deliver ads tailored to your interests based on your browsing activity. These cookies are set directly by Adsterra and are governed by their own privacy policy.
             </p>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-2">
-              <h3 className="font-semibold text-text-vivid">Important Google AdSense Notice:</h3>
+              <h3 className="font-semibold text-text-vivid">Adsterra Advertising Notice:</h3>
               <ul className="list-disc pl-5 space-y-1">
-                <li>Third party vendors, including Google, use cookies to serve ads based on a user's prior visits to your website or other websites.</li>
-                <li>Google's use of advertising cookies enables it and its partners to serve ads to your users based on their visit to your sites and/or other sites on the Internet.</li>
-                <li>Users may opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" className="text-brand-soft hover:underline">Ads Settings</a>.</li>
+                <li>Adsterra and its partner networks use cookies to serve ads based on a user&apos;s prior visits to this website or other websites.</li>
+                <li>You may see banner ads (300×250, 728×90), native content, and other ad formats powered by Adsterra.</li>
+                <li>Users may opt out of interest-based advertising by visiting <a href="https://www.youronlinechoices.eu/" target="_blank" rel="noopener noreferrer" className="text-brand-soft hover:underline">Your Online Choices</a> or <a href="https://optout.aboutads.info/" target="_blank" rel="noopener noreferrer" className="text-brand-soft hover:underline">aboutads.info</a>.</li>
               </ul>
             </div>
           </section>

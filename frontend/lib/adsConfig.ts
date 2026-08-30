@@ -1,20 +1,30 @@
 /**
- * Google AdSense Configuration & Helper Functions for Apollo
+ * Adsterra Ad Configuration for Apollo
  */
 
-// Default AdSense Publisher ID. Swap 'ca-pub-XXXXXXXXXXXXXXXX' or set NEXT_PUBLIC_ADSENSE_PUB_ID in .env.local
-export const ADSENSE_PUB_ID =
-  process.env.NEXT_PUBLIC_ADSENSE_PUB_ID || "ca-pub-2898195354340118";
+// Adsterra ad unit definitions
+export const ADSTERRA_UNITS = {
+  // 300x250 banner (IFRAME SYNC)
+  banner300x250: {
+    key: "287263a21170b0b4fcc6f62ad64c9425",
+    width: 300,
+    height: 250,
+  },
+  // 728x90 leaderboard (IFRAME SYNC)
+  leaderboard728x90: {
+    key: "fed15ec2b808ad78b95f3757737d2162",
+    width: 728,
+    height: 90,
+  },
+} as const;
 
-// Centralized Ad Slot IDs for various placements across Apollo.
-// Replace placeholder values with real slot IDs from your Google AdSense Dashboard.
-export const AD_SLOTS = {
-  homeRow1: process.env.NEXT_PUBLIC_AD_SLOT_HOME_1 || "1234567890",
-  homeRow2: process.env.NEXT_PUBLIC_AD_SLOT_HOME_2 || "2345678901",
-  browseGrid: process.env.NEXT_PUBLIC_AD_SLOT_BROWSE || "3456789012",
-  animeRow: process.env.NEXT_PUBLIC_AD_SLOT_ANIME || "4567890123",
-  preWatch: process.env.NEXT_PUBLIC_AD_SLOT_PREWATCH || "5678901234",
-};
+// Adsterra async script URLs
+export const ADSTERRA_SCRIPTS = {
+  nativeBanner: "https://pl31098606.profitableratecpmnetwork.com/57a45f319b0d3f47845ad8b9059b61de/invoke.js",
+  nativeBannerContainerId: "container-57a45f319b0d3f47845ad8b9059b61de",
+  popunder: "https://pl31098602.profitableratecpmnetwork.com/25/ea/fd/25eafdc0d5b5c73fff96db5f26b3fd80.js",
+  socialBar: "https://pl31098603.profitableratecpmnetwork.com/a7/af/9d/a7af9dd53724b72f361ecca2360aad8a.js",
+} as const;
 
 // Routes where advertisements must NEVER appear (including all nested sub-routes)
 export const EXCLUDED_ROUTES: string[] = [
@@ -42,19 +52,4 @@ export function isAdExcluded(pathname: string | null | undefined): boolean {
       normalized.startsWith(`${lowerRoute}?`)
     );
   });
-}
-
-/**
- * Safely initializes an AdSense unit instance on component mount without throwing errors
- * if scripts are blocked by ad-blockers or if AdSense is already populated.
- */
-export function pushAdSense(): void {
-  try {
-    if (typeof window !== "undefined") {
-      ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
-    }
-  } catch (err) {
-    // Fail silently if blocked by client extension or missing script
-    console.debug("[AdSense] Init push caught:", err);
-  }
 }

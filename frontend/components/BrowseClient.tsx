@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AdBanner } from "@/components/AdBanner";
 import { MovieCard } from "@/components/MovieCard";
-import { AD_SLOTS } from "@/lib/adsConfig";
 import { get } from "@/lib/http";
 import type { ContentListResponse, Title } from "@/lib/types";
 
@@ -418,7 +417,7 @@ export function BrowseClient({
                 <MovieCard item={item} />
                 {(i + 1) % 18 === 0 && (
                   <div className="col-span-full my-4">
-                    <AdBanner slotId={AD_SLOTS.browseGrid} format="horizontal" />
+                    <AdBanner unit="leaderboard728x90" />
                   </div>
                 )}
               </React.Fragment>

@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AdBanner } from "@/components/AdBanner";
-import { AD_SLOTS } from "@/lib/adsConfig";
 
 interface PreWatchAdProps {
   title?: string;
@@ -100,8 +99,7 @@ export function PreWatchAd({
         {/* Ad Banner Container */}
         <div className="my-4">
           <AdBanner
-            slotId={AD_SLOTS.preWatch}
-            format="rectangle"
+            unit="banner300x250"
             label="SPONSORED PRE-ROLL AD"
             className="my-0 max-w-full"
           />
