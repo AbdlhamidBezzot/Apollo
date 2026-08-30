@@ -40,9 +40,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </AuthProvider>
         <Analytics />
 
-        {/* ── Adsterra: Popunder – one per page, right above </body> ── */}
+        {/* ── Adsterra: Popunder (Anti-Adblock) – one per page, right above </body> ── */}
         <Script
-          src="https://pl31098602.profitableratecpmnetwork.com/25/ea/fd/25eafdc0d5b5c73fff96db5f26b3fd80.js"
+          src="https://heavenlysuspicious.com/25/ea/fd/25eafdc0d5b5c73fff96db5f26b3fd80.js"
           strategy="lazyOnload"
         />
         {/* ── Adsterra: Social Bar – right above </body> ── */}
