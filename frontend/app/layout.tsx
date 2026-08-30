@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import Script from "next/script";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { ChatBot } from "@/components/ChatBot";
 import { MovieNightModal } from "@/components/MovieNightModal";
 import { AuthProvider } from "@/components/AuthContext";
 import { Footer } from "@/components/HomeEnhancements";
-import { Analytics } from "@vercel/analytics/next"
-
+import { NativeBanner } from "@/components/NativeBanner";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "Apollo - Movies & Series",
@@ -18,10 +19,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <head>
-        {/* Adsterra: Popunder */}
-        <script src="https://pl31098602.profitableratecpmnetwork.com/25/ea/fd/25eafdc0d5b5c73fff96db5f26b3fd80.js" />
-        {/* Adsterra: SocialBar */}
-        <script src="https://pl31098603.profitableratecpmnetwork.com/a7/af/9d/a7af9dd53724b72f361ecca2360aad8a.js" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -35,11 +32,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Navbar />
           </Suspense>
           <main className="min-h-screen pb-8 lg:pl-24">{children}</main>
+          {/* Adsterra: Native Banner – anywhere in body */}
+          <NativeBanner />
           <div className="lg:pl-24"><Footer /></div>
           <ChatBot />
           <MovieNightModal />
         </AuthProvider>
         <Analytics />
+
+        {/* ── Adsterra: Popunder – one per page, right above </body> ── */}
+        <Script
+          src="https://pl31098602.profitableratecpmnetwork.com/25/ea/fd/25eafdc0d5b5c73fff96db5f26b3fd80.js"
+          strategy="lazyOnload"
+        />
+        {/* ── Adsterra: Social Bar – right above </body> ── */}
+        <Script
+          src="https://pl31098603.profitableratecpmnetwork.com/a7/af/9d/a7af9dd53724b72f361ecca2360aad8a.js"
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );
