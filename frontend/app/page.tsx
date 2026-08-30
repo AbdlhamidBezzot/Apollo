@@ -68,6 +68,8 @@ export default async function HomePage() {
     <div className="space-y-12 pb-4">
       {trending.items.length > 0 && <HeroBillboard slides={trending.items} />}
 
+      <ContinueWatchingRow />
+
       <HomeIntroBanner />
 
       <Top10Carousel items={topStreaming.items.length ? topStreaming.items : trending.items} />
@@ -79,8 +81,6 @@ export default async function HomePage() {
       <SignInNotice />
 
       <FeaturedEditorialSection />
-
-      <ContinueWatchingRow />
 
       <AdBanner unit="leaderboard728x90" />
 
