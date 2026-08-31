@@ -8,14 +8,14 @@ interface PreWatchAdProps {
   title?: string;
   poster?: string | null;
   onComplete: () => void;
-  initialCountdown?: number; // total seconds (default 10)
+  initialCountdown?: number; // total seconds (default 5)
 }
 
 export function PreWatchAd({
   title,
   poster,
   onComplete,
-  initialCountdown = 10,
+  initialCountdown = 5,
 }: PreWatchAdProps) {
   const [timeLeft, setTimeLeft] = useState(initialCountdown);
   const onCompleteRef = useRef(onComplete);

@@ -118,6 +118,7 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
       <PreWatchAd
         title={title || session.title || `${mediaType === "tv" ? "TV" : "Movie"} ${id}`}
         poster={poster || session.poster}
+        initialCountdown={5}
         onComplete={() => setAdCompleted(true)}
       />
     );
