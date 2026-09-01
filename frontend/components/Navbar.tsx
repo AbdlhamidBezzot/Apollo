@@ -71,6 +71,12 @@ const ICONS: Record<string, ReactElement> = {
       <path d="M8 7h8M8 11h8M8 15h5" />
     </>
   ),
+  sports: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 3a9 9 0 0 0 0 18M12 3a9 9 0 0 1 0 18M3 12h18" />
+    </>
+  ),
   close: <path d="M6 6l12 12M18 6L6 18" />,
 };
 
@@ -94,6 +100,7 @@ function Icon({ name, className = "h-6 w-6" }: { name: string; className?: strin
 /* ---------- Dock data ---------- */
 const DOCK_TOP = [
   { href: "/", label: "Home", icon: "home", base: "/", media: null as string | null },
+  { href: "/sports", label: "Live Sports", icon: "sports", base: "/sports", media: null },
   { href: "/browse?media_type=movie", label: "Movies", icon: "movies", base: "/browse", media: "movie" },
   { href: "/browse?media_type=tv", label: "TV Shows", icon: "series", base: "/browse", media: "tv" },
   { href: "/browse", label: "Browse", icon: "browse", base: "/browse", media: "all" },

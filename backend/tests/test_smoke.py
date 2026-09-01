@@ -202,3 +202,13 @@ def test_chatbot_returns_suggestions_without_tmdb():
         data = r.json()
         assert "reply" in data
         assert "suggested_titles" in data
+
+
+def test_football_matches_endpoint():
+    with get_client() as client:
+        r = client.get("/api/v1/football/matches")
+        assert r.status_code == 200, r.text
+        data = r.json()
+        assert "matches" in data
+        assert "pagination" in data
+

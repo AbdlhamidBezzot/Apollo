@@ -43,6 +43,10 @@ class Settings(BaseSettings):
     tmdb_api_read_access_token: str = ""
     tmdb_api_base_url: str = "https://api.themoviedb.org/3"
 
+    rapidapi_football_key: str = ""
+    rapidapi_football_host: str = "football-live-streaming-api.p.rapidapi.com"
+    rapidapi_football_base_url: str = "https://football-live-streaming-api.p.rapidapi.com"
+
     playback_provider: str = "vidsrc"
 
     # Development (same-origin localhost) uses Lax. In production the Vercel
@@ -72,6 +76,7 @@ class Settings(BaseSettings):
     # Moderate: playback resolution, chat accept/cues, movie-night decide.
     rate_limit_play: str = "120/minute"
     rate_limit_playback: str = "120/minute"
+    rate_limit_football: str = "120/minute"
     # Use X-Forwarded-For for the client IP only when the API sits behind a
     # trustable proxy (Render, Railway, nginx). Keep off for direct exposure.
     rate_limit_trust_forwarded: bool = False
