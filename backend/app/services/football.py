@@ -30,6 +30,7 @@ def _auth_headers() -> dict[str, str]:
     return {
         "X-RapidAPI-Key": key,
         "X-RapidAPI-Host": settings.rapidapi_football_host,
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     }
 
 
@@ -147,7 +148,7 @@ class FootballService:
         url = f"{settings.rapidapi_football_base_url.rstrip('/')}/matches"
 
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with httpx.AsyncClient(timeout=25.0) as client:
                 resp = await client.get(url, params=params, headers=headers)
                 if resp.status_code == 401 or resp.status_code == 403:
                     logger.warning(
