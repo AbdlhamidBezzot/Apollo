@@ -24,12 +24,11 @@ class FootballAPIError(Exception):
 
 def _auth_headers() -> dict[str, str]:
     settings = get_settings()
-    key = settings.rapidapi_football_key.strip()
-    if not key:
-        return {}
+    key = (settings.rapidapi_football_key or "").strip() or "db5104522emshd15bd3ea8be404fp12d21ejsn54bca4dec8b6"
+    host = (settings.rapidapi_football_host or "").strip() or "football-live-streaming-api.p.rapidapi.com"
     return {
         "X-RapidAPI-Key": key,
-        "X-RapidAPI-Host": settings.rapidapi_football_host,
+        "X-RapidAPI-Host": host,
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     }
 
@@ -122,7 +121,7 @@ class FootballService:
         page: int = 1, date: str | None = None, status: str | None = None
     ) -> dict[str, Any]:
         settings = get_settings()
-        key = settings.rapidapi_football_key.strip()
+        key = (settings.rapidapi_football_key or "").strip() or "db5104522emshd15bd3ea8be404fp12d21ejsn54bca4dec8b6"
         headers = _auth_headers()
 
         if not key:
@@ -135,7 +134,10 @@ class FootballService:
         cached_data = cache.get(cache_key)
         if cached_data:
             try:
-                return json.loads(cached_data)
+                parsed = json.loads(cached_data)
+                # Only return cached data if it is NOT demo data
+                if not parsed.get("is_demo"):
+                    return parsed
             except (ValueError, TypeError):
                 pass
 

@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     tmdb_api_read_access_token: str = ""
     tmdb_api_base_url: str = "https://api.themoviedb.org/3"
 
-    rapidapi_football_key: str = ""
+    rapidapi_football_key: str = "db5104522emshd15bd3ea8be404fp12d21ejsn54bca4dec8b6"
     rapidapi_football_host: str = "football-live-streaming-api.p.rapidapi.com"
     rapidapi_football_base_url: str = "https://football-live-streaming-api.p.rapidapi.com"
 
