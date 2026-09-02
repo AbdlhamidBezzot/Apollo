@@ -49,13 +49,13 @@ def _get_mock_matches(status: str | None = None, page: int = 1) -> dict[str, Any
             "awayTeamScore": "1",
             "servers": [
                 {
-                    "name": "Server 1 (Demo HLS Stream)",
+                    "name": "Server 1",
                     "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
                     "type": "direct",
                     "header": {},
                 },
                 {
-                    "name": "Server 2 (Backup Stream)",
+                    "name": "Server 2",
                     "url": "https://playertest.longtailvideo.com/adaptive/oceans/oceans.m3u8",
                     "type": "direct",
                     "header": {},
@@ -75,7 +75,7 @@ def _get_mock_matches(status: str | None = None, page: int = 1) -> dict[str, Any
             "awayTeamScore": "0",
             "servers": [
                 {
-                    "name": "Server 1 (Direct)",
+                    "name": "Server 1",
                     "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
                     "type": "direct",
                     "header": {},
@@ -95,7 +95,7 @@ def _get_mock_matches(status: str | None = None, page: int = 1) -> dict[str, Any
             "awayTeamScore": "-",
             "servers": [
                 {
-                    "name": "Server 1 (Scheduled)",
+                    "name": "Server 1",
                     "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
                     "type": "direct",
                     "header": {},
@@ -165,6 +165,13 @@ class FootballService:
                     data = {"matches": data.get("matches", []), "pagination": data.get("pagination", {"page": page, "hasNext": False})}
 
                 data["is_demo"] = False
+
+                # Normalize server names to "Server 1", "Server 2", etc.
+                for match in data.get("matches", []):
+                    if isinstance(match, dict) and "servers" in match and isinstance(match["servers"], list):
+                        for s_idx, srv in enumerate(match["servers"], start=1):
+                            if isinstance(srv, dict):
+                                srv["name"] = f"Server {s_idx}"
 
                 # Cache successful response
                 try:

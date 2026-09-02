@@ -391,7 +391,7 @@ export function FootballPlayerModal({ match, onClose }: FootballPlayerModalProps
 
             <div className="flex items-center gap-3">
               <span className="text-xs font-mono text-text-muted">
-                {currentServer?.name || "Server"}
+                {currentServer?.name || `Server ${activeServerIdx + 1}`}
               </span>
               <button
                 onClick={toggleFullscreen}

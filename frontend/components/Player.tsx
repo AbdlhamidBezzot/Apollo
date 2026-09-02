@@ -34,13 +34,10 @@ const IDLE_HIDE_MS = 3000;
 const NEXT_CARD_SECONDS = 15;
 const NEXT_AUTO_MS = 10000;
 
-const PROVIDER_LABELS: Record<string, string> = {
-  videasy: "VIDEASY",
-  cinemaos: "CinemaOS",
-  vidsrc: "Vidsrc",
+const providerLabel = (p: string, list: string[] = []) => {
+  const idx = list.indexOf(p);
+  return idx >= 0 ? `Server ${idx + 1}` : "Server 1";
 };
-
-const providerLabel = (p: string) => PROVIDER_LABELS[p] ?? p.charAt(0).toUpperCase() + p.slice(1);
 
 const isEmbed = (contentType: string) => contentType === "text/html";
 
@@ -108,6 +105,10 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
   const [marking, setMarking] = useState<"intro" | "outro" | null>(null);
   const [markingStart, setMarkingStart] = useState(0);
   const skippedRef = useRef<string>("");
+
+  const [subtitles, setSubtitles] = useState<{ id?: string; lang?: string; url?: string }[]>([]);
+  const [activeSubLang, setActiveSubLang] = useState<string>("off");
+  const [subOpen, setSubOpen] = useState<boolean>(false);
 
   const idleTimer = useRef<number>(0);
   const announceTimer = useRef<number>(0);
@@ -280,6 +281,25 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
       cancelled = true;
     };
   }, [embed, mediaType, tmdbId, seasonNum, episodeNum]);
+
+  // Load OpenSubtitles v3 tracks
+  useEffect(() => {
+    let cancelled = false;
+    get<{ subtitles: { id?: string; lang?: string; url?: string }[] }>(
+      `/api/v1/subtitles?tmdb_id=${tmdbId}&media_type=${mediaType}${
+        mediaType === "tv" ? `&season=${seasonNum}&episode=${episodeNum}` : ""
+      }`
+    )
+      .then((res) => {
+        if (!cancelled) {
+          setSubtitles(res.subtitles || []);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [tmdbId, mediaType, seasonNum, episodeNum]);
 
   // Load season list once so the episode picker can switch seasons.
   useEffect(() => {
@@ -607,7 +627,7 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
         } catch {
           /* ignore */
         }
-        announce(`Source: ${providerLabel(target)}`);
+        announce(`Source: ${providerLabel(target, providers)}`);
       } catch {
         announce("Could not load that source");
       } finally {
@@ -740,17 +760,17 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
         <div className="flex items-center gap-2">
           {providers.length > 1 && (
             <div className="flex items-center gap-0.5 rounded-full border border-white/10 bg-black/20 p-1" role="group" aria-label="Playback source">
-              {providers.map((p) => (
+              {providers.map((p, idx) => (
                 <button
                   key={p}
                   onClick={() => changeProvider(p)}
                   disabled={busyResolve || p === provider}
-                  title={p === provider ? "Active source" : `Switch to ${providerLabel(p)}`}
+                  title={p === provider ? "Active source" : `Switch to Server ${idx + 1}`}
                   className={`rounded-full px-3 py-1 text-xs font-semibold transition disabled:cursor-default ${
                     p === provider ? "bg-brand text-white" : "text-text-muted hover:text-text-vivid"
                   }`}
                 >
-                  {providerLabel(p)}
+                  Server {idx + 1}
                 </button>
               ))}
             </div>
@@ -853,6 +873,16 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
               }
             }}
           >
+            {subtitles.map((sub, i) => (
+              <track
+                key={sub.id || i}
+                kind="subtitles"
+                src={sub.url}
+                srcLang={sub.lang || "en"}
+                label={sub.lang?.toUpperCase() || `Sub ${i + 1}`}
+                default={activeSubLang === sub.lang}
+              />
+            ))}
           </video>
 
           <div
@@ -1016,6 +1046,52 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
                               }`}
                           >
                             {l.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {subtitles.length > 0 && (
+                  <div className="relative">
+                    <button
+                      onClick={() => setSubOpen((v) => !v)}
+                      aria-label="Subtitles"
+                      aria-expanded={subOpen}
+                      className={`rounded border px-2 py-0.5 font-mono text-[11px] transition ${
+                        activeSubLang !== "off"
+                          ? "border-brand bg-brand/20 text-brand-soft font-bold"
+                          : "border-white/10 text-text-muted hover:border-brand/50 hover:text-white"
+                      }`}
+                    >
+                      💬 {activeSubLang === "off" ? "Subs" : activeSubLang.toUpperCase()}
+                    </button>
+                    {subOpen && (
+                      <div className="absolute bottom-full right-0 z-20 mb-2 max-h-48 w-44 overflow-y-auto rounded-lg border border-white/10 glass shadow-glass">
+                        <button
+                          onClick={() => {
+                            setActiveSubLang("off");
+                            setSubOpen(false);
+                          }}
+                          className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${
+                            activeSubLang === "off" ? "font-semibold text-brand-soft" : "text-text-vivid"
+                          }`}
+                        >
+                          Off
+                        </button>
+                        {subtitles.map((sub, i) => (
+                          <button
+                            key={sub.id || i}
+                            onClick={() => {
+                              setActiveSubLang(sub.lang || "en");
+                              setSubOpen(false);
+                            }}
+                            className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${
+                              activeSubLang === sub.lang ? "font-semibold text-brand-soft" : "text-text-vivid"
+                            }`}
+                          >
+                            {sub.lang?.toUpperCase() || `Sub ${i + 1}`}
                           </button>
                         ))}
                       </div>

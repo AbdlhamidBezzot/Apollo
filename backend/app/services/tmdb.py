@@ -250,5 +250,15 @@ class TMDBClient:
             lambda: _tmdb_get(f"{media_type}/{tmdb_id}/season/{season_number}", {}),
         )
 
+    @staticmethod
+    async def external_ids(media_type: str, tmdb_id: int) -> dict[str, Any]:
+        return await _cached(
+            f"{media_type}/{tmdb_id}/external_ids",
+            {},
+            TMDB_CACHE_TTL,
+            "external_ids",
+            lambda: _tmdb_get(f"{media_type}/{tmdb_id}/external_ids", {}),
+        )
+
 
 tmdb = TMDBClient()
