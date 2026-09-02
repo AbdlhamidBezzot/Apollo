@@ -106,10 +106,6 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
   const [markingStart, setMarkingStart] = useState(0);
   const skippedRef = useRef<string>("");
 
-  const [subtitles, setSubtitles] = useState<{ id?: string; lang?: string; url?: string }[]>([]);
-  const [activeSubLang, setActiveSubLang] = useState<string>("off");
-  const [subOpen, setSubOpen] = useState<boolean>(false);
-
   const idleTimer = useRef<number>(0);
   const announceTimer = useRef<number>(0);
 
@@ -281,25 +277,6 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
       cancelled = true;
     };
   }, [embed, mediaType, tmdbId, seasonNum, episodeNum]);
-
-  // Load OpenSubtitles v3 tracks
-  useEffect(() => {
-    let cancelled = false;
-    get<{ subtitles: { id?: string; lang?: string; url?: string }[] }>(
-      `/api/v1/subtitles?tmdb_id=${tmdbId}&media_type=${mediaType}${
-        mediaType === "tv" ? `&season=${seasonNum}&episode=${episodeNum}` : ""
-      }`
-    )
-      .then((res) => {
-        if (!cancelled) {
-          setSubtitles(res.subtitles || []);
-        }
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [tmdbId, mediaType, seasonNum, episodeNum]);
 
   // Load season list once so the episode picker can switch seasons.
   useEffect(() => {
@@ -873,16 +850,6 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
               }
             }}
           >
-            {subtitles.map((sub, i) => (
-              <track
-                key={sub.id || i}
-                kind="subtitles"
-                src={sub.url}
-                srcLang={sub.lang || "en"}
-                label={sub.lang?.toUpperCase() || `Sub ${i + 1}`}
-                default={activeSubLang === sub.lang}
-              />
-            ))}
           </video>
 
           <div
@@ -1046,52 +1013,6 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
                               }`}
                           >
                             {l.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {subtitles.length > 0 && (
-                  <div className="relative">
-                    <button
-                      onClick={() => setSubOpen((v) => !v)}
-                      aria-label="Subtitles"
-                      aria-expanded={subOpen}
-                      className={`rounded border px-2 py-0.5 font-mono text-[11px] transition ${
-                        activeSubLang !== "off"
-                          ? "border-brand bg-brand/20 text-brand-soft font-bold"
-                          : "border-white/10 text-text-muted hover:border-brand/50 hover:text-white"
-                      }`}
-                    >
-                      💬 {activeSubLang === "off" ? "Subs" : activeSubLang.toUpperCase()}
-                    </button>
-                    {subOpen && (
-                      <div className="absolute bottom-full right-0 z-20 mb-2 max-h-48 w-44 overflow-y-auto rounded-lg border border-white/10 glass shadow-glass">
-                        <button
-                          onClick={() => {
-                            setActiveSubLang("off");
-                            setSubOpen(false);
-                          }}
-                          className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${
-                            activeSubLang === "off" ? "font-semibold text-brand-soft" : "text-text-vivid"
-                          }`}
-                        >
-                          Off
-                        </button>
-                        {subtitles.map((sub, i) => (
-                          <button
-                            key={sub.id || i}
-                            onClick={() => {
-                              setActiveSubLang(sub.lang || "en");
-                              setSubOpen(false);
-                            }}
-                            className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${
-                              activeSubLang === sub.lang ? "font-semibold text-brand-soft" : "text-text-vivid"
-                            }`}
-                          >
-                            {sub.lang?.toUpperCase() || `Sub ${i + 1}`}
                           </button>
                         ))}
                       </div>
