@@ -15,6 +15,7 @@ logger = logging.getLogger("app.stremio")
 
 WATCHHUB_BASE_URL = "https://watchhub.strem.io"
 OPENSUBTITLES_BASE_URL = "https://opensubtitles-v3.strem.io"
+NETFLIX_CATALOG_BASE_URL = "https://7a82163c306e-stremio-netflix-catalog-addon.baby-beamup.club"
 
 
 async def get_imdb_id(media_type: str, tmdb_id: int) -> str | None:
@@ -81,6 +82,26 @@ class StremioService:
                     return data.get("subtitles", [])
         except Exception as exc:
             logger.error("Error fetching OpenSubtitles for %s: %s", query_id, str(exc))
+
+        return []
+
+    @staticmethod
+    async def fetch_streaming_catalog(
+        catalog_id: str = "nfx",
+        media_type: str = "movie",
+    ) -> list[dict[str, Any]]:
+        """Fetch streaming platform catalogs (Netflix nfx, HBO Max hbm, Disney+ dnp, Apple TV+ atp, Prime Video amp)."""
+        stremio_type = "series" if media_type == "tv" else "movie"
+        url = f"{NETFLIX_CATALOG_BASE_URL}/catalog/{stremio_type}/{catalog_id}.json"
+
+        try:
+            async with httpx.AsyncClient(timeout=8.0) as client:
+                resp = await client.get(url)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    return data.get("metas", [])
+        except Exception as exc:
+            logger.error("Error fetching streaming catalog %s/%s: %s", catalog_id, stremio_type, str(exc))
 
         return []
 

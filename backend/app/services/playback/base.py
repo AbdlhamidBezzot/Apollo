@@ -40,13 +40,14 @@ class PlaybackProvider(ABC):
 
 
 def get_provider_registry() -> dict[str, type[PlaybackProvider]]:
-    from . import cinemaos, videasy, vidsrc, watchhub
+    from . import autoembed, cinemaos, videasy, vidsrc, vidsrc_me, watchhub
 
     return {
-        "cinemaos": cinemaos.CinemaOSPlaybackProvider,
         "videasy": videasy.VideasyPlaybackProvider,
+        "cinemaos": cinemaos.CinemaOSPlaybackProvider,
+        "autoembed": autoembed.AutoEmbedPlaybackProvider,
+        "vidsrc_me": vidsrc_me.VidSrcMePlaybackProvider,
         "watchhub": watchhub.WatchHubPlaybackProvider,
-        # Legacy provider kept for backward compatibility.
         "vidsrc": vidsrc.VidsrcPlaybackProvider,
     }
 

@@ -34,3 +34,13 @@ def test_playback_resolve_watchhub():
         data = r.json()
         assert data["provider"] == "watchhub"
         assert "stream_url" in data
+
+
+def test_stremio_catalog_endpoint():
+    with get_client() as client:
+        r = client.get("/api/v1/content/stremio-catalog?catalog_id=nfx&media_type=movie")
+        assert r.status_code == 200, r.text
+        data = r.json()
+        assert data["catalog_id"] == "nfx"
+        assert "items" in data
+
