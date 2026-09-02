@@ -14,7 +14,6 @@ from app.db import get_db
 from app.models import EpisodeMetadata
 from app.schemas import ContentList, EpisodeMetadataUpdate
 from app.services.recommendations import recommend_for_profile
-from app.services.stremio import stremio_service
 from app.services.tmdb import TMDbError, tmdb
 
 from ..deps import CurrentProfile
@@ -289,15 +288,4 @@ async def similar(
         return ContentList(**data)
     except TMDbError as exc:
         raise HTTPException(status_code=502, detail=sanitize_detail(exc, 502))
-
-
-@router.get("/stremio-catalog")
-async def stremio_catalog(
-    catalog_id: str = Query("nfx", description="nfx, hbm, dnp, amp, atp"),
-    media_type: Literal["movie", "tv"] = "movie",
-    _rl=Depends(_rl_trending),
-):
-    """Fetch catalog items from Stremio Streaming Catalogs addon (Netflix, HBO Max, Disney+, etc.)."""
-    items = await stremio_service.fetch_streaming_catalog(catalog_id=catalog_id, media_type=media_type)
-    return {"catalog_id": catalog_id, "media_type": media_type, "items": items}
 
