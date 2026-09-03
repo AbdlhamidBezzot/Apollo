@@ -88,6 +88,8 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
           setSession(res);
         }
       } catch (err: unknown) {
+
+
         const issue = classifyError(err);
         logTechnicalDetail(issue, { mediaType, id });
         setError(issue.message);

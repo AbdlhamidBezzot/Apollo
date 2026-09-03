@@ -11,6 +11,7 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    Index,
     Integer,
     String,
     UniqueConstraint,
@@ -37,6 +38,7 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     profiles: Mapped[list[Profile]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    addon_preferences: Mapped[list[UserAddonPreference]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
 
 class Profile(Base):
@@ -256,3 +258,52 @@ class ContactSubmission(Base):
     # open | resolved
     status: Mapped[str] = mapped_column(String(32), default="open")
     submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+
+
+class AddonCatalog(Base):
+    """Global admin-curated add-on catalogue entry."""
+
+    __tablename__ = "addon_catalog"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    addon_id: Mapped[str] = mapped_column(String(120), nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    description: Mapped[str] = mapped_column(String(500), default="")
+    manifest_url: Mapped[str] = mapped_column(String(1000), nullable=False, unique=True)
+    resources: Mapped[list] = mapped_column(JSON, default=list)
+    types: Mapped[list] = mapped_column(JSON, default=list)
+    # tag: official | dev | community
+    tag: Mapped[str] = mapped_column(String(32), default="community")
+    # status: active | broken | disabled
+    status: Mapped[str] = mapped_column(String(16), default="active", index=True)
+    is_default_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    last_validated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    user_preferences: Mapped[list[UserAddonPreference]] = relationship(
+        back_populates="catalog_addon", cascade="all, delete-orphan"
+    )
+
+
+class UserAddonPreference(Base):
+    """Per-user enable/disable toggle for an add-on from the catalog."""
+
+    __tablename__ = "user_addon_preferences"
+    __table_args__ = (
+        UniqueConstraint("user_id", "addon_catalog_id", name="uq_user_addon_pref"),
+        Index("idx_user_addon_pref_enabled", "user_id", "enabled"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    addon_catalog_id: Mapped[int] = mapped_column(
+        ForeignKey("addon_catalog.id", ondelete="CASCADE"), index=True
+    )
+    enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    custom_manifest_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    user: Mapped[User] = relationship(back_populates="addon_preferences")
+    catalog_addon: Mapped[AddonCatalog] = relationship(back_populates="user_preferences")
+
+

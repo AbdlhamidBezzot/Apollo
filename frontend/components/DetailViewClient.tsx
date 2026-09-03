@@ -5,6 +5,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { DetailTabs } from "@/components/DetailTabs";
 import { MovieNightButton } from "@/components/MovieNightButton";
+
+
+
 import { TitleActions } from "@/components/TitleActions";
 import { backdropUrl, posterUrl, releaseYear, titleName } from "@/lib/api";
 import { getEditorialTake } from "@/lib/editorial-generator";
@@ -193,7 +196,9 @@ export function DetailViewClient({
           cast={cast}
           similar={similar}
         />
+
       </div>
     </div>
   );
+
 }

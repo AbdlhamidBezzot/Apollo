@@ -40,17 +40,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </AuthProvider>
         <Analytics />
 
-        {/* ── Adsterra: Popunder (Anti-Adblock) – one per page, right above </body> ── */}
-        <Script
-          src="https://heavenlysuspicious.com/25/ea/fd/25eafdc0d5b5c73fff96db5f26b3fd80.js"
-          strategy="lazyOnload"
-        />
-        {/* ── Adsterra: Social Bar – right above </body> ── */}
-        <Script
-          src="https://pl31098603.profitableratecpmnetwork.com/a7/af/9d/a7af9dd53724b72f361ecca2360aad8a.js"
-          strategy="lazyOnload"
-        />
+        {/* ── Adsterra: Popunder & Social Bar (Production Only) ── */}
+        {process.env.NODE_ENV === "production" && (
+          <>
+            {/* Popunder disabled temporarily:
+            <Script
+              src="https://heavenlysuspicious.com/25/ea/fd/25eafdc0d5b5c73fff96db5f26b3fd80.js"
+              strategy="lazyOnload"
+            />
+            */}
+            <Script
+              src="https://pl31098603.profitableratecpmnetwork.com/a7/af/9d/a7af9dd53724b72f361ecca2360aad8a.js"
+              strategy="lazyOnload"
+            />
+          </>
+        )}
       </body>
     </html>
+
   );
 }

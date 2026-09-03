@@ -277,3 +277,77 @@ class ContactSubmissionOut(BaseModel):
     status: str
     submitted_at: datetime
 
+
+# --- Add-on Catalog (admin-curated) ---
+class CatalogAddonOut(BaseModel):
+    """Catalog entry returned to the user, includes their current toggle state."""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    addon_id: str
+    name: str
+    description: str
+    manifest_url: str
+    resources: list[str]
+    types: list[str]
+    tag: str
+    status: str
+    is_default_enabled: bool
+    last_validated_at: datetime
+    # user's current toggle (False when no preference row exists yet)
+    user_enabled: bool = False
+    custom_manifest_url: str | None = None
+
+
+class UserAddonToggle(BaseModel):
+    enabled: bool
+    custom_manifest_url: str | None = None
+
+
+
+# --- Admin add-on management ---
+class AdminAddonCreate(BaseModel):
+    manifest_url: str = Field(min_length=10, max_length=1000)
+    tag: str = Field(default="community", pattern="^(official|dev|community)$")
+    description: str = Field(default="", max_length=500)
+    is_default_enabled: bool = False
+
+
+class AdminAddonUpdate(BaseModel):
+    tag: str | None = Field(default=None, pattern="^(official|dev|community)$")
+    description: str | None = Field(default=None, max_length=500)
+    is_default_enabled: bool | None = None
+    status: str | None = Field(default=None, pattern="^(active|broken|disabled)$")
+
+
+class ApolloSubtitle(BaseModel):
+    id: str
+    language: str
+    url: str
+
+
+class ApolloStream(BaseModel):
+    id: str
+    addon_id: str
+    addon_name: str
+    title: str | None = None
+    quality: str | None = None
+    language: str | None = None
+    url: str | None = None
+    is_direct: bool = False
+    is_torrent: bool = False
+    subtitles: list[ApolloSubtitle] = []
+    metadata: dict[str, Any] = {}
+
+
+class MediaStreamsResponse(BaseModel):
+    tmdb_id: int
+    media_type: MediaType
+    streams: list[ApolloStream] = []
+
+
+class MediaSubtitlesResponse(BaseModel):
+    tmdb_id: int
+    media_type: MediaType
+    subtitles: list[ApolloSubtitle] = []
+

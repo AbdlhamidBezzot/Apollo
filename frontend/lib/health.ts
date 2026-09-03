@@ -16,7 +16,7 @@ export interface HealthResult {
 /** Fetch /health with a short timeout. Prefer cached results to avoid hammering. */
 export async function checkBackendHealth(
   apiBase: string,
-  timeoutMs = 4000
+  timeoutMs = 8000
 ): Promise<HealthResult> {
   const base = apiBase.replace(/\/+$/, "");
   const controller = new AbortController();

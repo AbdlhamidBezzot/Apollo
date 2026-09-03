@@ -22,10 +22,21 @@ from app.core.diagnostics import DiagnosticsMiddleware
 from app.core.errors import sanitize_detail
 from app.core.ratelimit import get_rate_limiter
 from app.db import engine, init_db
+from app.api.router import api_router
+from app.core.cache import get_cache
+from app.core.config import get_settings
+from app.core.diagnostics import DiagnosticsMiddleware
+from app.core.errors import sanitize_detail
+from app.core.ratelimit import get_rate_limiter
+from app.db import engine, init_db
 from app.services.tmdb import TMDbError, tmdb
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
+
+
+from app.services.seed_catalog import seed_catalog
+from app.services.addon_cron import run_addon_revalidation_cron
 
 
 async def _warm_home_feed() -> None:
@@ -46,6 +57,8 @@ async def _warm_home_feed() -> None:
 async def lifespan(_: FastAPI):
     settings.ensure_production_ready()
     init_db()
+    seed_catalog()
+    cron_task = asyncio.create_task(run_addon_revalidation_cron())
     cache = get_cache()
     cache.require_redis()  # production: fail fast if Redis is unavailable (no silent memory fallback)
     get_rate_limiter()  # warm the rate limiter so cache fallback is resolved once
@@ -65,7 +78,10 @@ async def lifespan(_: FastAPI):
             logger.warning("Cache backend: memory (Redis unavailable — ok for local dev)")
     if settings.tmdb_api_key or settings.tmdb_api_read_access_token:
         await _warm_home_feed()
-    yield
+    try:
+        yield
+    finally:
+        cron_task.cancel()
 
 
 app = FastAPI(
@@ -107,13 +123,16 @@ async def unhandled_exception_handler(_: Request, exc: Exception) -> JSONRespons
 
 
 _HEALTH_TMDB_TTL = 120
+_health_cache: dict[str, tuple[bool, float]] = {}
 
 
 async def _check_database() -> bool:
-    try:
+    def _ping():
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
         return True
+    try:
+        return await asyncio.to_thread(_ping)
     except Exception:
         logger.exception("Database health check failed")
         return False
@@ -132,16 +151,18 @@ async def _check_redis() -> dict:
 async def _check_tmdb() -> bool:
     if not (settings.tmdb_api_key or settings.tmdb_api_read_access_token):
         return False
-    cached = get_cache().get("health:tmdb")
-    if cached is not None:
-        return cached == "1"
+    import time
+    now = time.monotonic()
+    cached = _health_cache.get("tmdb")
+    if cached and (now - cached[1]) < _HEALTH_TMDB_TTL:
+        return cached[0]
     ok = False
     try:
         headers = {"Accept": "application/json"}
         if settings.tmdb_api_read_access_token:
             headers["Authorization"] = f"Bearer {settings.tmdb_api_read_access_token}"
         params = {"api_key": settings.tmdb_api_key} if settings.tmdb_api_key else None
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=1.5) as client:
             resp = await client.get(
                 f"{settings.tmdb_api_base_url.rstrip('/')}/configuration",
                 params=params,
@@ -150,21 +171,25 @@ async def _check_tmdb() -> bool:
             ok = resp.status_code == 200
     except Exception:
         logger.exception("TMDB health check failed")
-    try:
-        get_cache().set("health:tmdb", "1" if ok else "0", _HEALTH_TMDB_TTL)
-    except Exception:
-        pass
+    _health_cache["tmdb"] = (ok, now)
     return ok
+
 
 
 @app.get("/health")
 async def health():
-    redis_status = await _check_redis()
+    db_ok, redis_status, tmdb_ok = await asyncio.gather(
+        _check_database(),
+        _check_redis(),
+        _check_tmdb(),
+        return_exceptions=True,
+    )
     return {
         "status": "ok",
-        "database": await _check_database(),
-        "redis": redis_status,
-        "tmdb": await _check_tmdb(),
+        "database": db_ok if isinstance(db_ok, bool) else False,
+        "redis": redis_status if isinstance(redis_status, dict) else {"connected": False},
+        "tmdb": tmdb_ok if isinstance(tmdb_ok, bool) else False,
         "version": app.version,
         "environment": settings.app_env,
     }
+

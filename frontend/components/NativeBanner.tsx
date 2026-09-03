@@ -13,6 +13,7 @@ export function NativeBanner() {
   const injectedRef = useRef(false);
 
   useEffect(() => {
+    if (process.env.NODE_ENV !== "production") return;
     if (isAdExcluded(pathname)) return;
     if (injectedRef.current) return;
     injectedRef.current = true;

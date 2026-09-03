@@ -236,7 +236,7 @@ export function ChatBot() {
                               <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-text-muted">
                                 {typeof s.vote_average === "number" && s.vote_average > 0 ? (
                                   <span className="rounded bg-badge-rating/15 px-1.5 font-bold text-badge-rating">
-                                    â˜… {s.vote_average.toFixed(1)}
+                                    ★ {s.vote_average.toFixed(1)}
                                   </span>
                                 ) : null}
                                 <span className="uppercase">{s.media_type}</span>
@@ -249,7 +249,7 @@ export function ChatBot() {
                             onClick={() => playSuggestion(s)}
                             className="block w-full border-t border-white/10 px-3 py-2 text-left text-xs font-bold text-brand-soft transition hover:bg-white/5 disabled:opacity-40"
                           >
-                            â–¶ Stream now
+                            ▶ Stream now
                           </button>
                         </div>
                       ))}

@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: YPoDBI5XWDQTG3QHhIcb3Y7f
       POSTGRES_DB: apollo
     ports:
-      - "5432:5432"
+      - "5435:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

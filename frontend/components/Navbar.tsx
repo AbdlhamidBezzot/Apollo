@@ -77,6 +77,12 @@ const ICONS: Record<string, ReactElement> = {
       <path d="M12 3a9 9 0 0 0 0 18M12 3a9 9 0 0 1 0 18M3 12h18" />
     </>
   ),
+  addons: (
+    <>
+      <path d="M12 2v4M12 18v4M4 12H2M22 12h-2M19.07 4.93l-2.83 2.83M7.76 16.24l-2.83 2.83M19.07 19.07l-2.83-2.83M7.76 7.76L4.93 4.93" />
+      <circle cx="12" cy="12" r="4" />
+    </>
+  ),
   close: <path d="M6 6l12 12M18 6L6 18" />,
 };
 
@@ -108,6 +114,8 @@ const DOCK_TOP = [
   { href: "/editorial", label: "Editorial", icon: "editorial", base: "/editorial", media: null },
   { href: "/my-list", label: "Watchlist", icon: "watchlist", base: "/my-list", media: null },
 ];
+
+
 
 /* ---------- Logo ---------- */
 function ApolloLogo({ compact }: { compact: boolean }) {
@@ -222,7 +230,7 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
           className="w-full bg-transparent text-sm text-text-vivid outline-none placeholder:text-text-muted"
         />
         <kbd className="hidden rounded-md border border-white/10 bg-white/5 px-1.5 py-0.5 font-mono text-[10px] text-text-muted sm:block">
-          âŒ˜K
+          ⌘K
         </kbd>
       </form>
 
@@ -250,10 +258,10 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
           {busy ? (
             <div className="flex items-center gap-2 px-4 py-3 text-sm text-text-muted">
               <span className="h-3 w-3 animate-spin rounded-full border-2 border-brand border-t-transparent" />
-              Searchingâ€¦
+              Searching...
             </div>
           ) : res.length === 0 ? (
-            <p className="px-4 py-4 text-sm text-text-muted">No results for â€œ{q}â€.</p>
+            <p className="px-4 py-4 text-sm text-text-muted">No results for "{q}".</p>
           ) : (
             res.map((item) => {
               const mt = item.media_type === "tv" ? "tv" : "movie";
@@ -281,7 +289,7 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
                         {mt}
                       </span>
                       {releaseYear(item)}
-                      {item.vote_average ? <span className="text-badge-rating">â˜… {item.vote_average.toFixed(1)}</span> : null}
+                      {item.vote_average ? <span className="text-badge-rating">★ {item.vote_average.toFixed(1)}</span> : null}
                     </p>
                   </div>
                 </button>
@@ -292,7 +300,7 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
             onClick={() => go(`/search?q=${encodeURIComponent(q.trim())}`)}
             className="block w-full border-t border-white/10 px-4 py-2.5 text-left text-sm font-medium text-brand-soft transition hover:bg-white/5"
           >
-            See all results for â€œ{q}â€ â†’
+            See all results for "{q}" →
           </button>
         </div>
       )}
@@ -377,11 +385,16 @@ export function Navbar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const media = searchParams.get("media_type");
+  const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [hover, setHover] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -479,7 +492,9 @@ export function Navbar() {
           <CommandSearch open={searchOpen} setOpen={setSearchOpen} />
 
           <div className="flex shrink-0 items-center gap-2">
-            {loading ? null : user ? (
+            {!mounted || loading ? (
+              <div className="h-10 w-20 animate-pulse rounded-full border border-white/10 bg-white/5" aria-hidden="true" />
+            ) : user ? (
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setMenuOpen((v) => !v)}
@@ -502,6 +517,7 @@ export function Navbar() {
                     {[
                       { href: "/my-list", label: "My List" },
                       { href: "/history", label: "Viewing History" },
+                      { href: "/settings/addons", label: "⊕ Add-ons" },
                       { href: "/profile", label: "Account Settings" },
                     ].map((l) => (
                       <Link
@@ -534,6 +550,7 @@ export function Navbar() {
                 Sign in
               </Link>
             )}
+
 
             <button
               onClick={() => setMobileOpen((v) => !v)}

@@ -47,10 +47,15 @@ def init_db() -> None:
 def _apply_migrations() -> None:
     """Idempotent ALTER TABLE migrations for columns added after initial deploy."""
     with engine.begin() as conn:
+        # Idempotent column additions
         for table, definitions in {
             "watch_history": {"season_number": "INTEGER", "episode_number": "INTEGER"},
+            "user_addon_preferences": {"custom_manifest_url": "VARCHAR(1000)"},
         }.items():
             for column, ddl in definitions.items():
                 existing = {col["name"] for col in sa_inspect(conn).get_columns(table)}
                 if column not in existing:
                     conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}"))
+
+
+

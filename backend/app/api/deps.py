@@ -49,6 +49,21 @@ def get_current_user(
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
+def get_current_user_optional(
+    request: Request,
+    db: DbDep,
+    access_token: str | None = Depends(cookie_scheme),
+) -> User | None:
+    try:
+        return get_current_user(request, db, access_token)
+    except HTTPException:
+        return None
+
+
+CurrentUserOptional = Annotated[User | None, Depends(get_current_user_optional)]
+
+
+
 def get_current_profile(user: CurrentUser, db: DbDep, request: Request) -> Profile:
     profile_id = request.cookies.get(PROFILE_COOKIE)
     if profile_id:

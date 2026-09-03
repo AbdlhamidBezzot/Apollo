@@ -194,3 +194,54 @@ export interface RoomChatMessage {
   text: string;
   time?: string;
 }
+
+// --- Add-ons & Normalized Streams ---
+export interface CatalogAddonOut {
+  id: number;
+  addon_id: string;
+  name: string;
+  description: string;
+  manifest_url: string;
+  resources: string[];
+  types: string[];
+  tag: "official" | "dev" | "community" | string;
+  status: "active" | "broken" | "disabled" | string;
+  is_default_enabled: boolean;
+  last_validated_at: string;
+  user_enabled: boolean;
+  custom_manifest_url?: string | null;
+}
+
+
+
+export interface ApolloSubtitle {
+  id: string;
+  language: string;
+  url: string;
+}
+
+export interface ApolloStream {
+  id: string;
+  addon_id: string;
+  addon_name: string;
+  title?: string | null;
+  quality?: string | null;
+  language?: string | null;
+  url?: string | null;
+  is_direct: boolean;
+  is_torrent: boolean;
+  subtitles: ApolloSubtitle[];
+  metadata: Record<string, unknown>;
+}
+
+export interface MediaStreamsResponse {
+  tmdb_id: number;
+  media_type: string;
+  streams: ApolloStream[];
+}
+
+export interface MediaSubtitlesResponse {
+  tmdb_id: number;
+  media_type: string;
+  subtitles: ApolloSubtitle[];
+}

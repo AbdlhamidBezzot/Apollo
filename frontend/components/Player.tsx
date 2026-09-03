@@ -6,7 +6,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { get, post, put } from "@/lib/http";
 import { useAuth } from "@/components/AuthContext";
 import { useMovieNight } from "@/lib/useMovieNight";
-import type { Episode, PlaybackCue, SeasonEpisodes, TitleDetail } from "@/lib/types";
+import { downloadMediaToLocalMachine } from "@/lib/download";
+
+import type { ApolloStream, ApolloSubtitle, Episode, MediaStreamsResponse, MediaSubtitlesResponse, PlaybackCue, SeasonEpisodes, TitleDetail } from "@/lib/types";
+
 
 interface PlayerProps {
   streamUrl: string;
@@ -57,6 +60,7 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
   const [rate, setRate] = useState(1);
   const [savedPos, setSavedPos] = useState(0);
   const lastReport = useRef(0);
+  const [provider, setProvider] = useState<string>(providerProp || "cinemaos");
   const embed = isEmbed(contentType);
   const embedGotRealProgress = useRef(false);
 
@@ -65,8 +69,8 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
   const [episodeNum, setEpisodeNum] = useState(episode ?? 1);
   const [busyResolve, setBusyResolve] = useState(false);
 
-  const [providers, setProviders] = useState<string[]>(["videasy", "cinemaos"]);
-  const [provider, setProvider] = useState<string>(providerProp || "cinemaos");
+  const [providers, setProviders] = useState<string[]>(["cinemaos", "videasy", "vidsrc"]);
+
 
   const [seasons, setSeasons] = useState<{ season_number: number; name?: string }[]>([]);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
@@ -99,6 +103,15 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
   const [levels, setLevels] = useState<{ index: number; height: number; label: string }[]>([]);
   const [curLevel, setCurLevel] = useState(-1);
   const [qualityOpen, setQualityOpen] = useState(false);
+
+  // Add-on subtitle state
+  const [addonSubtitles, setAddonSubtitles] = useState<ApolloSubtitle[]>([]);
+  const [selectedSubtitle, setSelectedSubtitle] = useState<string | null>(null);
+  const [subtitleMenuOpen, setSubtitleMenuOpen] = useState(false);
+
+
+
+
 
   const [cue, setCue] = useState<PlaybackCue | null>(null);
   const [cueMenuOpen, setCueMenuOpen] = useState(false);
@@ -261,6 +274,25 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
       window.removeEventListener("beforeunload", flush);
     };
   }, [embed, saveProgress]);
+
+  // Load add-on streams and subtitles for the current title.
+  useEffect(() => {
+    let cancelled = false;
+    const base = mediaType === "tv"
+      ? `/api/v1/media/${tmdbId}/streams?media_type=tv&season=${seasonNum}&episode=${episodeNum}`
+      : `/api/v1/media/${tmdbId}/streams?media_type=movie`;
+    get<MediaStreamsResponse>(base)
+      .then((res) => { if (!cancelled) setAddonStreams(res.streams || []); })
+      .catch(() => {});
+    const subBase = mediaType === "tv"
+      ? `/api/v1/media/${tmdbId}/subtitles?media_type=tv&season=${seasonNum}&episode=${episodeNum}`
+      : `/api/v1/media/${tmdbId}/subtitles?media_type=movie`;
+    get<MediaSubtitlesResponse>(subBase)
+      .then((res) => { if (!cancelled) setAddonSubtitles(res.subtitles || []); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [tmdbId, mediaType, seasonNum, episodeNum]);
+
 
   // Load skip-intro/outro cues for the current episode.
   useEffect(() => {
@@ -733,6 +765,7 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
           ) : (
             <p className="font-mono text-xs text-text-muted">Playback source: {contentType}</p>
           )}
+
         </div>
         <div className="flex items-center gap-2">
           {providers.length > 1 && (
@@ -752,6 +785,7 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
               ))}
             </div>
           )}
+
           {roomCode && room.connected && (
             <button
               onClick={() => setChatOpen((v) => !v)}
@@ -761,6 +795,7 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
               Movie Night · {room.code} · {room.members} 👥
             </button>
           )}
+
           <Link
             href={mediaType === "tv" ? `/tv/${tmdbId}` : `/movie/${tmdbId}`}
             className="rounded-full border border-white/10 px-4 py-1.5 text-xs font-medium text-text-muted transition hover:border-brand/50 hover:text-text-vivid"
@@ -769,6 +804,8 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
           </Link>
         </div>
       </div>
+
+
 
       {embed ? (
         <div
@@ -817,6 +854,7 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
         >
           <video
             ref={videoRef}
+
             src={useHlsJs ? undefined : src}
             poster={poster || undefined}
             onClick={togglePlay}
@@ -850,6 +888,17 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
               }
             }}
           >
+            {/* Addon subtitle tracks */}
+            {addonSubtitles.map((sub) => (
+              <track
+                key={sub.id}
+                kind="subtitles"
+                src={sub.url}
+                srcLang={sub.language}
+                label={sub.language.toUpperCase()}
+                default={selectedSubtitle === sub.id}
+              />
+            ))}
           </video>
 
           <div
@@ -1084,6 +1133,114 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
                   </div>
                 )}
 
+                {/* Addon Stream Source Picker */}
+                {addonStreams.length > 0 && (
+                  <div className="relative">
+                    <button
+                      onClick={() => { setAddonStreamMenuOpen((v) => !v); setSubtitleMenuOpen(false); }}
+                      aria-label="Add-on sources"
+                      aria-expanded={addonStreamMenuOpen}
+                      className="rounded border border-white/10 px-2 py-0.5 font-mono text-[11px] text-text-muted hover:border-brand/50 hover:text-white"
+                    >
+                      Sources ({addonStreams.length})
+                    </button>
+                    {addonStreamMenuOpen && (
+                      <div className="absolute bottom-full right-0 z-20 mb-2 w-64 overflow-hidden rounded-lg border border-white/10 glass shadow-glass">
+                        <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-text-muted border-b border-white/10">Add-on Sources</p>
+                        {addonStreams.map((stream) => (
+                          <button
+                            key={stream.id}
+                            onClick={() => {
+                              if (stream.url) {
+                                if (stream.url.startsWith("magnet:")) {
+                                  window.open(stream.url, "_blank");
+                                } else {
+                                  setSrc(stream.url);
+                                  setSelectedAddonStream(stream);
+                                }
+                              }
+                              setAddonStreamMenuOpen(false);
+                            }}
+                            className={`block w-full px-3 py-2 text-left text-xs hover:bg-white/5 ${
+                              selectedAddonStream?.id === stream.id ? "text-brand-soft font-semibold" : "text-text-vivid"
+                            }`}
+                          >
+                            <span className="flex items-center justify-between gap-2">
+                              <span className="truncate">{stream.title || stream.addon_name}</span>
+                              <span className="flex shrink-0 gap-1">
+                                {stream.quality && (
+                                  <span className="rounded bg-white/10 px-1 py-0.5 text-[9px] font-bold">{stream.quality}</span>
+                                )}
+                                {stream.is_torrent && (
+                                  <span className="rounded bg-yellow-500/20 px-1 py-0.5 text-[9px] font-bold text-yellow-400">P2P</span>
+                                )}
+                                {stream.is_direct && (
+                                  <span className="rounded bg-emerald-500/20 px-1 py-0.5 text-[9px] font-bold text-emerald-400">Direct</span>
+                                )}
+                              </span>
+                            </span>
+                            <span className="mt-0.5 block text-[10px] text-text-muted/60">{stream.addon_name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Addon Subtitle Picker */}
+                {addonSubtitles.length > 0 && (
+                  <div className="relative">
+                    <button
+                      onClick={() => { setSubtitleMenuOpen((v) => !v); setAddonStreamMenuOpen(false); }}
+                      aria-label="Subtitles"
+                      aria-expanded={subtitleMenuOpen}
+                      className={`rounded border px-2 py-0.5 font-mono text-[11px] transition hover:text-white ${
+                        selectedSubtitle ? "border-brand/50 text-brand-soft" : "border-white/10 text-text-muted hover:border-brand/50"
+                      }`}
+                    >
+                      CC
+                    </button>
+                    {subtitleMenuOpen && (
+                      <div className="absolute bottom-full right-0 z-20 mb-2 w-48 overflow-hidden rounded-lg border border-white/10 glass shadow-glass">
+                        <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-text-muted border-b border-white/10">Subtitles</p>
+                        <button
+                          onClick={() => { setSelectedSubtitle(null); setSubtitleMenuOpen(false); }}
+                          className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${
+                            !selectedSubtitle ? "font-semibold text-brand-soft" : "text-text-vivid"
+                          }`}
+                        >
+                          Off
+                        </button>
+                        {addonSubtitles.map((sub) => (
+                          <button
+                            key={sub.id}
+                            onClick={() => { setSelectedSubtitle(sub.id); setSubtitleMenuOpen(false); }}
+                            className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${
+                              selectedSubtitle === sub.id ? "font-semibold text-brand-soft" : "text-text-vivid"
+                            }`}
+                          >
+                            {sub.language.toUpperCase()}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Download Button — direct authorized streams only, never torrent */}
+                {selectedAddonStream && selectedAddonStream.is_direct && !selectedAddonStream.is_torrent && selectedAddonStream.url && (
+                  <a
+                    href={selectedAddonStream.url}
+                    download
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Download this stream"
+                    title="Download direct stream"
+                    className="rounded border border-white/10 px-2 py-0.5 font-mono text-[11px] text-text-muted transition hover:border-brand/50 hover:text-white"
+                  >
+                    ↓
+                  </a>
+                )}
 
               </div>
             </div>
