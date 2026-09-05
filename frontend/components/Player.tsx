@@ -6,7 +6,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { get, post, put } from "@/lib/http";
 import { useAuth } from "@/components/AuthContext";
 import { useMovieNight } from "@/lib/useMovieNight";
-import { downloadMediaToLocalMachine } from "@/lib/download";
 
 import type { ApolloStream, ApolloSubtitle, Episode, MediaStreamsResponse, MediaSubtitlesResponse, PlaybackCue, SeasonEpisodes, TitleDetail } from "@/lib/types";
 
@@ -108,6 +107,11 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
   const [addonSubtitles, setAddonSubtitles] = useState<ApolloSubtitle[]>([]);
   const [selectedSubtitle, setSelectedSubtitle] = useState<string | null>(null);
   const [subtitleMenuOpen, setSubtitleMenuOpen] = useState(false);
+
+  // Add-on streams state
+  const [addonStreams, setAddonStreams] = useState<ApolloStream[]>([]);
+  const [selectedAddonStream, setSelectedAddonStream] = useState<ApolloStream | null>(null);
+  const [addonStreamMenuOpen, setAddonStreamMenuOpen] = useState<boolean>(false);
 
 
 
