@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+import { API_URL } from "@/lib/api";
 
 type FormState = {
   name: string;
@@ -30,7 +29,7 @@ export default function ContactPage() {
     setError(null);
 
     try {
-      const res = await fetch(`${API_BASE}/api/v1/contact`, {
+      const res = await fetch(`${API_URL}/api/v1/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
