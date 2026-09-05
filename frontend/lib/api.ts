@@ -1,4 +1,5 @@
-const DEFAULT_API_URL = "http://localhost:8000";
+const DEFAULT_DEV_API_URL = "http://localhost:8000";
+const PRODUCTION_API_URL = "https://apollo-makx.onrender.com";
 
 export const API_URL = resolveApiUrl();
 export const TMDB_IMAGE_BASE = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE || "https://image.tmdb.org/t/p";
@@ -6,16 +7,10 @@ export const TMDB_IMAGE_BASE = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE || "https
 function resolveApiUrl(): string {
   const explicit = (process.env.NEXT_PUBLIC_API_URL || "").trim().replace(/\/+$/, "");
   if (explicit) return explicit;
-  if (process.env.NEXT_PUBLIC_VERCEL_ENV && process.env.NODE_ENV === "production") {
-    // Deployed on Vercel without NEXT_PUBLIC_API_URL: there is no proxy, so a
-    // relative URL would silently 404. Surface the misconfiguration loudly.
-    // eslint-disable-next-line no-console
-    console.error(
-      "[Apollo] NEXT_PUBLIC_API_URL is not set on Vercel. The frontend cannot reach the " +
-        "production backend. Set NEXT_PUBLIC_API_URL to your deployed API root."
-    );
+  if (process.env.NODE_ENV === "production" || process.env.NEXT_PUBLIC_VERCEL_ENV) {
+    return PRODUCTION_API_URL;
   }
-  return DEFAULT_API_URL;
+  return DEFAULT_DEV_API_URL;
 }
 
 export function warnIfProductionPointsAtLocalhost(): void {
