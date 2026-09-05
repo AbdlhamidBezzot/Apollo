@@ -4,10 +4,21 @@ import Link from "next/link";
 import { EDITORIAL_ARTICLES } from "@/lib/editorial-data";
 
 export const metadata: Metadata = {
-  title: "Editorial & Film Guides | Apollo Cinema Hub",
+  title: "Editorial & Film Guides - Apollo",
   description:
     "Explore original film reviews, in-depth genre guides, anime canon vs filler breakdowns, and AI streaming insights curated by Apollo film critics.",
+  alternates: {
+    canonical: "https://www.missapollo.me/editorial",
+  },
+  openGraph: {
+    title: "Editorial & Film Guides - Apollo",
+    description: "Explore original film reviews, in-depth genre guides, and streaming insights on Apollo.",
+    url: "https://www.missapollo.me/editorial",
+    siteName: "Apollo",
+    type: "website",
+  },
 };
+
 
 export default function EditorialHubPage() {
   const featured = EDITORIAL_ARTICLES[0];

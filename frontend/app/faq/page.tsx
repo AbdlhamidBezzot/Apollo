@@ -2,10 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Frequently Asked Questions | Apollo",
+  title: "FAQ - Apollo",
   description:
     "Find answers to common questions about Apollo's movie discovery engine, legal content aggregation, AI movie night features, and streaming providers.",
+  alternates: {
+    canonical: "https://www.missapollo.me/faq",
+  },
+  openGraph: {
+    title: "FAQ - Apollo",
+    description: "Answers to common questions about Apollo's movie discovery engine.",
+    url: "https://www.missapollo.me/faq",
+    siteName: "Apollo",
+    type: "website",
+  },
 };
+
 
 const FAQS = [
   {

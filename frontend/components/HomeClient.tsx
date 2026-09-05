@@ -97,7 +97,9 @@ export function HomeClient() {
 
   return (
     <div className="space-y-12 pb-4">
+      <h1 className="sr-only">Apollo — Discover Movies &amp; TV Shows</h1>
       {/* Hero Billboard */}
+
       {trending.length > 0 ? (
         <HeroBillboard slides={trending} />
       ) : loading ? (

@@ -2,10 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Apollo",
+  title: "Terms of Service - Apollo",
   description:
     "Apollo Terms of Service outline acceptable site usage, content indexing disclaimers, intellectual property notices, and DMCA takedown policies.",
+  alternates: {
+    canonical: "https://www.missapollo.me/terms",
+  },
+  openGraph: {
+    title: "Terms of Service - Apollo",
+    description: "Apollo Terms of Service outline acceptable site usage and legal policies.",
+    url: "https://www.missapollo.me/terms",
+    siteName: "Apollo",
+    type: "website",
+  },
 };
+
 
 export default function TermsOfServicePage() {
   return (

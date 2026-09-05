@@ -100,9 +100,10 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
             </span>
           </div>
 
-          <h1 className="mb-3 text-4xl font-extrabold leading-[1.1] tracking-tightest text-text-vivid sm:text-6xl">
+          <h2 className="mb-3 text-4xl font-extrabold leading-[1.1] tracking-tightest text-text-vivid sm:text-6xl">
             {shownTitle}
-          </h1>
+          </h2>
+
 
           <div className="mb-4 flex flex-wrap items-center gap-2">
             {genreNames.map((g) => (

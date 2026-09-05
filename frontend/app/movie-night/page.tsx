@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { MovieNightRoomClient } from "@/components/MovieNightRoom";
+
+export const metadata: Metadata = {
+  title: "Movie Night Room - Apollo",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function MovieNightPage() {
   return (

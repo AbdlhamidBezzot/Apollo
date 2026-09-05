@@ -1,21 +1,38 @@
 import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://apollo-stream.com";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.missapollo.me";
 
   return {
     rules: [
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/profile/"],
-      },
-      {
-        userAgent: "Mediapartners-Google",
-        allow: "/",
+        disallow: [
+          "/api/",
+          "/profile/",
+          "/my-list/",
+          "/history/",
+          "/settings/",
+          "/login/",
+          "/watch/",
+        ],
       },
       {
         userAgent: "Googlebot",
+        allow: "/",
+        disallow: [
+          "/api/",
+          "/profile/",
+          "/my-list/",
+          "/history/",
+          "/settings/",
+          "/login/",
+          "/watch/",
+        ],
+      },
+      {
+        userAgent: "Mediapartners-Google",
         allow: "/",
       },
     ],

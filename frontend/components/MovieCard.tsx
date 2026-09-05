@@ -24,8 +24,9 @@ export function MovieCard({ item, onRemove }: { item: Title; onRemove?: (item: T
         {/* Poster (fades out on hover) */}
         <Image
           src={posterUrl(item.poster_path)}
-          alt={titleName(item)}
+          alt={`${titleName(item)} poster`}
           fill
+
           sizes="(max-width: 640px) 144px, 176px"
           className={`object-cover transition-all duration-500 ease-out ${
             hovered ? "scale-110 opacity-0" : "scale-100 opacity-100"

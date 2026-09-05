@@ -1,9 +1,9 @@
 // Server Component — do NOT add "use client" here.
+import { notFound } from "next/navigation";
 import { DetailViewClient } from "@/components/DetailViewClient";
-import { ErrorScreen } from "@/components/ErrorScreen";
+import { posterUrl, titleName } from "@/lib/api";
 import { get } from "@/lib/http";
 import type { ContentListResponse, Title, TitleDetail } from "@/lib/types";
-
 
 export async function DetailView({ mediaType, id }: { mediaType: "movie" | "tv"; id: number }) {
   let item: TitleDetail | null = null;
@@ -20,14 +20,41 @@ export async function DetailView({ mediaType, id }: { mediaType: "movie" | "tv";
     /* fall through */
   }
 
-  if (!item) {
-    return (
-      <ErrorScreen
-        title="Title not found"
-        message="We couldn't load this title right now. Please try again in a moment."
-      />
-    );
+  if (!item || !item.id) {
+    notFound();
   }
 
-  return <DetailViewClient item={item} similar={similar} mediaType={mediaType} />;
+  const name = titleName(item);
+  const releaseDate = item.release_date || item.first_air_date;
+  const poster = item.poster_path ? posterUrl(item.poster_path, "w500") : undefined;
+  const genres = item.genres?.map((g) => g.name) || [];
+
+  const jsonLdData = {
+    "@context": "https://schema.org",
+    "@type": mediaType === "movie" ? "Movie" : "TVSeries",
+    name,
+    description: item.overview || undefined,
+    image: poster ? [poster] : undefined,
+    datePublished: releaseDate || undefined,
+    genre: genres.length ? genres : undefined,
+    ...(item.vote_average && item.vote_count ? {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: item.vote_average.toFixed(1),
+        ratingCount: item.vote_count,
+        bestRating: "10",
+        worstRating: "1",
+      },
+    } : {}),
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
+      />
+      <DetailViewClient item={item} similar={similar} mediaType={mediaType} />
+    </>
+  );
 }

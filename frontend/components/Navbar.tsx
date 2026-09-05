@@ -107,13 +107,14 @@ function Icon({ name, className = "h-6 w-6" }: { name: string; className?: strin
 const DOCK_TOP = [
   { href: "/", label: "Home", icon: "home", base: "/", media: null as string | null },
   { href: "/sports", label: "Live Sports", icon: "sports", base: "/sports", media: null },
-  { href: "/browse?media_type=movie", label: "Movies", icon: "movies", base: "/browse", media: "movie" },
-  { href: "/browse?media_type=tv", label: "TV Shows", icon: "series", base: "/browse", media: "tv" },
+  { href: "/movies", label: "Movies", icon: "movies", base: "/movies", media: null },
+  { href: "/tv", label: "TV Shows", icon: "series", base: "/tv", media: null },
   { href: "/browse", label: "Browse", icon: "browse", base: "/browse", media: "all" },
   { href: "/anime", label: "Anime Hub", icon: "anime", base: "/anime", media: null },
   { href: "/editorial", label: "Editorial", icon: "editorial", base: "/editorial", media: null },
   { href: "/my-list", label: "Watchlist", icon: "watchlist", base: "/my-list", media: null },
 ];
+
 
 
 
@@ -415,6 +416,8 @@ export function Navbar() {
 
   const isActive = (link: (typeof DOCK_TOP)[number]) => {
     if (link.base === "/") return pathname === "/";
+    if (link.base === "/movies") return pathname === "/movies";
+    if (link.base === "/tv") return pathname === "/tv";
     if (link.base === "/anime") return pathname.startsWith("/anime");
     if (link.base === "/my-list") return pathname.startsWith("/my-list");
     if (link.base === "/browse") {
@@ -424,6 +427,7 @@ export function Navbar() {
     }
     return pathname.startsWith(link.base);
   };
+
 
   const initials = (user?.name || user?.email || "A").charAt(0).toUpperCase();
 

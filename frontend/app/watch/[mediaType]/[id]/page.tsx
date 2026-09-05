@@ -1,5 +1,24 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { WatchClient } from "@/components/WatchClient";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ mediaType: string; id: string }>;
+}): Promise<Metadata> {
+  const { mediaType, id } = await params;
+  return {
+    title: `Watch Player - Apollo`,
+    robots: {
+      index: false,
+      follow: false,
+    },
+    alternates: {
+      canonical: `https://www.missapollo.me/${mediaType === "tv" ? "tv" : "movie"}/${id}`,
+    },
+  };
+}
 
 export default async function WatchPage({ params }: { params: Promise<{ mediaType: string; id: string }> }) {
   const { mediaType, id } = await params;

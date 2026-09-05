@@ -2,10 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Apollo",
+  title: "Privacy Policy - Apollo",
   description:
     "Apollo's Privacy Policy explains how we collect, use, and safeguard your data, including advertising cookies, analytics, and user privacy rights.",
+  alternates: {
+    canonical: "https://www.missapollo.me/privacy",
+  },
+  openGraph: {
+    title: "Privacy Policy - Apollo",
+    description: "Apollo's Privacy Policy explains how we safeguard your data.",
+    url: "https://www.missapollo.me/privacy",
+    siteName: "Apollo",
+    type: "website",
+  },
 };
+
 
 export default function PrivacyPolicyPage() {
   return (

@@ -1,5 +1,26 @@
+import type { Metadata } from "next";
 import { BrowseClient, type BrowseParams } from "@/components/BrowseClient";
 import { get } from "@/lib/http";
+
+export const metadata: Metadata = {
+  title: "Browse Movies & TV Shows - Apollo",
+  description: "Browse movies, TV shows, and anime by genre, year, rating, and language on Apollo.",
+  alternates: {
+    canonical: "https://www.missapollo.me/browse",
+  },
+  openGraph: {
+    title: "Browse Movies & TV Shows - Apollo",
+    description: "Browse movies, TV shows, and anime by genre, year, rating, and language on Apollo.",
+    url: "https://www.missapollo.me/browse",
+    siteName: "Apollo",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Browse Movies & TV Shows - Apollo",
+    description: "Browse movies, TV shows, and anime by genre, year, rating, and language on Apollo.",
+  },
+};
 
 interface BrowseProps {
   searchParams: Promise<Partial<Record<keyof BrowseParams, string>>>;

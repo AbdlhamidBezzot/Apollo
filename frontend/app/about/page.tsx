@@ -2,10 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "About Us | Apollo - Next-Gen Legal Streaming Discovery",
+  title: "About Us - Apollo",
   description:
     "Learn about Apollo, our mission to transform media discovery through legal content aggregation, AI recommendation engines, and editorial cinema guides.",
+  alternates: {
+    canonical: "https://www.missapollo.me/about",
+  },
+  openGraph: {
+    title: "About Us - Apollo",
+    description: "Learn about Apollo, our mission to transform media discovery.",
+    url: "https://www.missapollo.me/about",
+    siteName: "Apollo",
+    type: "website",
+  },
 };
+
 
 export default function AboutPage() {
   return (

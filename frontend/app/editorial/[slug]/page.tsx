@@ -55,8 +55,9 @@ export default async function EditorialArticlePage({ params }: { params: Promise
     publisher: {
       "@type": "Organization",
       name: "Apollo",
-      url: "https://apollo-stream.com",
+      url: "https://www.missapollo.me",
     },
+
   };
 
   return (
