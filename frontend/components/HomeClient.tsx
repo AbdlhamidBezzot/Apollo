@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AdBanner } from "@/components/AdBanner";
 import { ContinueWatchingRow } from "@/components/ContinueWatchingRow";
 import { HeroBillboard } from "@/components/HeroBillboard";
-import { DiscoveryHub, EditorsPickSpotlight, FeaturedEditorialSection, HomeIntroBanner, ProviderMarquee, Top10Carousel } from "@/components/HomeEnhancements";
+import { DiscoveryHub, ProviderMarquee, Top10Carousel } from "@/components/HomeEnhancements";
 import { MovieRow } from "@/components/MovieRow";
 import { RecommendationsRow } from "@/components/RecommendationsRow";
 import { SignInNotice } from "@/components/SignInNotice";
@@ -113,19 +113,13 @@ export function HomeClient() {
 
       <ContinueWatchingRow />
 
-      <HomeIntroBanner />
-
       {topStreaming.length > 0 || trending.length > 0 ? (
         <Top10Carousel items={topStreaming.length ? topStreaming : trending} />
       ) : null}
 
-      <EditorsPickSpotlight />
-
       <DiscoveryHub />
       <ProviderMarquee />
       <SignInNotice />
-
-      <FeaturedEditorialSection />
 
       <AdBanner unit="leaderboard728x90" />
 
