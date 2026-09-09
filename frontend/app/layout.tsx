@@ -107,6 +107,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Analytics />
         <Script src="/hilltopads.js" strategy="afterInteractive" />
         <Script src="/multitag.js" strategy="afterInteractive" />
+        <Script src="/inpage-push.js" strategy="afterInteractive" />
       </body>
     </html>
 

@@ -2,12 +2,13 @@
 
 import { useEffect, useRef } from "react";
 
-interface Ad300x250Props {
+interface AdBannerProps {
   className?: string;
   label?: string;
+  format?: "300x250" | "728x90" | "auto";
 }
 
-function SingleAdBox() {
+function MultiTagBox({ width = 300, height = 250 }: { width?: number; height?: number }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -24,15 +25,27 @@ function SingleAdBox() {
     containerRef.current.appendChild(script);
   }, []);
 
+  const is728 = width === 728;
+
   return (
     <div
       ref={containerRef}
-      className="w-[300px] h-[250px] min-w-[300px] min-h-[250px] flex items-center justify-center bg-black/40 rounded-xl overflow-hidden shadow-inner border border-white/5"
+      style={{
+        maxWidth: "100%",
+        width: is728 ? "728px" : "300px",
+        height: is728 ? "90px" : "250px",
+        minHeight: is728 ? "90px" : "250px",
+      }}
+      className="flex items-center justify-center bg-black/40 rounded-xl overflow-hidden shadow-inner border border-white/5 mx-auto"
     />
   );
 }
 
-export function Ad300x250({ className = "", label = "Sponsored Advertisement" }: Ad300x250Props) {
+export function Ad300x250({
+  className = "",
+  label = "Sponsored Advertisement",
+  format = "auto",
+}: AdBannerProps) {
   return (
     <div className={`mx-auto w-full max-w-7xl px-4 sm:px-6 my-8 ${className}`}>
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-surface-dark/70 p-4 sm:p-6 shadow-glass backdrop-blur-md">
@@ -40,17 +53,39 @@ export function Ad300x250({ className = "", label = "Sponsored Advertisement" }:
           <span className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">
             {label}
           </span>
-          <span className="text-[10px] font-mono text-white/30">300x250 Banner</span>
+          <span className="text-[10px] font-mono text-white/30">
+            {format === "728x90" ? "728x90 Leaderboard" : "MultiTag Responsive Banner"}
+          </span>
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-6">
-          <SingleAdBox />
-          <div className="hidden md:flex">
-            <SingleAdBox />
+
+        {format === "728x90" ? (
+          <div className="flex justify-center items-center overflow-x-auto py-2">
+            <MultiTagBox width={728} height={90} />
           </div>
-        </div>
+        ) : format === "300x250" ? (
+          <div className="flex flex-wrap items-center justify-center gap-6">
+            <MultiTagBox width={300} height={250} />
+            <div className="hidden md:flex">
+              <MultiTagBox width={300} height={250} />
+            </div>
+          </div>
+        ) : (
+          /* Auto / Responsive: 728x90 on Desktop, 300x250 on Mobile */
+          <div className="flex justify-center items-center">
+            <div className="hidden md:block w-full text-center">
+              <MultiTagBox width={728} height={90} />
+            </div>
+            <div className="block md:hidden w-full text-center">
+              <MultiTagBox width={300} height={250} />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
+// Alias for general ad banner usage
+export const AdBanner = Ad300x250;
 
 export default Ad300x250;
