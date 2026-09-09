@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { Ad300x250 } from "@/components/Ad300x250";
 import { MovieCard } from "@/components/MovieCard";
+import { PokePingsAd } from "@/components/PokePingsAd";
 import { get } from "@/lib/http";
 import type { ContentListResponse, Title } from "@/lib/types";
 
@@ -411,11 +413,30 @@ export function BrowseClient({
         <p className="text-text-muted">{error}</p>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {items.map((item, i) => (
-              <MovieCard key={`${item.media_type || "movie"}-${item.id}-${i}`} item={item} />
-            ))}
-          </div>
+          {/* Ads injected every 18 cards throughout the scroll feed */}
+          {(() => {
+            const chunks: Title[][] = [];
+            for (let i = 0; i < items.length; i += 18) {
+              chunks.push(items.slice(i, i + 18));
+            }
+            return chunks.map((chunk, chunkIdx) => (
+              <div key={chunkIdx}>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                  {chunk.map((item, i) => (
+                    <MovieCard key={`${item.media_type || "movie"}-${item.id}-${i}`} item={item} />
+                  ))}
+                </div>
+                {/* Show an ad banner after each chunk */}
+                {chunkIdx % 2 === 0 ? (
+                  <Ad300x250 format="auto" className="mt-6" />
+                ) : (
+                  <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 my-6">
+                    <PokePingsAd />
+                  </div>
+                )}
+              </div>
+            ));
+          })()}
 
           {page < totalPages && (
             <div ref={sentinelRef} className="mt-8 flex justify-center">
