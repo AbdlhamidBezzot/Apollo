@@ -98,9 +98,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <MovieNightModal />
         </AuthProvider>
         <Analytics />
-        {/* Adcash AutoTag — runs after aclib is loaded */}
-        <Script id="adcash-autotag" strategy="afterInteractive">
+        {/* Adcash AutoTag — Zone 1 */}
+        <Script id="adcash-autotag-1" strategy="afterInteractive">
           {`aclib.runAutoTag({ zoneId: 'nxxjepaz5e' });`}
+        </Script>
+        {/* Adcash AutoTag — Zone 2 */}
+        <Script id="adcash-autotag-2" strategy="afterInteractive">
+          {`aclib.runAutoTag({ zoneId: 'tngsvlnp8b' });`}
         </Script>
       </body>
     </html>
