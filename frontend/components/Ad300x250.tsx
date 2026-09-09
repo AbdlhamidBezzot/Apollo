@@ -25,7 +25,7 @@ export function Ad300x250({ className = "" }: AdBannerProps) {
       script.text = `
         if (window.aclib && typeof window.aclib.runBanner === 'function') {
           aclib.runBanner({
-            zoneId: '12133798',
+            zoneId: '12133806',
           });
         }
       `;

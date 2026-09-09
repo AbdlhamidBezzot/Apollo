@@ -102,10 +102,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Script id="adcash-inpage-push" strategy="afterInteractive">
           {`aclib.runInPagePush({ zoneId: '12133790', maxAds: 2 });`}
         </Script>
-        {/* Adcash AutoTag */}
-        <Script id="adcash-autotag" strategy="afterInteractive">
-          {`aclib.runAutoTag({ zoneId: 'nxxjepaz5e' });`}
-        </Script>
       </body>
     </html>
 

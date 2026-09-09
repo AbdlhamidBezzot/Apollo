@@ -7,7 +7,6 @@ import { ContinueWatchingRow } from "@/components/ContinueWatchingRow";
 import { HeroBillboard } from "@/components/HeroBillboard";
 import { DiscoveryHub, ProviderMarquee, Top10Carousel } from "@/components/HomeEnhancements";
 import { MovieRow } from "@/components/MovieRow";
-import { PokePingsAd } from "@/components/PokePingsAd";
 import { RecommendationsRow } from "@/components/RecommendationsRow";
 import { SignInNotice } from "@/components/SignInNotice";
 import { get } from "@/lib/http";
@@ -124,10 +123,6 @@ export function HomeClient() {
       <DiscoveryHub />
       <ProviderMarquee />
       <SignInNotice />
-
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 my-6">
-        <PokePingsAd />
-      </div>
 
       <RecommendationsRow />
 
