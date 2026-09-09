@@ -70,6 +70,12 @@ export const metadata: Metadata = {
   },
   verification: {
     google: "IuiXeB01DppSggc0BiQhgl-71NEWZVszBHceQEdnPEs",
+    other: {
+      "261a0053ab087fd751570dafaaee649ad4114b60": ["261a0053ab087fd751570dafaaee649ad4114b60"],
+    },
+  },
+  other: {
+    "261a0053ab087fd751570dafaaee649ad4114b60": "261a0053ab087fd751570dafaaee649ad4114b60",
   },
 };
 
@@ -78,6 +84,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <head>
+        <meta name="261a0053ab087fd751570dafaaee649ad4114b60" content="261a0053ab087fd751570dafaaee649ad4114b60" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
