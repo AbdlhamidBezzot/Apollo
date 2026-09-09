@@ -78,6 +78,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <head>
+        {/* Adcash library */}
+        <Script id="aclib" src="//acscdn.com/script/aclib.js" strategy="beforeInteractive" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -96,6 +98,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <MovieNightModal />
         </AuthProvider>
         <Analytics />
+        {/* Adcash In-Page Push */}
+        <Script id="adcash-inpage-push" strategy="afterInteractive">
+          {`aclib.runInPagePush({ zoneId: '12133790', maxAds: 2 });`}
+        </Script>
       </body>
     </html>
 
