@@ -33,11 +33,6 @@ export function PokePingsAd({ className = "" }: { className?: string }) {
 
         {/* Content */}
         <div className="flex-1 z-10 text-center sm:text-left">
-          <div className="flex items-center justify-center sm:justify-start gap-1.5 mb-1">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-purple-400/70">
-              Affiliate · Sponsored
-            </span>
-          </div>
 
           <h3 className="text-lg font-extrabold text-white tracking-tight leading-tight">
             PokePings – Free Access
