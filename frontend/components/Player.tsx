@@ -4,6 +4,7 @@ import Link from "next/link";
 import Hls from "hls.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { get, post, put } from "@/lib/http";
+import { Ad300x250 } from "@/components/Ad300x250";
 import { useAuth } from "@/components/AuthContext";
 import { useMovieNight } from "@/lib/useMovieNight";
 
@@ -1331,6 +1332,8 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
           </form>
         </div>
       )}
+
+      <Ad300x250 />
 
       <div aria-live="polite" className="sr-only">
         {announcement}

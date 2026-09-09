@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { Ad300x250 } from "@/components/Ad300x250";
 import { DetailTabs } from "@/components/DetailTabs";
 import { MovieNightButton } from "@/components/MovieNightButton";
 
@@ -186,6 +187,8 @@ export function DetailViewClient({
             </div>
           </div>
         </div>
+
+        <Ad300x250 />
 
         {/* Detail Tabs Section */}
         <DetailTabs

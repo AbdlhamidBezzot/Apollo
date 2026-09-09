@@ -7,6 +7,7 @@ import { ChatBot } from "@/components/ChatBot";
 import { MovieNightModal } from "@/components/MovieNightModal";
 import { AuthProvider } from "@/components/AuthContext";
 import { Footer } from "@/components/HomeEnhancements";
+import { PopunderScript } from "@/components/PopunderScript";
 
 import { Analytics } from "@vercel/analytics/next";
 
@@ -101,6 +102,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="lg:pl-24"><Footer /></div>
           <ChatBot />
           <MovieNightModal />
+          <PopunderScript />
         </AuthProvider>
         <Analytics />
         <Script src="/hilltopads.js" strategy="afterInteractive" />

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { Ad300x250 } from "@/components/Ad300x250";
 import { ContinueWatchingRow } from "@/components/ContinueWatchingRow";
 import { HeroBillboard } from "@/components/HeroBillboard";
 import { DiscoveryHub, ProviderMarquee, Top10Carousel } from "@/components/HomeEnhancements";
@@ -117,11 +118,15 @@ export function HomeClient() {
         <Top10Carousel items={topStreaming.length ? topStreaming : trending} />
       ) : null}
 
+      <Ad300x250 />
+
       <DiscoveryHub />
       <ProviderMarquee />
       <SignInNotice />
 
       <RecommendationsRow />
+
+      <Ad300x250 />
 
       {/* Catalog Rows or Inline Retry Widget */}
       {rows.map((row, idx) => (
