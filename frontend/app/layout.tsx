@@ -7,7 +7,6 @@ import { ChatBot } from "@/components/ChatBot";
 import { MovieNightModal } from "@/components/MovieNightModal";
 import { AuthProvider } from "@/components/AuthContext";
 import { Footer } from "@/components/HomeEnhancements";
-import { PopunderScript } from "@/components/PopunderScript";
 
 import { Analytics } from "@vercel/analytics/next";
 
@@ -71,12 +70,6 @@ export const metadata: Metadata = {
   },
   verification: {
     google: "IuiXeB01DppSggc0BiQhgl-71NEWZVszBHceQEdnPEs",
-    other: {
-      "261a0053ab087fd751570dafaaee649ad4114b60": ["261a0053ab087fd751570dafaaee649ad4114b60"],
-    },
-  },
-  other: {
-    "261a0053ab087fd751570dafaaee649ad4114b60": "261a0053ab087fd751570dafaaee649ad4114b60",
   },
 };
 
@@ -85,7 +78,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <head>
-        <meta name="261a0053ab087fd751570dafaaee649ad4114b60" content="261a0053ab087fd751570dafaaee649ad4114b60" />
         {/* Adcash library — must be as high as possible in <head> */}
         <Script id="aclib" src="//acscdn.com/script/aclib.js" strategy="beforeInteractive" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -104,11 +96,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="lg:pl-24"><Footer /></div>
           <ChatBot />
           <MovieNightModal />
-          <PopunderScript />
         </AuthProvider>
         <Analytics />
-        <Script src="/hilltopads.js" strategy="afterInteractive" />
-        <Script src="/inpage-push.js" strategy="afterInteractive" />
         {/* Adcash AutoTag — runs after aclib is loaded */}
         <Script id="adcash-autotag" strategy="afterInteractive">
           {`aclib.runAutoTag({ zoneId: 'nxxjepaz5e' });`}
