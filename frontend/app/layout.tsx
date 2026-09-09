@@ -98,10 +98,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <MovieNightModal />
         </AuthProvider>
         <Analytics />
-        {/* Adcash In-Page Push */}
-        <Script id="adcash-inpage-push" strategy="afterInteractive">
-          {`aclib.runInPagePush({ zoneId: '12133790', maxAds: 2 });`}
-        </Script>
       </body>
     </html>
 
