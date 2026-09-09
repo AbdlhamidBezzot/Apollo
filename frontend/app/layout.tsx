@@ -102,6 +102,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Script id="notifpush-sdk" strategy="afterInteractive">
           {`window._nAdzq=window._nAdzq||[];(function(){window._nAdzq.push(["setIds","4eba71ba7d2a4105"]);var e="https://notifpush.com/scripts/";var t=document.createElement("script");t.type="text/javascript";t.defer=true;t.async=true;t.src=e+"nadz-sdk.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)})();`}
         </Script>
+        {/* Adcash Pop */}
+        <Script id="adcash-pop" strategy="afterInteractive">
+          {`aclib.runPop({ zoneId: '12133826' });`}
+        </Script>
       </body>
     </html>
 
