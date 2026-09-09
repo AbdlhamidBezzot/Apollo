@@ -78,8 +78,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <head>
-        {/* Adcash library — must be as high as possible in <head> */}
-        <Script id="aclib" src="//acscdn.com/script/aclib.js" strategy="beforeInteractive" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -98,14 +96,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <MovieNightModal />
         </AuthProvider>
         <Analytics />
-        {/* Adcash AutoTag — Zone 1 */}
-        <Script id="adcash-autotag-1" strategy="afterInteractive">
-          {`aclib.runAutoTag({ zoneId: 'nxxjepaz5e' });`}
-        </Script>
-        {/* Adcash AutoTag — Zone 2 */}
-        <Script id="adcash-autotag-2" strategy="afterInteractive">
-          {`aclib.runAutoTag({ zoneId: 'tngsvlnp8b' });`}
-        </Script>
       </body>
     </html>
 
