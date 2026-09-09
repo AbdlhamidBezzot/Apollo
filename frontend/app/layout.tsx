@@ -86,6 +86,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="dark">
       <head>
         <meta name="261a0053ab087fd751570dafaaee649ad4114b60" content="261a0053ab087fd751570dafaaee649ad4114b60" />
+        {/* Adcash library — must be as high as possible in <head> */}
+        <Script id="aclib" src="//acscdn.com/script/aclib.js" strategy="beforeInteractive" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -106,8 +108,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </AuthProvider>
         <Analytics />
         <Script src="/hilltopads.js" strategy="afterInteractive" />
-        <Script src="/multitag.js" strategy="afterInteractive" />
         <Script src="/inpage-push.js" strategy="afterInteractive" />
+        {/* Adcash AutoTag — runs after aclib is loaded */}
+        <Script id="adcash-autotag" strategy="afterInteractive">
+          {`aclib.runAutoTag({ zoneId: 'nxxjepaz5e' });`}
+        </Script>
       </body>
     </html>
 
