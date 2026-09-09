@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AdBanner } from "@/components/AdBanner";
+
 import { ContinueWatchingRow } from "@/components/ContinueWatchingRow";
 import { HeroBillboard } from "@/components/HeroBillboard";
 import { DiscoveryHub, ProviderMarquee, Top10Carousel } from "@/components/HomeEnhancements";
@@ -121,8 +121,6 @@ export function HomeClient() {
       <ProviderMarquee />
       <SignInNotice />
 
-      <AdBanner unit="leaderboard728x90" />
-
       <RecommendationsRow />
 
       {/* Catalog Rows or Inline Retry Widget */}
@@ -154,7 +152,7 @@ export function HomeClient() {
               </button>
             </div>
           )}
-          {idx === 1 && <AdBanner unit="leaderboard728x90" />}
+
         </div>
       ))}
 

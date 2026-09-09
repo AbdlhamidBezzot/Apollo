@@ -54,32 +54,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section className="space-y-3 border-t border-white/10 pt-6">
-            <h2 className="text-xl font-bold text-text-vivid">4. Adsterra Advertising &amp; Cookies</h2>
-            <p>
-              Apollo partners with Adsterra to serve advertisements. Adsterra and its network partners may use cookies, web beacons, and similar technologies to deliver ads tailored to your interests based on your browsing activity. These cookies are set directly by Adsterra and are governed by their own privacy policy.
-            </p>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-2">
-              <h3 className="font-semibold text-text-vivid">Adsterra Advertising Notice:</h3>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Adsterra and its partner networks use cookies to serve ads based on a user&apos;s prior visits to this website or other websites.</li>
-                <li>You may see banner ads (300×250, 728×90), native content, and other ad formats powered by Adsterra.</li>
-                <li>Users may opt out of interest-based advertising by visiting <a href="https://www.youronlinechoices.eu/" target="_blank" rel="noopener noreferrer" className="text-brand-soft hover:underline">Your Online Choices</a> or <a href="https://optout.aboutads.info/" target="_blank" rel="noopener noreferrer" className="text-brand-soft hover:underline">aboutads.info</a>.</li>
-              </ul>
-            </div>
-          </section>
-
-          <section className="space-y-3 border-t border-white/10 pt-6">
-            <h2 className="text-xl font-bold text-text-vivid">5. Advertising Partners Privacy Policies</h2>
-            <p>
-              Third-party ad servers or ad networks use technologies like cookies, JavaScript, or Web Beacons that are used in their respective advertisements and links that appear on Apollo, which are sent directly to users' browser. They automatically receive your IP address when this occurs. These technologies are used to measure the effectiveness of their advertising campaigns and/or to personalize the advertising content that you see on websites that you visit.
-            </p>
-            <p>
-              Note that Apollo has no access to or control over these cookies that are used by third-party advertisers.
-            </p>
-          </section>
-
-          <section className="space-y-3 border-t border-white/10 pt-6">
-            <h2 className="text-xl font-bold text-text-vivid">6. GDPR Data Protection Rights</h2>
+            <h2 className="text-xl font-bold text-text-vivid">4. GDPR Data Protection Rights</h2>
             <p>We would like to make sure you are fully aware of all of your data protection rights. Every user is entitled to the following:</p>
             <ul className="list-disc pl-5 space-y-1">
               <li><strong className="text-text-vivid">The right to access</strong> – You have the right to request copies of your personal data.</li>
@@ -90,12 +65,12 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section className="space-y-3 border-t border-white/10 pt-6">
-            <h2 className="text-xl font-bold text-text-vivid">7. CCPA Privacy Rights (Do Not Sell My Personal Information)</h2>
+            <h2 className="text-xl font-bold text-text-vivid">5. CCPA Privacy Rights (Do Not Sell My Personal Information)</h2>
             <p>Under the CCPA, California consumers have the right to request that a business disclose the categories and specific pieces of personal data collected, or request deletion of personal data. Apollo does not sell personal information to third parties.</p>
           </section>
 
           <section className="space-y-3 border-t border-white/10 pt-6">
-            <h2 className="text-xl font-bold text-text-vivid">8. Contact Us</h2>
+            <h2 className="text-xl font-bold text-text-vivid">6. Contact Us</h2>
             <p>
               If you have any questions regarding this Privacy Policy or wish to exercise your rights, please visit our <Link href="/contact" className="text-brand-soft hover:underline">Contact Page</Link>.
             </p>

@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ErrorScreen } from "@/components/ErrorScreen";
 import { Player } from "@/components/Player";
-import { PreWatchAd } from "@/components/PreWatchAd";
+
 import { classifyError, logTechnicalDetail } from "@/lib/errors";
 import { get, post } from "@/lib/http";
 import type { PlaybackSession } from "@/lib/types";
@@ -27,7 +27,6 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
   const [title, setTitle] = useState("");
   const [poster, setPoster] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [adCompleted, setAdCompleted] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -115,16 +114,7 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
     );
   }
 
-  if (!adCompleted) {
-    return (
-      <PreWatchAd
-        title={title || session.title || `${mediaType === "tv" ? "TV" : "Movie"} ${id}`}
-        poster={poster || session.poster}
-        initialCountdown={5}
-        onComplete={() => setAdCompleted(true)}
-      />
-    );
-  }
+
 
   return (
     <Player

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AdBanner } from "@/components/AdBanner";
+
 import { AnimeHubPrefs } from "@/components/AnimeHubPrefs";
 import { MovieRow } from "@/components/MovieRow";
 import { get } from "@/lib/http";
@@ -100,8 +100,6 @@ export function AnimeClient() {
           </button>
         </div>
       )}
-
-      <AdBanner unit="leaderboard728x90" />
 
       {/* Series Row */}
       {series.length > 0 ? (
