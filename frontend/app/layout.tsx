@@ -103,6 +103,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <MovieNightModal />
         </AuthProvider>
         <Analytics />
+        <Script src="/hilltopads.js" strategy="afterInteractive" />
+        <Script src="/multitag.js" strategy="afterInteractive" />
       </body>
     </html>
 
