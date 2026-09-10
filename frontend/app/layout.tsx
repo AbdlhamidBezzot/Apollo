@@ -70,6 +70,9 @@ export const metadata: Metadata = {
   },
   verification: {
     google: "IuiXeB01DppSggc0BiQhgl-71NEWZVszBHceQEdnPEs",
+    other: {
+      "6a97888e-site-verification": ["d10dde179d8ec2d925c8340a9c294592"],
+    },
   },
 };
 
@@ -78,6 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <head>
+        <meta name="6a97888e-site-verification" content="d10dde179d8ec2d925c8340a9c294592" />
         {/* Adcash library */}
         <Script id="aclib" src="//acscdn.com/script/aclib.js" strategy="beforeInteractive" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
