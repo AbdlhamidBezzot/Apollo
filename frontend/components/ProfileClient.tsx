@@ -60,12 +60,15 @@ export function ProfileClient() {
     setSavingAvatar(true);
     setAvatarMessage("");
     try {
-      await put("/api/v1/me/avatar", { avatar: avatarUrl.trim() });
-      await refresh();
+      const savedProfile = await put<UserProfile>("/api/v1/me/avatar", { avatar: avatarUrl.trim() });
+      setAvatarUrl(savedProfile.avatar || avatarUrl.trim());
       setAvatarMessage("Profile picture saved successfully!");
       setTimeout(() => setAvatarMessage(""), 3000);
-    } catch {
-      setAvatarMessage("Could not save profile picture.");
+      // A successful save must not be reported as failed if refreshing the
+      // separate shared session request happens to fail.
+      void refresh();
+    } catch (error) {
+      setAvatarMessage(error instanceof Error ? error.message : "Could not save profile picture.");
     } finally {
       setSavingAvatar(false);
     }
@@ -222,7 +225,7 @@ export function ProfileClient() {
                 disabled={deleting}
                 className="rounded-full bg-red-600 px-5 py-2 text-sm font-bold text-white transition hover:bg-red-500 disabled:opacity-50"
               >
-                {deleting ? "Deleting…" : "Yes, delete permanently"}
+                {deleting ? "DeletingÃ¢â‚¬Â¦" : "Yes, delete permanently"}
               </button>
               <button
                 onClick={() => setConfirmingDelete(false)}
