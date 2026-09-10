@@ -1,4 +1,150 @@
-highrevenueformat.com, 287263a21170b0b4fcc6f62ad64c9425, DIRECT
-profitableratecpmnetwork.com, 57a45f319b0d3f47845ad8b9059b61de, DIRECT
-profitableratecpmnetwork.com, 25eafdc0d5b5c73fff96db5f26b3fd80, DIRECT
-profitableratecpmnetwork.com, a7af9dd53724b72f361ecca2360aad8a, DIRECT
+aleadinfo.com, 5671, DIRECT
+#Adrenalead is the exclusive operator of our desktop and mobile push notification ad product
+
+# Magnite
+rubiconproject.com, 28307, DIRECT, 0bfd66d529a55807
+
+# Taboola
+taboola.com, 2038200, DIRECT, c228e6794e811952
+taboola.com, 1899489,DIRECT,c228e6794e811952
+pubmatic.com, 156307, RESELLER, 5d62403b186f2ace
+appnexus.com, 3364, RESELLER
+indexexchange.com, 183756, RESELLER
+contextweb.com, 560382, RESELLER
+rubiconproject.com, 16698, RESELLER, 0bfd66d529a55807
+openx.com, 539154393, RESELLER
+freewheel.tv, 799921, RESELLER
+smartadserver.com, 3563, RESELLER
+beachfront.com, 13749, RESELLER, e2541279e8e2ca4d
+improvedigital.com, 1577, RESELLER
+video.unrulymedia.com, 1166984029, RESELLER
+smaato.com, 1100047487, RESELLER, 07bcf65f187117b4
+sonobi.com, 9a1db44c9c, RESELLER, d1a215d9eb5aee9e
+sharethrough.com, RVhuFS44, RESELLER, d53b998a7bd4ecd2
+amxrtb.com, 105199725, RESELLER
+emxdgt.com, 1643, RESELLER, 1e1d41537f7cad7f
+media.net, 8CU292ZDI, RESELLER
+yieldmo.com, 3357506016601120771, RESELLER
+triplelift.com, 14073, RESELLER, 6c33edb13117fd86
+inmobi.com, a985e39014a94721a8e97c929d32ef9d, RESELLER, 83e75a7ae333ca9d
+google.com, pub-3677668629134422, RESELLER, f08c47fec0942fa0
+themediagrid.com, I2G5ZV, RESELLER, 35d5010d7789b49d
+
+# RichAudience
+richaudience.com, vDoC2deMXY, RESELLER
+appnexus.com, 8233, RESELLER
+pubmatic.com, 81564, RESELLER, 5d62403b186f2ace
+pubmatic.com, 156538, RESELLER, 5d62403b186f2ace
+rubiconproject.com, 13510, RESELLER
+adform.com, 1942, RESELLER
+lijit.com, 249425, RESELLER
+video.unrulymedia.com, 592728597, RESELLER
+smartadserver.com, 2640, RESELLER
+adyoulike.com, f1dfbb7f133fbdb25c96e7d85a5e628b, RESELLER
+themediagrid.com, P19GFJ, RESELLER, 9fac4a4a87c2a44f
+smartadserver.com, 1999, RESELLER, 060d053dcf45cbf3
+onetag.com, 8d4b087143c49f0, RESELLER
+amxrtb.com, 105199794, RESELLER
+contextweb.com, 563371, RESELLER, 89ff185a4c4e857c
+onetag.com, 7a4244b2979db22, RESELLER
+onetag.com, 7a4244b2979db22-OB, RESELLER
+openx.com, 539625136, RESELLER
+rubiconproject.com, 17210, RESELLER, 0bfd66d529a55807
+appnexus.com, 10264, RESELLER, f5ab79cb980f11d1
+inmobi.com, e98f0d119adf44788d60132b6e20fc5d, RESELLER, 83e75a7ae333ca9d
+conversantmedia.com, 100989, RESELLER, 03113cd04947736d
+rubiconproject.com, 11726, RESELLER, 0bfd66d529a55807
+
+# Adagio
+adagio.io, 1517, RESELLER
+rubiconproject.com, 19116, RESELLER, 0bfd66d529a55807
+pubmatic.com, 159110, RESELLER, 5d62403b186f2ace
+improvedigital.com, 1790, RESELLER
+smartadserver.com, 3554, RESELLER
+loopme.com, 5679, RESELLER, 6c8d5f95897a5a3b
+sharethrough.com, OAW69Fon, RESELLER, d53b998a7bd4ecd2
+admanmedia.com, 2216, RESELLER
+33across.com, 0015a00002oUk4aAAC, RESELLER, bbea06d9c4d2853c
+appnexus.com, 10239, RESELLER, f5ab79cb980f11d1
+rubiconproject.com, 16414, RESELLER, 0bfd66d529a55807
+pubmatic.com, 156423, RESELLER, 5d62403b186f2ace
+conversantmedia.com, 100141, RESELLER
+triplelift.com, 13482, RESELLER, 6c33edb13117fd86
+onetag.com, 6b859b96c564fbe, RESELLER
+
+# MGID
+mgid.com, 833141, DIRECT, d4c29acad76ce94f
+
+# Onetag
+onetag.com, 835c44cec934000, DIRECT
+appnexus.com, 13099, RESELLER
+pubmatic.com, 161593, RESELLER, 5d62403b186f2ace
+rubiconproject.com, 11006, RESELLER, 0bfd66d529a55807
+
+# pubmatic
+pubmatic.com, 159374, RESELLER, 5d62403b186f2ace
+
+# azerion
+quantum-advertising.com, 6170, RESELLER
+appnexus.com, 2579, RESELLER
+improvedigital.com, 1220, RESELLER
+pubgalaxy.com, 13182, RESELLER
+rubiconproject.com, 18630, RESELLER, 0bfd66d529a55807
+improvedigital.com, 2215, RESELLER
+
+# gingerad
+#partenaires autorises
+gingerad.com, 1007, RESELLER
+appnexus.com, 12070, RESELLER, f5ab79cb980f11d1
+smartadserver.com, 4183, RESELLER
+pubmatic.com, 162299, RESELLER, 5d62403b186f2ace
+quantum-advertising.com, 6232, RESELLER
+onetag.com, 7c3f893b7164340, RESELLER
+adyoulike.com, 63754632e0d24a49dde34df920b86c51, RESELLER
+lijit.com, 437646, RESELLER, fafdf38b16bf6b2b
+lijit.com, 437646-eb, RESELLER, fafdf38b16bf6b2b
+sharethrough.com, iRv1a3eV, RESELLER, d53b998a7bd4ecd2
+rubiconproject.com, 25890, RESELLER, 0bfd66d529a55807
+
+# equativ
+#Equativ SSPs (ex Smart)
+smartadserver.com, 4484, RESELLER, 060d053dcf45cbf3
+sharethrough.com, 4484, RESELLER, 060d053dcf45cbf3
+pubmatic.com, 156439, RESELLER, 5d62403b186f2ace
+pubmatic.com, 154037, RESELLER, 5d62403b186f2ace
+rubiconproject.com, 16114, RESELLER, 0bfd66d529a55807
+appnexus.com, 3703, RESELLER, f5ab79cb980f11d1
+loopme.com, 5679, RESELLER, 6c8d5f95897a5a3b
+xad.com, 958, RESELLER, 81cbf0a75a5e0e9a
+smaato.com, 1100044045, RESELLER, 07bcf65f187117b4
+pubnative.net, 1006576, RESELLER, d641df8625486a7b
+verve.com, 15503, RESELLER, 0c8f5958fc2d6270
+adyoulike.com, b4bf4fdd9b0b915f746f6747ff432bde, RESELLER
+axonix.com, 57264, RESELLER
+admanmedia.com, 43, RESELLER
+sharethrough.com, OAW69Fon, RESELLER, d53b998a7bd4ecd2
+contextweb.com, 560288, RESELLER, 89ff185a4c4e857c
+ 
+#Equativ SSPs resellers (ex Smart)
+adcolony.com, 496220845654deec, RESELLER, 1ad675c9de6b5176 #Smaato
+appads.in, 107606, RESELLER #Smaato
+se7en.es, 212459, RESELLER, 064bc410192443d8 #Smaato
+appnexus.com, 14077, RESELLER #Axonix (emodonic)
+rubiconproject.com, 17328, RESELLER, 0bfd66d529a55807 #Verve (Pubnative) 
+
+# adyoulike
+adyoulike.com, 45d0e84dacdc2854b813dda410bb18d4, DIRECT 
+appnexus.com, 7664, RESELLER 
+pubmatic.com, 160925, RESELLER, 5d62403b186f2ace 
+rubiconproject.com, 20736, RESELLER, 0bfd66d529a55807 
+smartadserver.com, 4144, RESELLER 
+onetag.com, 7a07370227fc000, RESELLER 
+nativo.com, 5848, RESELLER, 59521ca7cc5e9fee 
+33across.com, 0015a00003HljHyAAJ, RESELLER 
+risecodes.com, 64c7a4acd6298f0001a7d867, RESELLER 
+spotim.market, sp_AYL2022, RESELLER, 077e5f709d15bdbb 
+Xapads.com, 196344, RESELLER 
+richaudience.com, JAHJ4YZq4O, RESELLER
+
+# criteo
+themediagrid.com, YZ2I83, DIRECT, 9fac4a4a87c2a44f
