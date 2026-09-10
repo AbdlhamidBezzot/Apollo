@@ -1,5 +1,4 @@
-aleadinfo.com, 5671, DIRECT
-#Adrenalead is the exclusive operator of our desktop and mobile push notification ad product
+
 
 # Magnite
 rubiconproject.com, 28307, DIRECT, 0bfd66d529a55807
