@@ -1593,21 +1593,64 @@ export function Player({
 
           {/* YouTube "Up Next" / Recommended Sidebar */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pb-1 border-b border-white/10">
               <h3 className="font-bold text-base text-white">Up next</h3>
-              <div className="flex items-center gap-2 text-xs text-text-muted">
-                <span>Autoplay</span>
-                <button
-                  onClick={() => setAutoplayNext((v) => !v)}
-                  className={`h-5 w-9 rounded-full p-0.5 transition ${autoplayNext ? "bg-brand" : "bg-white/20"}`}
-                >
-                  <div className={`h-4 w-4 rounded-full bg-white transition ${autoplayNext ? "translate-x-4" : "translate-x-0"}`} />
-                </button>
-              </div>
             </div>
 
             {/* Recommended Video Cards */}
             <div className="space-y-2">
+              {/* For TV Shows: Show upcoming episodes of current show FIRST */}
+              {mediaType === "tv" && episodes.length > 0 && (
+                <>
+                  {episodes
+                    .filter((ep) => ep.episode_number > episodeNum)
+                    .slice(0, 4)
+                    .map((ep) => {
+                      const isNextEp = ep.episode_number === episodeNum + 1;
+                      const thumb = ep.still_path
+                        ? `https://image.tmdb.org/t/p/w500${ep.still_path}`
+                        : detail?.backdrop_path
+                        ? `https://image.tmdb.org/t/p/w500${detail.backdrop_path}`
+                        : "/placeholder-backdrop.svg";
+
+                      return (
+                        <button
+                          key={`next-ep-${ep.episode_number}`}
+                          onClick={() => switchEpisode(seasonNum, ep.episode_number)}
+                          disabled={busyResolve}
+                          className="group w-full flex gap-3 text-left rounded-xl p-1.5 hover:bg-white/10 transition border border-transparent hover:border-white/10 disabled:opacity-50"
+                        >
+                          <div className="relative aspect-video w-36 shrink-0 overflow-hidden rounded-xl bg-black/60 border border-white/5">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={thumb}
+                              alt={ep.name || `Episode ${ep.episode_number}`}
+                              className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                            />
+                            <span className="absolute bottom-1 right-1 rounded bg-black/80 px-1.5 py-0.5 text-[9px] font-bold text-brand-soft uppercase tracking-wider">
+                              S{seasonNum} E{ep.episode_number}
+                            </span>
+                            {isNextEp && (
+                              <span className="absolute top-1 left-1 rounded bg-brand px-1.5 py-0.5 text-[9px] font-extrabold text-white shadow uppercase tracking-wider">
+                                UP NEXT
+                              </span>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1 py-0.5">
+                            <h4 className="font-semibold text-xs text-white line-clamp-2 leading-snug group-hover:text-brand-soft transition">
+                              {ep.episode_number}. {ep.name || `Episode ${ep.episode_number}`}
+                            </h4>
+                            <p className="text-[11px] text-text-muted mt-1 line-clamp-1">
+                              {ep.overview || `${displayTitle} - Season ${seasonNum}`}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                </>
+              )}
+
+              {/* Similar / Recommended Video Cards */}
               {similar.length === 0 ? (
                 <div className="space-y-2">
                   {[1, 2, 3, 4].map((i) => (
