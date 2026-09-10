@@ -6,7 +6,6 @@ import Hls from "hls.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { del, get, post, put } from "@/lib/http";
 import { Ad300x250 } from "@/components/Ad300x250";
-import { VastPreRoll } from "@/components/VastPreRoll";
 import { useAuth } from "@/components/AuthContext";
 import { useMovieNight } from "@/lib/useMovieNight";
 
@@ -117,7 +116,6 @@ export function Player({
   const [nextCard, setNextCard] = useState(false);
   const [countdown, setCountdown] = useState(10);
   const [autoplayNext, setAutoplayNext] = useState(true);
-  const [showPreRollAd, setShowPreRollAd] = useState(true);
 
   const isHls = !embed && (contentType === "application/x-mpegURL" || /\.m3u8(\?|$)/i.test(src));
   const useHlsJs = !embed && isHls && typeof window !== "undefined" && Hls.isSupported();
@@ -963,7 +961,6 @@ export function Player({
               className="relative overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl"
               onDoubleClick={fullscreen}
             >
-              {showPreRollAd && <VastPreRoll onAdComplete={() => setShowPreRollAd(false)} />}
               <iframe
                 src={embedSrc}
                 title={displayTitle}
@@ -1004,7 +1001,6 @@ export function Player({
               onPointerLeave={() => setShowControls(false)}
               onDoubleClick={fullscreen}
             >
-              {showPreRollAd && <VastPreRoll onAdComplete={() => setShowPreRollAd(false)} />}
               <video
                 ref={videoRef}
                 src={useHlsJs ? undefined : src}
