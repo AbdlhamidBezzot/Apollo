@@ -101,8 +101,14 @@ async def logout(response: Response):
 
 
 @router.get("/me", response_model=UserOut)
-async def me(user: CurrentUser):
-    avatar = user.profiles[0].avatar if user.profiles and user.profiles[0].avatar else None
+async def me(user: CurrentUser, db: DbDep):
+    profile = db.query(Profile).filter(Profile.user_id == user.id).order_by(Profile.id).first()
+    if not profile:
+        profile = Profile(user_id=user.id, display_name=user.name)
+        db.add(profile)
+        db.commit()
+        db.refresh(profile)
+    avatar = profile.avatar if profile and profile.avatar else None
     return UserOut(
         id=user.id,
         email=user.email,

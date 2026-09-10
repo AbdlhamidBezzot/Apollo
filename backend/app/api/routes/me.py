@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
@@ -22,7 +22,7 @@ from app.schemas import (
     WatchlistItemOut,
 )
 
-from ..deps import CurrentProfile, CurrentUser
+from ..deps import PROFILE_COOKIE, CurrentProfile, CurrentUser
 
 router = APIRouter(prefix="/me", tags=["me"])
 
@@ -206,7 +206,20 @@ async def list_ratings(profile: CurrentProfile, db: DbDep):
 
 
 @router.put("/avatar", response_model=ProfileOut)
-async def update_avatar(payload: AvatarUpdate, profile: CurrentProfile, db: DbDep):
+async def update_avatar(payload: AvatarUpdate, user: CurrentUser, db: DbDep, request: Request):
+    profile_id = request.cookies.get(PROFILE_COOKIE)
+    profile = None
+    if profile_id and profile_id.isdigit():
+        profile = db.get(Profile, int(profile_id))
+        if profile and profile.user_id != user.id:
+            profile = None
+    if not profile:
+        profile = db.query(Profile).filter(Profile.user_id == user.id).order_by(Profile.id).first()
+    if not profile:
+        profile = Profile(user_id=user.id, display_name=user.name)
+        db.add(profile)
+        db.flush()
+
     profile.avatar = payload.avatar.strip()
     db.commit()
     db.refresh(profile)

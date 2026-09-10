@@ -54,24 +54,27 @@ export function ProfileClient() {
     }
   };
 
-  const handleSaveAvatar = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!avatarUrl.trim()) return;
+  const saveAvatar = async (urlToSave: string) => {
+    if (!urlToSave.trim()) return;
     setSavingAvatar(true);
     setAvatarMessage("");
     try {
-      const savedProfile = await put<UserProfile>("/api/v1/me/avatar", { avatar: avatarUrl.trim() });
-      setAvatarUrl(savedProfile.avatar || avatarUrl.trim());
+      const savedProfile = await put<UserProfile>("/api/v1/me/avatar", { avatar: urlToSave.trim() });
+      setAvatarUrl(savedProfile.avatar || urlToSave.trim());
       setAvatarMessage("Profile picture saved successfully!");
-      setTimeout(() => setAvatarMessage(""), 3000);
-      // A successful save must not be reported as failed if refreshing the
-      // separate shared session request happens to fail.
+      setTimeout(() => setAvatarMessage(""), 3500);
       void refresh();
     } catch (error) {
-      setAvatarMessage(error instanceof Error ? error.message : "Could not save profile picture.");
+      const msg = error instanceof Error ? error.message : "Could not save profile picture.";
+      setAvatarMessage(msg);
     } finally {
       setSavingAvatar(false);
     }
+  };
+
+  const handleSaveAvatar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await saveAvatar(avatarUrl);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,10 +84,20 @@ export function ProfileClient() {
       setAvatarMessage("Image must be smaller than 10MB.");
       return;
     }
+    setSavingAvatar(true);
+    setAvatarMessage("Processing image...");
     const reader = new FileReader();
+    reader.onerror = () => {
+      setSavingAvatar(false);
+      setAvatarMessage("Failed to read image file.");
+    };
     reader.onload = (event) => {
       const img = new Image();
-      img.onload = () => {
+      img.onerror = () => {
+        setSavingAvatar(false);
+        setAvatarMessage("Invalid image format.");
+      };
+      img.onload = async () => {
         const canvas = document.createElement("canvas");
         const MAX_SIZE = 300;
         let width = img.width;
@@ -107,7 +120,10 @@ export function ProfileClient() {
           ctx.drawImage(img, 0, 0, width, height);
           const resizedDataUrl = canvas.toDataURL("image/jpeg", 0.85);
           setAvatarUrl(resizedDataUrl);
-          setAvatarMessage("Image ready! Click 'Save Profile Picture' below to confirm.");
+          await saveAvatar(resizedDataUrl);
+        } else {
+          setSavingAvatar(false);
+          setAvatarMessage("Could not process image.");
         }
       };
       if (typeof event.target?.result === "string") {
