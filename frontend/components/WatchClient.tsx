@@ -107,9 +107,27 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
 
   if (!session) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-12">
-        <div className="skeleton mb-3 h-8 w-64 rounded" />
-        <div className="skeleton aspect-video w-full rounded-xl" />
+      <div className="mx-auto max-w-[1750px] px-3 sm:px-6 py-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 space-y-4">
+            <div className="skeleton aspect-video w-full rounded-2xl" />
+            <div className="skeleton h-8 w-3/4 rounded-lg" />
+            <div className="skeleton h-12 w-full rounded-full" />
+            <div className="skeleton h-28 w-full rounded-2xl" />
+          </div>
+          <div className="lg:col-span-4 space-y-3">
+            <div className="skeleton h-6 w-28 rounded" />
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex gap-3">
+                <div className="skeleton aspect-video w-36 rounded-xl shrink-0" />
+                <div className="flex-1 space-y-2 py-1">
+                  <div className="skeleton h-3.5 w-full rounded" />
+                  <div className="skeleton h-3 w-2/3 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

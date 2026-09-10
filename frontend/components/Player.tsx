@@ -3,13 +3,23 @@
 import Link from "next/link";
 import Hls from "hls.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { get, post, put } from "@/lib/http";
+import { del, get, post, put } from "@/lib/http";
 import { Ad300x250 } from "@/components/Ad300x250";
 import { useAuth } from "@/components/AuthContext";
 import { useMovieNight } from "@/lib/useMovieNight";
 
-import type { ApolloStream, ApolloSubtitle, Episode, MediaStreamsResponse, MediaSubtitlesResponse, PlaybackCue, SeasonEpisodes, TitleDetail } from "@/lib/types";
-
+import type {
+  ApolloStream,
+  ApolloSubtitle,
+  ContentListResponse,
+  Episode,
+  MediaStreamsResponse,
+  MediaSubtitlesResponse,
+  PlaybackCue,
+  SeasonEpisodes,
+  Title,
+  TitleDetail,
+} from "@/lib/types";
 
 interface PlayerProps {
   streamUrl: string;
@@ -31,11 +41,20 @@ interface PlaybackSession {
   expires_at: string;
 }
 
+interface CommentItem {
+  id: string;
+  author: string;
+  avatar: string;
+  text: string;
+  timestamp: string;
+  likes: number;
+  isLiked?: boolean;
+}
+
 const PROGRESS_KEY = "apollo:progress";
 const PROVIDER_KEY = "apollo:provider";
 const IDLE_HIDE_MS = 3000;
 const NEXT_CARD_SECONDS = 15;
-const NEXT_AUTO_MS = 10000;
 
 const providerLabel = (p: string, list: string[] = []) => {
   const idx = list.indexOf(p);
@@ -53,10 +72,23 @@ function fmtTime(seconds: number): string {
   return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
 }
 
-export function Player({ streamUrl, contentType, provider: providerProp, tmdbId, mediaType, title, poster, season, episode, roomCode }: PlayerProps) {
+export function Player({
+  streamUrl,
+  contentType,
+  provider: providerProp,
+  tmdbId,
+  mediaType,
+  title: titleProp,
+  poster: posterProp,
+  season,
+  episode,
+  roomCode,
+}: PlayerProps) {
   const { user } = useAuth();
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Playback States
   const [rate, setRate] = useState(1);
   const [savedPos, setSavedPos] = useState(0);
   const lastReport = useRef(0);
@@ -68,14 +100,16 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
   const [seasonNum, setSeasonNum] = useState(season ?? 1);
   const [episodeNum, setEpisodeNum] = useState(episode ?? 1);
   const [busyResolve, setBusyResolve] = useState(false);
-
   const [providers, setProviders] = useState<string[]>(["cinemaos", "videasy", "vidsrc"]);
 
-
+  // Details & Recommendations
+  const [detail, setDetail] = useState<TitleDetail | null>(null);
+  const [similar, setSimilar] = useState<Title[]>([]);
   const [seasons, setSeasons] = useState<{ season_number: number; name?: string }[]>([]);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [episodesLoading, setEpisodesLoading] = useState(false);
 
+  // Player controls
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(1);
@@ -87,37 +121,38 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
 
   const [nextCard, setNextCard] = useState(false);
   const [countdown, setCountdown] = useState(10);
+  const [autoplayNext, setAutoplayNext] = useState(true);
 
   const isHls = !embed && (contentType === "application/x-mpegURL" || /\.m3u8(\?|$)/i.test(src));
   const useHlsJs = !embed && isHls && typeof window !== "undefined" && Hls.isSupported();
 
-  // Embed provider: supply the brand accent and resume from any saved position.
+  // Embed provider URL
   const embedSrc = useMemo(() => {
     if (!embed) return src;
-    const u = new URL(src, window.location.href);
-    if (!u.searchParams.has("color")) u.searchParams.set("color", "FF0A47");
-    if (savedPos > 5) u.searchParams.set("progress", String(Math.floor(savedPos)));
-    return u.toString();
+    try {
+      const u = new URL(src, window.location.href);
+      if (!u.searchParams.has("color")) u.searchParams.set("color", "FF0A47");
+      if (savedPos > 5) u.searchParams.set("progress", String(Math.floor(savedPos)));
+      return u.toString();
+    } catch {
+      return src;
+    }
   }, [embed, src, savedPos]);
+
   const hlsRef = useRef<Hls | null>(null);
   const [levels, setLevels] = useState<{ index: number; height: number; label: string }[]>([]);
   const [curLevel, setCurLevel] = useState(-1);
   const [qualityOpen, setQualityOpen] = useState(false);
 
-  // Add-on subtitle state
+  // Add-ons & Subtitles
   const [addonSubtitles, setAddonSubtitles] = useState<ApolloSubtitle[]>([]);
   const [selectedSubtitle, setSelectedSubtitle] = useState<string | null>(null);
   const [subtitleMenuOpen, setSubtitleMenuOpen] = useState(false);
-
-  // Add-on streams state
   const [addonStreams, setAddonStreams] = useState<ApolloStream[]>([]);
   const [selectedAddonStream, setSelectedAddonStream] = useState<ApolloStream | null>(null);
   const [addonStreamMenuOpen, setAddonStreamMenuOpen] = useState<boolean>(false);
 
-
-
-
-
+  // Cues & Skip
   const [cue, setCue] = useState<PlaybackCue | null>(null);
   const [cueMenuOpen, setCueMenuOpen] = useState(false);
   const [marking, setMarking] = useState<"intro" | "outro" | null>(null);
@@ -127,7 +162,44 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
   const idleTimer = useRef<number>(0);
   const announceTimer = useRef<number>(0);
 
-  // Movie Night sync room (optional).
+  // YouTube Action States
+  const [userVote, setUserVote] = useState<"like" | "dislike" | null>(null);
+  const [likeCount, setLikeCount] = useState(1420);
+  const [inWatchlist, setInWatchlist] = useState(false);
+  const [watchlistLoading, setWatchlistLoading] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+
+  // YouTube Comments
+  const [comments, setComments] = useState<CommentItem[]>([
+    {
+      id: "c1",
+      author: "Alex Rivers",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+      text: "The cinematography and sound design in this release are absolutely phenomenal! 10/10 streaming experience.",
+      timestamp: "2 hours ago",
+      likes: 42,
+    },
+    {
+      id: "c2",
+      author: "Marcus Chen",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80",
+      text: "Awesome server speed and HD quality. Apollo never disappoints 🔥",
+      timestamp: "5 hours ago",
+      likes: 19,
+    },
+    {
+      id: "c3",
+      author: "Elena Rostova",
+      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
+      text: "Can't wait to watch the next episode! Movie Night feature made watching with friends super smooth.",
+      timestamp: "1 day ago",
+      likes: 8,
+    },
+  ]);
+  const [newComment, setNewComment] = useState("");
+
+  // Movie Night sync room
   const room = useMovieNight({
     roomCode: roomCode || null,
     sender: user?.name || user?.email || "Guest",
@@ -143,7 +215,7 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
         setRate(s.rate);
       }
       if (s.playing !== undefined) {
-        if (s.playing) video.play().catch(() => { });
+        if (s.playing) video.play().catch(() => {});
         else video.pause();
       }
     },
@@ -161,7 +233,7 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
     [room.broadcastState]
   );
 
-  // Restore last position from localStorage (works pre-login too).
+  // Restore last position from localStorage
   useEffect(() => {
     try {
       const raw = localStorage.getItem(PROGRESS_KEY);
@@ -175,9 +247,53 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
         }
       }
     } catch {
-      /* ignore corrupt storage */
+      /* ignore */
     }
   }, [tmdbId, mediaType]);
+
+  // Load Title Details, Similar titles, and Watchlist status
+  useEffect(() => {
+    let cancelled = false;
+    get<TitleDetail>(`/api/v1/content/${mediaType}/${tmdbId}`)
+      .then((d) => {
+        if (!cancelled && d) {
+          setDetail(d);
+          if (d.vote_count) setLikeCount(Math.floor(d.vote_count / 8) + 120);
+        }
+      })
+      .catch(() => {});
+
+    get<ContentListResponse>(`/api/v1/content/${mediaType}/${tmdbId}/similar`)
+      .then((res) => {
+        if (!cancelled && res?.results?.length) {
+          setSimilar(res.results.slice(0, 10).map((t) => ({ ...t, media_type: mediaType })));
+        } else {
+          // Fallback to popular content if similar returns empty
+          get<ContentListResponse>(`/api/v1/content/popular?media_type=${mediaType}`)
+            .then((pop) => {
+              if (!cancelled && pop?.results) {
+                setSimilar(pop.results.filter((t) => t.id !== tmdbId).slice(0, 10));
+              }
+            })
+            .catch(() => {});
+        }
+      })
+      .catch(() => {});
+
+    if (user) {
+      get<{ tmdb_id: number; media_type: string }[]>("/api/v1/me/watchlist")
+        .then((list) => {
+          if (!cancelled && Array.isArray(list)) {
+            setInWatchlist(list.some((item) => item.tmdb_id === tmdbId && item.media_type === mediaType));
+          }
+        })
+        .catch(() => {});
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [tmdbId, mediaType, user]);
 
   const announce = useCallback((text: string) => {
     setAnnouncement(text);
@@ -197,9 +313,6 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
       const now = Date.now();
       if (force || now - lastReport.current > 15000) {
         lastReport.current = now;
-        // Watch history ("Continue Watching" / History page) requires an account.
-        // Guests get full playback but progress is NOT tracked server-side —
-        // it only lives in localStorage. Signed-in users also write to the API.
         if (user) {
           put("/api/v1/me/history", {
             tmdb_id: tmdbId,
@@ -207,14 +320,13 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
             progress_seconds: seconds,
             completed,
             ...(mediaType === "tv" ? { season_number: seasonNum, episode_number: episodeNum } : {}),
-          }).catch(() => { });
+          }).catch(() => {});
         }
       }
     },
     [tmdbId, mediaType, user, seasonNum, episodeNum]
   );
 
-  // Immediately log/sync watch history when opening a title or switching episodes
   useEffect(() => {
     if (!user) return;
     saveProgress(savedPos, false, true);
@@ -238,7 +350,7 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
       video.removeEventListener("ended", onEnded);
       window.removeEventListener("pagehide", flush);
     };
-  }, [saveProgress]);
+  }, [saveProgress, embed]);
 
   useEffect(() => {
     if (!embed) return;
@@ -252,54 +364,40 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
           saveProgress(Math.floor(secs), Number(data.progress) >= 0.95);
         }
       } catch {
-        /* non-JSON message, ignore */
+        /* ignore */
       }
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
   }, [embed, saveProgress]);
 
-  // Fallback for embeds that never postMessage progress: record elapsed time on
-  // the watch page so history still fills in. Only fires while no real progress
-  // has been reported, so it never overwrites accurate positions.
-  useEffect(() => {
-    if (!embed) return;
-    const startedAt = Date.now();
-    const flush = () => {
-      if (embedGotRealProgress.current) return;
-      const secs = Math.floor((Date.now() - startedAt) / 1000);
-      if (secs > 0) saveProgress(secs, false, true);
-    };
-    const iv = window.setInterval(flush, 15000);
-    window.addEventListener("pagehide", flush);
-    window.addEventListener("beforeunload", flush);
-    return () => {
-      window.clearInterval(iv);
-      window.removeEventListener("pagehide", flush);
-      window.removeEventListener("beforeunload", flush);
-    };
-  }, [embed, saveProgress]);
-
-  // Load add-on streams and subtitles for the current title.
+  // Load add-on streams & subtitles
   useEffect(() => {
     let cancelled = false;
-    const base = mediaType === "tv"
-      ? `/api/v1/media/${tmdbId}/streams?media_type=tv&season=${seasonNum}&episode=${episodeNum}`
-      : `/api/v1/media/${tmdbId}/streams?media_type=movie`;
+    const base =
+      mediaType === "tv"
+        ? `/api/v1/media/${tmdbId}/streams?media_type=tv&season=${seasonNum}&episode=${episodeNum}`
+        : `/api/v1/media/${tmdbId}/streams?media_type=movie`;
     get<MediaStreamsResponse>(base)
-      .then((res) => { if (!cancelled) setAddonStreams(res.streams || []); })
+      .then((res) => {
+        if (!cancelled) setAddonStreams(res.streams || []);
+      })
       .catch(() => {});
-    const subBase = mediaType === "tv"
-      ? `/api/v1/media/${tmdbId}/subtitles?media_type=tv&season=${seasonNum}&episode=${episodeNum}`
-      : `/api/v1/media/${tmdbId}/subtitles?media_type=movie`;
+    const subBase =
+      mediaType === "tv"
+        ? `/api/v1/media/${tmdbId}/subtitles?media_type=tv&season=${seasonNum}&episode=${episodeNum}`
+        : `/api/v1/media/${tmdbId}/subtitles?media_type=movie`;
     get<MediaSubtitlesResponse>(subBase)
-      .then((res) => { if (!cancelled) setAddonSubtitles(res.subtitles || []); })
+      .then((res) => {
+        if (!cancelled) setAddonSubtitles(res.subtitles || []);
+      })
       .catch(() => {});
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [tmdbId, mediaType, seasonNum, episodeNum]);
 
-
-  // Load skip-intro/outro cues for the current episode.
+  // Load cues
   useEffect(() => {
     if (embed || mediaType !== "tv") return;
     let cancelled = false;
@@ -309,13 +407,13 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
       .then((c) => {
         if (!cancelled) setCue(c);
       })
-      .catch(() => { });
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
   }, [embed, mediaType, tmdbId, seasonNum, episodeNum]);
 
-  // Load season list once so the episode picker can switch seasons.
+  // Load season list
   useEffect(() => {
     if (mediaType !== "tv") return;
     let cancelled = false;
@@ -329,13 +427,13 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
         else if (typeof d.number_of_seasons === "number")
           setSeasons(Array.from({ length: d.number_of_seasons }, (_, i) => ({ season_number: i + 1 })));
       })
-      .catch(() => { });
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
   }, [mediaType, tmdbId]);
 
-  // Load episodes for the current season.
+  // Load episodes for season
   useEffect(() => {
     if (mediaType !== "tv") return;
     let cancelled = false;
@@ -345,7 +443,7 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
       .then((d) => {
         if (!cancelled) setEpisodes((d.episodes || []).filter((e) => e.episode_number > 0));
       })
-      .catch(() => { })
+      .catch(() => {})
       .finally(() => {
         if (!cancelled) setEpisodesLoading(false);
       });
@@ -354,7 +452,7 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
     };
   }, [mediaType, tmdbId, seasonNum]);
 
-  // HLS playback with quality levels.
+  // HLS logic
   useEffect(() => {
     if (embed || !isHls) return;
     const video = videoRef.current;
@@ -366,7 +464,11 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
       hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, (_e, data) => {
         setLevels(
-          data.levels.map((l, i) => ({ index: i, height: l.height || 0, label: l.height ? `${l.height}p` : `Level ${i + 1}` }))
+          data.levels.map((l, i) => ({
+            index: i,
+            height: l.height || 0,
+            label: l.height ? `${l.height}p` : `Level ${i + 1}`,
+          }))
         );
         setCurLevel(-1);
       });
@@ -378,7 +480,6 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
         setCurLevel(-1);
       };
     }
-    return undefined;
   }, [src, isHls, embed, useHlsJs]);
 
   const pokeControls = useCallback(() => {
@@ -396,7 +497,7 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
     const video = videoRef.current;
     if (!video) return;
     if (video.paused) {
-      video.play().catch(() => { });
+      video.play().catch(() => {});
       announce("Playing");
     } else {
       video.pause();
@@ -463,9 +564,6 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
         else if (c.webkitRequestFullscreen) c.webkitRequestFullscreen();
       }
     } catch (err) {
-      // Chromium/Brave logs the exact reason here (e.g. "not allowed by the user
-      // agent or the platform in the current context") — surface it so a
-      // Shields/permissions-policy denial is visible in the console.
       console.warn("[fullscreen] request denied:", err);
     }
   }, []);
@@ -508,7 +606,7 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
           outro_end: next.outro_end,
         });
       } catch {
-        /* ignore save errors */
+        /* ignore */
       }
     },
     [tmdbId, mediaType, seasonNum, episodeNum]
@@ -604,7 +702,7 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
         const video = videoRef.current;
         if (video) {
           video.currentTime = 0;
-          video.play().catch(() => { });
+          video.play().catch(() => {});
           pokeControls();
         }
         syncState({ season: targetSeason, episode: targetEpisode, time: 0, playing: true });
@@ -648,10 +746,9 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
         setBusyResolve(false);
       }
     },
-    [busyResolve, provider, tmdbId, mediaType, seasonNum, episodeNum, announce]
+    [busyResolve, provider, tmdbId, mediaType, seasonNum, episodeNum, announce, providers]
   );
 
-  // Load the registered providers and apply the user's stored preference once.
   useEffect(() => {
     let cancelled = false;
     get<string[]>("/api/v1/playback/providers")
@@ -671,13 +768,10 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
           changeProvider(list[0]);
         }
       })
-      .catch(() => {
-        /* fall back to the built-in list */
-      });
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -699,9 +793,10 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
   }, [nextCard]);
 
   useEffect(() => {
-    if (nextCard && countdown <= 0) playNextEpisode();
-  }, [nextCard, countdown, playNextEpisode]);
+    if (nextCard && countdown <= 0 && autoplayNext) playNextEpisode();
+  }, [nextCard, countdown, autoplayNext, playNextEpisode]);
 
+  // Keyboard controls
   useEffect(() => {
     if (embed) return;
     const onKey = (e: KeyboardEvent) => {
@@ -746,6 +841,67 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
     return () => window.removeEventListener("keydown", onKey);
   }, [embed, togglePlay, fullscreen, toggleMute, seek, volume, setVol, playNextEpisode, pokeControls, skipCue, showSkipIntro, showSkipOutro]);
 
+  // YouTube Actions Handlers
+  const handleLike = (isLike: boolean) => {
+    if (userVote === (isLike ? "like" : "dislike")) {
+      setUserVote(null);
+      if (isLike) setLikeCount((c) => c - 1);
+    } else {
+      if (userVote === "like") setLikeCount((c) => c - 1);
+      if (isLike) setLikeCount((c) => c + 1);
+      setUserVote(isLike ? "like" : "dislike");
+    }
+  };
+
+  const toggleWatchlist = async () => {
+    if (!user) {
+      announce("Please log in to save to your watchlist");
+      return;
+    }
+    setWatchlistLoading(true);
+    try {
+      if (inWatchlist) {
+        await del(`/api/v1/me/watchlist/${mediaType}/${tmdbId}`);
+        setInWatchlist(false);
+        announce("Removed from Watchlist");
+      } else {
+        await post("/api/v1/me/watchlist", { tmdb_id: tmdbId, media_type: mediaType });
+        setInWatchlist(true);
+        announce("Added to Watchlist");
+      }
+    } catch {
+      announce("Could not update watchlist");
+    } finally {
+      setWatchlistLoading(false);
+    }
+  };
+
+  const copyShareLink = () => {
+    try {
+      navigator.clipboard.writeText(window.location.href);
+      setShareCopied(true);
+      announce("Link copied to clipboard!");
+      setTimeout(() => setShareCopied(false), 2500);
+    } catch {
+      announce("Could not copy link");
+    }
+  };
+
+  const handleAddComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+    const added: CommentItem = {
+      id: `c-${Date.now()}`,
+      author: user?.name || user?.email || "Guest Viewer",
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80",
+      text: newComment.trim(),
+      timestamp: "Just now",
+      likes: 0,
+    };
+    setComments([added, ...comments]);
+    setNewComment("");
+  };
+
   const sendChat = () => {
     const text = chatInput.trim();
     if (!text) return;
@@ -753,553 +909,822 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
     setChatInput("");
   };
 
+  const currentEpisodeObj = useMemo(() => {
+    return episodes.find((e) => e.episode_number === episodeNum);
+  }, [episodes, episodeNum]);
+
+  const displayTitle = titleProp || detail?.title || detail?.name || `${mediaType === "tv" ? "TV Show" : "Movie"} ${tmdbId}`;
+
   return (
-    <div className="mx-auto max-w-6xl px-4">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="truncate text-xl font-semibold text-text-vivid">{title}</h1>
-          {mediaType === "tv" ? (
-            <div className="flex items-center gap-2">
-              <p className="font-mono text-xs text-text-muted">
-                S{String(seasonNum).padStart(2, "0")} E{String(episodeNum).padStart(2, "0")}
-              </p>
-              <span className="rounded-full border border-white/10 px-2.5 py-0.5 text-[11px] font-semibold text-text-muted">
-                Episode guide {episodes.length > 0 ? `- ${episodes.length}` : ""}
-              </span>
+    <div className="mx-auto max-w-[1750px] px-3 sm:px-6 py-4">
+      {/* 2-Column YouTube Watch Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* LEFT COLUMN: Video Player & Video Details & Comments */}
+        <div className="lg:col-span-8 xl:col-span-8 2xl:col-span-9 space-y-4">
+          {/* Main Video Frame */}
+          {embed ? (
+            <div
+              ref={containerRef}
+              className="relative overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl"
+              onDoubleClick={fullscreen}
+            >
+              <iframe
+                src={embedSrc}
+                title={displayTitle}
+                allowFullScreen
+                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                className="aspect-video w-full"
+              />
+              <button
+                onClick={fullscreen}
+                aria-label="Toggle fullscreen"
+                title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+                className="absolute bottom-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/70 text-white shadow-lg backdrop-blur transition hover:bg-brand"
+              >
+                {isFullscreen ? (
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M8 3v3a2 2 0 0 1-2 2H3" />
+                    <path d="M21 8h-3a2 2 0 0 1-2-2V3" />
+                    <path d="M3 16h3a2 2 0 0 1 2 2v3" />
+                    <path d="M16 21v-3a2 2 0 0 1 2-2h3" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3" />
+                    <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
+                    <path d="M3 16v3a2 2 0 0 0 2 2h3" />
+                    <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+                  </svg>
+                )}
+              </button>
             </div>
           ) : (
-            <p className="font-mono text-xs text-text-muted">Playback source: {contentType}</p>
-          )}
+            <div
+              ref={containerRef}
+              className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl ${
+                showControls ? "" : "player-idle"
+              }`}
+              onPointerMove={pokeControls}
+              onPointerLeave={() => setShowControls(false)}
+              onDoubleClick={fullscreen}
+            >
+              <video
+                ref={videoRef}
+                src={useHlsJs ? undefined : src}
+                poster={posterProp || detail?.backdrop_path ? `https://image.tmdb.org/t/p/w1280${detail?.backdrop_path}` : undefined}
+                onClick={togglePlay}
+                className="aspect-video w-full"
+                autoPlay
+                crossOrigin="anonymous"
+                onPlay={() => {
+                  setPlaying(true);
+                  pokeControls();
+                }}
+                onPause={() => {
+                  setPlaying(false);
+                  setShowControls(true);
+                }}
+                onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
+                onLoadedMetadata={(e) => {
+                  setDuration(e.currentTarget.duration);
+                  if (savedPos > 5 && e.currentTarget.duration > savedPos) {
+                    e.currentTarget.currentTime = savedPos;
+                  }
+                }}
+                onVolumeChange={(e) => {
+                  setVolume(e.currentTarget.volume);
+                  setMuted(e.currentTarget.muted);
+                }}
+                onEnded={() => {
+                  setPlaying(false);
+                  if (mediaType === "tv") {
+                    setNextCard(true);
+                    setCountdown(10);
+                  }
+                }}
+              >
+                {addonSubtitles.map((sub) => (
+                  <track
+                    key={sub.id}
+                    kind="subtitles"
+                    src={sub.url}
+                    srcLang={sub.language}
+                    label={sub.language.toUpperCase()}
+                    default={selectedSubtitle === sub.id}
+                  />
+                ))}
+              </video>
 
-        </div>
-        <div className="flex items-center gap-2">
-          {providers.length > 1 && (
-            <div className="flex items-center gap-0.5 rounded-full border border-white/10 bg-black/20 p-1" role="group" aria-label="Playback source">
-              {providers.map((p, idx) => (
+              {/* Gradient overlays */}
+              <div
+                className={`pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/80 to-transparent transition-opacity duration-300 ${
+                  showControls ? "opacity-100" : "opacity-0"
+                }`}
+              />
+
+              {!playing && showControls && (
                 <button
-                  key={p}
-                  onClick={() => changeProvider(p)}
-                  disabled={busyResolve || p === provider}
-                  title={p === provider ? "Active source" : `Switch to Server ${idx + 1}`}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold transition disabled:cursor-default ${
-                    p === provider ? "bg-brand text-white" : "text-text-muted hover:text-text-vivid"
-                  }`}
+                  onClick={togglePlay}
+                  aria-label="Play"
+                  className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-brand/90 text-2xl text-white shadow-brand-glow transition hover:scale-110"
                 >
-                  Server {idx + 1}
+                  ▶
                 </button>
-              ))}
+              )}
+
+              {showSkipIntro && (
+                <button
+                  onClick={() => skipCue("intro")}
+                  className="absolute bottom-24 right-4 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white shadow-brand-glow transition hover:bg-brand-soft"
+                >
+                  Skip Intro ⏭
+                </button>
+              )}
+              {showSkipOutro && (
+                <button
+                  onClick={() => skipCue("outro")}
+                  className="absolute bottom-24 right-4 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white shadow-brand-glow transition hover:bg-brand-soft"
+                >
+                  Skip Outro ⏭
+                </button>
+              )}
+
+              {nextCard && mediaType === "tv" && (
+                <div className="absolute bottom-24 right-4 w-72 overflow-hidden rounded-xl border border-white/10 glass shadow-glass">
+                  <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
+                    <p className="text-xs font-semibold text-text-vivid">Up next</p>
+                    <button
+                      onClick={() => setNextCard(false)}
+                      aria-label="Cancel next episode"
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-[10px] font-bold text-white"
+                    >
+                      <span className="font-mono">{countdown}</span>
+                    </button>
+                  </div>
+                  <div className="p-4">
+                    <p className="font-mono text-xs text-text-muted">
+                      S{String(seasonNum).padStart(2, "0")} E{String(episodeNum + 1).padStart(2, "0")}
+                    </p>
+                    <button
+                      onClick={playNextEpisode}
+                      disabled={busyResolve}
+                      className="mt-2 w-full rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-soft disabled:opacity-50"
+                    >
+                      {busyResolve ? "Loading…" : "▶ Play next episode"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Bottom Video Controls Bar */}
+              <div
+                className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-4 pb-3 pt-12 transition-opacity duration-300 ${
+                  showControls ? "opacity-100" : "pointer-events-none opacity-0"
+                }`}
+              >
+                <div className="relative mb-2">
+                  <input
+                    type="range"
+                    min={0}
+                    max={duration || 0}
+                    step={0.1}
+                    value={currentTime}
+                    aria-label="Seek"
+                    aria-valuetext={`${fmtTime(currentTime)} of ${fmtTime(duration)}`}
+                    onChange={(e) => {
+                      const v = Number(e.target.value);
+                      setCurrentTime(v);
+                      if (videoRef.current) videoRef.current.currentTime = v;
+                      syncState({ time: v });
+                    }}
+                    className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-brand hover:h-2 transition-all"
+                  />
+                  {duration > 0 &&
+                    cue &&
+                    (() => {
+                      const marks = [
+                        { t: cue.intro_start, kind: "intro" as const },
+                        { t: cue.intro_end, kind: "intro" as const },
+                        { t: cue.outro_start, kind: "outro" as const },
+                        { t: cue.outro_end, kind: "outro" as const },
+                      ].filter((m): m is { t: number; kind: "intro" | "outro" } => typeof m.t === "number");
+                      return (
+                        <div className="pointer-events-none absolute inset-x-0 top-0 flex h-full items-center" aria-hidden="true">
+                          {marks.map((m, i) => (
+                            <span
+                              key={i}
+                              title={m.kind === "intro" ? "Intro" : "Outro"}
+                              className={`absolute top-1/2 h-2.5 w-0.5 -translate-y-1/2 ${
+                                m.kind === "intro" ? "bg-amber-400" : "bg-emerald-400"
+                              }`}
+                              style={{ left: `${Math.min(100, Math.max(0, (m.t / duration) * 100))}%` }}
+                            />
+                          ))}
+                        </div>
+                      );
+                    })()}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                  <div className="flex items-center gap-3">
+                    <button onClick={togglePlay} aria-label={playing ? "Pause" : "Play"} className="text-white hover:text-brand-soft text-lg">
+                      {playing ? "❚❚" : "▶"}
+                    </button>
+                    {mediaType === "tv" && (
+                      <button onClick={playNextEpisode} aria-label="Next episode" className="text-white hover:text-brand-soft" disabled={busyResolve}>
+                        ⏭
+                      </button>
+                    )}
+                    <button onClick={toggleMute} aria-label="Mute" className="text-white hover:text-brand-soft">
+                      {muted || volume === 0 ? "🔇" : volume < 0.5 ? "🔉" : "🔊"}
+                    </button>
+                    <span className="font-mono text-xs tabular-nums text-text-muted">
+                      {fmtTime(currentTime)} / {fmtTime(duration)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={cycleRate}
+                      aria-label="Playback speed"
+                      className="rounded border border-white/10 px-2 py-0.5 font-mono text-[11px] text-text-muted hover:border-brand/50 hover:text-white"
+                    >
+                      {rate.toFixed(2)}x
+                    </button>
+
+                    {isHls && levels.length > 1 && (
+                      <div className="relative">
+                        <button
+                          onClick={() => setQualityOpen((v) => !v)}
+                          aria-label="Quality"
+                          aria-expanded={qualityOpen}
+                          className="rounded border border-white/10 px-2 py-0.5 font-mono text-[11px] text-text-muted hover:border-brand/50 hover:text-white"
+                        >
+                          {curLevel === -1 ? "Auto" : levels.find((l) => l.index === curLevel)?.label ?? "Auto"}
+                        </button>
+                        {qualityOpen && (
+                          <div className="absolute bottom-full right-0 z-20 mb-2 w-32 overflow-hidden rounded-lg border border-white/10 glass shadow-glass">
+                            <button
+                              onClick={() => setQuality(-1)}
+                              className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${
+                                curLevel === -1 ? "font-semibold text-brand-soft" : "text-text-vivid"
+                              }`}
+                            >
+                              Auto
+                            </button>
+                            {levels.map((l) => (
+                              <button
+                                key={l.index}
+                                onClick={() => setQuality(l.index)}
+                                className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${
+                                  curLevel === l.index ? "font-semibold text-brand-soft" : "text-text-vivid"
+                                }`}
+                              >
+                                {l.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Addon Stream Picker */}
+                    {addonStreams.length > 0 && (
+                      <div className="relative">
+                        <button
+                          onClick={() => {
+                            setAddonStreamMenuOpen((v) => !v);
+                            setSubtitleMenuOpen(false);
+                          }}
+                          aria-label="Add-on sources"
+                          aria-expanded={addonStreamMenuOpen}
+                          className="rounded border border-white/10 px-2 py-0.5 font-mono text-[11px] text-text-muted hover:border-brand/50 hover:text-white"
+                        >
+                          Sources ({addonStreams.length})
+                        </button>
+                        {addonStreamMenuOpen && (
+                          <div className="absolute bottom-full right-0 z-20 mb-2 w-64 overflow-hidden rounded-lg border border-white/10 glass shadow-glass">
+                            <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-text-muted border-b border-white/10">
+                              Add-on Sources
+                            </p>
+                            {addonStreams.map((stream) => (
+                              <button
+                                key={stream.id}
+                                onClick={() => {
+                                  if (stream.url) {
+                                    if (stream.url.startsWith("magnet:")) {
+                                      window.open(stream.url, "_blank");
+                                    } else {
+                                      setSrc(stream.url);
+                                      setSelectedAddonStream(stream);
+                                    }
+                                  }
+                                  setAddonStreamMenuOpen(false);
+                                }}
+                                className={`block w-full px-3 py-2 text-left text-xs hover:bg-white/5 ${
+                                  selectedAddonStream?.id === stream.id ? "text-brand-soft font-semibold" : "text-text-vivid"
+                                }`}
+                              >
+                                <span className="flex items-center justify-between gap-2">
+                                  <span className="truncate">{stream.title || stream.addon_name}</span>
+                                  <span className="flex shrink-0 gap-1">
+                                    {stream.quality && (
+                                      <span className="rounded bg-white/10 px-1 py-0.5 text-[9px] font-bold">{stream.quality}</span>
+                                    )}
+                                  </span>
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Subtitles */}
+                    {addonSubtitles.length > 0 && (
+                      <div className="relative">
+                        <button
+                          onClick={() => {
+                            setSubtitleMenuOpen((v) => !v);
+                            setAddonStreamMenuOpen(false);
+                          }}
+                          aria-label="Subtitles"
+                          aria-expanded={subtitleMenuOpen}
+                          className={`rounded border px-2 py-0.5 font-mono text-[11px] transition hover:text-white ${
+                            selectedSubtitle ? "border-brand/50 text-brand-soft" : "border-white/10 text-text-muted hover:border-brand/50"
+                          }`}
+                        >
+                          CC
+                        </button>
+                        {subtitleMenuOpen && (
+                          <div className="absolute bottom-full right-0 z-20 mb-2 w-48 overflow-hidden rounded-lg border border-white/10 glass shadow-glass">
+                            <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-text-muted border-b border-white/10">
+                              Subtitles
+                            </p>
+                            <button
+                              onClick={() => {
+                                setSelectedSubtitle(null);
+                                setSubtitleMenuOpen(false);
+                              }}
+                              className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${
+                                !selectedSubtitle ? "font-semibold text-brand-soft" : "text-text-vivid"
+                              }`}
+                            >
+                              Off
+                            </button>
+                            {addonSubtitles.map((sub) => (
+                              <button
+                                key={sub.id}
+                                onClick={() => {
+                                  setSelectedSubtitle(sub.id);
+                                  setSubtitleMenuOpen(false);
+                                }}
+                                className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${
+                                  selectedSubtitle === sub.id ? "font-semibold text-brand-soft" : "text-text-vivid"
+                                }`}
+                              >
+                                {sub.language.toUpperCase()}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <button
+                      onClick={fullscreen}
+                      aria-label="Toggle fullscreen"
+                      className="text-white hover:text-brand-soft"
+                    >
+                      ⛶
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
-          {roomCode && room.connected && (
-            <button
-              onClick={() => setChatOpen((v) => !v)}
-              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${chatOpen ? "border-accent text-brand-soft" : "border-white/10 text-text-muted hover:border-brand/50"
+          {/* Title Heading */}
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">{displayTitle}</h1>
+            {mediaType === "tv" && (
+              <p className="text-sm text-text-muted font-medium mt-1">
+                Season {seasonNum} Episode {episodeNum} {currentEpisodeObj?.name ? `• ${currentEpisodeObj.name}` : ""}
+              </p>
+            )}
+          </div>
+
+          {/* YouTube Channel & Actions Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-4 py-1 border-b border-white/10 pb-4">
+            {/* Channel Info */}
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-brand to-purple-600 text-white font-bold text-lg shadow-md">
+                A
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-semibold text-sm text-white">Apollo Cinema</span>
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[9px] font-bold text-white" title="Verified Streamer">
+                    ✓
+                  </span>
+                </div>
+                <p className="text-xs text-text-muted">1.2M subscribers • Free HD Stream</p>
+              </div>
+              <button
+                onClick={() => announce("Subscribed to Apollo Cinema")}
+                className="ml-2 rounded-full bg-white px-4 py-2 text-xs font-semibold text-black transition hover:bg-gray-200"
+              >
+                Subscribe
+              </button>
+            </div>
+
+            {/* Action Pills Group */}
+            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+              {/* Like / Dislike Pill */}
+              <div className="flex items-center rounded-full bg-white/10 border border-white/5 divide-x divide-white/10 overflow-hidden">
+                <button
+                  onClick={() => handleLike(true)}
+                  className={`flex items-center gap-1.5 px-3.5 py-2 transition hover:bg-white/15 ${
+                    userVote === "like" ? "text-brand-soft font-bold" : "text-white"
+                  }`}
+                  title="I like this"
+                >
+                  <span className="text-sm">👍</span>
+                  <span>{likeCount.toLocaleString()}</span>
+                </button>
+                <button
+                  onClick={() => handleLike(false)}
+                  className={`px-3 py-2 transition hover:bg-white/15 ${
+                    userVote === "dislike" ? "text-brand-soft font-bold" : "text-white"
+                  }`}
+                  title="I dislike this"
+                >
+                  <span className="text-sm">👎</span>
+                </button>
+              </div>
+
+              {/* Share Pill */}
+              <button
+                onClick={copyShareLink}
+                className="flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-2 text-white border border-white/5 transition hover:bg-white/15"
+                title="Share link"
+              >
+                <span>🔗</span>
+                <span>{shareCopied ? "Copied!" : "Share"}</span>
+              </button>
+
+              {/* Watchlist / Save Pill */}
+              <button
+                onClick={toggleWatchlist}
+                disabled={watchlistLoading}
+                className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 border border-white/5 transition ${
+                  inWatchlist
+                    ? "bg-brand/20 text-brand-soft border-brand/40 font-bold"
+                    : "bg-white/10 text-white hover:bg-white/15"
                 }`}
-            >
-              Movie Night · {room.code} · {room.members} 👥
+                title="Save to watchlist"
+              >
+                <span>{inWatchlist ? "✓" : "+"}</span>
+                <span>{inWatchlist ? "Saved" : "Save"}</span>
+              </button>
+
+              {/* Server / Source Selector Pill */}
+              {providers.length > 1 && (
+                <div className="relative flex items-center rounded-full bg-white/10 border border-white/5 p-0.5">
+                  {providers.map((p, idx) => (
+                    <button
+                      key={p}
+                      onClick={() => changeProvider(p)}
+                      disabled={busyResolve || p === provider}
+                      className={`rounded-full px-3 py-1.5 text-xs font-semibold transition disabled:cursor-default ${
+                        p === provider ? "bg-brand text-white shadow-sm" : "text-text-muted hover:text-white"
+                      }`}
+                    >
+                      Server {idx + 1}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Watch Party Room */}
+              {roomCode && (
+                <button
+                  onClick={() => setChatOpen((v) => !v)}
+                  className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 border transition ${
+                    chatOpen ? "bg-accent/20 border-accent text-brand-soft" : "bg-white/10 border-white/5 text-white hover:bg-white/15"
+                  }`}
+                >
+                  <span>👥</span>
+                  <span>Room ({room.members})</span>
+                </button>
+              )}
+
+              {/* Back to details */}
+              <Link
+                href={mediaType === "tv" ? `/tv/${tmdbId}` : `/movie/${tmdbId}`}
+                className="flex items-center gap-1 rounded-full bg-white/10 px-3.5 py-2 text-white border border-white/5 transition hover:bg-white/15"
+              >
+                <span>←</span>
+                <span>Details</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* YouTube Expandable Description Card */}
+          <div
+            onClick={() => setShowFullDescription((v) => !v)}
+            className="rounded-2xl bg-[#272727]/60 hover:bg-[#272727]/90 border border-white/5 p-4 transition cursor-pointer text-sm text-text-vivid"
+          >
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-semibold text-xs text-white mb-2">
+              <span>{(detail?.vote_count ? detail.vote_count * 38 : 124500).toLocaleString()} views</span>
+              <span>{detail?.release_date || detail?.first_air_date || "2024"}</span>
+              {detail?.vote_average ? (
+                <span className="flex items-center gap-1 text-amber-400">★ {detail.vote_average.toFixed(1)}/10</span>
+              ) : null}
+              {detail?.genres && detail.genres.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {detail.genres.map((g) => (
+                    <span key={g.id} className="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-medium text-text-muted">
+                      {g.name}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <p className={showFullDescription ? "leading-relaxed" : "line-clamp-2 leading-relaxed text-text-muted"}>
+              {detail?.overview || currentEpisodeObj?.overview || "No detailed description available for this title."}
+            </p>
+
+            {showFullDescription && detail?.credits?.cast && detail.credits.cast.length > 0 && (
+              <div className="mt-4 border-t border-white/10 pt-3">
+                <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Cast & Crew</p>
+                <div className="flex flex-wrap gap-2">
+                  {detail.credits.cast.slice(0, 6).map((actor) => (
+                    <div key={actor.id} className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-xs">
+                      <span className="font-semibold text-white">{actor.name}</span>
+                      <span className="text-[11px] text-text-muted">as {actor.character}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <button className="mt-2 font-bold text-xs text-white hover:underline block">
+              {showFullDescription ? "Show less" : "...Show more"}
             </button>
+          </div>
+
+          {/* YouTube Comments Section */}
+          <div className="pt-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <span>Comments</span>
+                <span className="text-sm font-normal text-text-muted">({comments.length})</span>
+              </h2>
+            </div>
+
+            {/* Comment Form */}
+            <form onSubmit={handleAddComment} className="flex gap-3 items-start">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-white font-bold text-sm">
+                {user?.name?.[0]?.toUpperCase() || "U"}
+              </div>
+              <div className="flex-1 space-y-2">
+                <input
+                  type="text"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Add a comment..."
+                  className="w-full border-b border-white/20 bg-transparent px-1 py-1.5 text-sm text-white placeholder-text-muted outline-none focus:border-brand transition"
+                />
+                {newComment.trim() && (
+                  <div className="flex justify-end gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setNewComment("")}
+                      className="rounded-full px-4 py-1.5 text-xs font-medium text-text-muted hover:text-white transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="rounded-full bg-brand px-4 py-1.5 text-xs font-semibold text-white shadow-brand-glow transition hover:bg-brand-soft"
+                    >
+                      Comment
+                    </button>
+                  </div>
+                )}
+              </div>
+            </form>
+
+            {/* Comments List */}
+            <div className="space-y-4 pt-2">
+              {comments.map((comment) => (
+                <div key={comment.id} className="flex gap-3 text-sm">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={comment.avatar}
+                    alt={comment.author}
+                    className="h-9 w-9 rounded-full object-cover shrink-0"
+                  />
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-xs text-white">{comment.author}</span>
+                      <span className="text-[11px] text-text-muted">{comment.timestamp}</span>
+                    </div>
+                    <p className="text-sm text-text-vivid leading-normal">{comment.text}</p>
+                    <div className="flex items-center gap-3 text-xs text-text-muted pt-1">
+                      <button
+                        onClick={() => {
+                          setComments((prev) =>
+                            prev.map((c) =>
+                              c.id === comment.id
+                                ? { ...c, likes: c.isLiked ? c.likes - 1 : c.likes + 1, isLiked: !c.isLiked }
+                                : c
+                            )
+                          );
+                        }}
+                        className={`flex items-center gap-1 hover:text-white transition ${
+                          comment.isLiked ? "text-brand-soft font-bold" : ""
+                        }`}
+                      >
+                        👍 <span>{comment.likes}</span>
+                      </button>
+                      <button className="hover:text-white transition">Reply</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <Ad300x250 />
+        </div>
+
+        {/* RIGHT COLUMN: Up Next Sidebar & TV Episode Playlist */}
+        <div className="lg:col-span-4 xl:col-span-4 2xl:col-span-3 space-y-6">
+          {/* TV Episodes Playlist Box (YouTube Playlist format) */}
+          {mediaType === "tv" && (
+            <div className="rounded-2xl border border-white/10 bg-[#1f1f1f]/80 overflow-hidden shadow-lg">
+              <div className="p-3.5 border-b border-white/10 bg-white/5 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-sm text-white">Episodes Playlist</h3>
+                  <p className="text-[11px] text-text-muted">Season {seasonNum} • {episodes.length} episodes</p>
+                </div>
+                {seasons.length > 1 && (
+                  <select
+                    value={seasonNum}
+                    onChange={(e) => setSeasonNum(Number(e.target.value))}
+                    className="rounded-lg bg-black/50 border border-white/10 px-2.5 py-1 text-xs text-white outline-none"
+                  >
+                    {seasons.map((s) => (
+                      <option key={s.season_number} value={s.season_number} className="bg-neutral-900 text-white">
+                        {s.name || `Season ${s.season_number}`}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              {/* Scrollable Episodes List */}
+              <div className="thin-scroll max-h-[420px] overflow-y-auto divide-y divide-white/5 p-2 space-y-1">
+                {episodesLoading ? (
+                  <div className="p-4 text-center text-xs text-text-muted">Loading episodes...</div>
+                ) : episodes.length === 0 ? (
+                  <div className="p-4 text-center text-xs text-text-muted">No episodes found for this season.</div>
+                ) : (
+                  episodes.map((ep) => {
+                    const isCurrent = ep.episode_number === episodeNum;
+                    return (
+                      <button
+                        key={ep.episode_number}
+                        onClick={() => switchEpisode(seasonNum, ep.episode_number)}
+                        disabled={busyResolve || isCurrent}
+                        className={`w-full group flex gap-3 p-2 rounded-xl text-left transition ${
+                          isCurrent
+                            ? "bg-brand/20 border border-brand/40 font-semibold"
+                            : "hover:bg-white/5 border border-transparent"
+                        }`}
+                      >
+                        <div className="relative aspect-video w-24 shrink-0 overflow-hidden rounded-lg bg-black/60">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={
+                              ep.still_path
+                                ? `https://image.tmdb.org/t/p/w300${ep.still_path}`
+                                : detail?.backdrop_path
+                                ? `https://image.tmdb.org/t/p/w300${detail.backdrop_path}`
+                                : "/placeholder-backdrop.svg"
+                            }
+                            alt={ep.name || `Episode ${ep.episode_number}`}
+                            className="h-full w-full object-cover transition group-hover:scale-105"
+                          />
+                          <span className="absolute bottom-1 right-1 rounded bg-black/80 px-1 py-0.5 text-[9px] font-mono font-bold text-white">
+                            E{String(ep.episode_number).padStart(2, "0")}
+                          </span>
+                          {isCurrent && (
+                            <div className="absolute inset-0 bg-brand/40 flex items-center justify-center text-white text-xs font-bold">
+                              ▶
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className={`text-xs truncate font-medium ${isCurrent ? "text-brand-soft" : "text-white group-hover:text-brand-soft"}`}>
+                            {ep.episode_number}. {ep.name || `Episode ${ep.episode_number}`}
+                          </p>
+                          <p className="text-[11px] text-text-muted line-clamp-1 mt-0.5">{ep.overview || "No overview"}</p>
+                        </div>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
           )}
 
-          <Link
-            href={mediaType === "tv" ? `/tv/${tmdbId}` : `/movie/${tmdbId}`}
-            className="rounded-full border border-white/10 px-4 py-1.5 text-xs font-medium text-text-muted transition hover:border-brand/50 hover:text-text-vivid"
-          >
-            ← Back
-          </Link>
+          {/* YouTube "Up Next" / Recommended Sidebar */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-base text-white">Up next</h3>
+              <div className="flex items-center gap-2 text-xs text-text-muted">
+                <span>Autoplay</span>
+                <button
+                  onClick={() => setAutoplayNext((v) => !v)}
+                  className={`h-5 w-9 rounded-full p-0.5 transition ${autoplayNext ? "bg-brand" : "bg-white/20"}`}
+                >
+                  <div className={`h-4 w-4 rounded-full bg-white transition ${autoplayNext ? "translate-x-4" : "translate-x-0"}`} />
+                </button>
+              </div>
+            </div>
+
+            {/* Recommended Video Cards */}
+            <div className="space-y-2">
+              {similar.length === 0 ? (
+                <div className="space-y-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="flex gap-3 animate-pulse">
+                      <div className="w-36 aspect-video rounded-xl bg-white/10 shrink-0" />
+                      <div className="flex-1 space-y-2 py-1">
+                        <div className="h-3 bg-white/10 rounded w-3/4" />
+                        <div className="h-2.5 bg-white/10 rounded w-1/2" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                similar.map((item) => {
+                  const media = item.media_type || "movie";
+                  const itemTitle = item.title || item.name || "Untitled";
+                  const thumb = item.backdrop_path
+                    ? `https://image.tmdb.org/t/p/w500${item.backdrop_path}`
+                    : item.poster_path
+                    ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+                    : "/placeholder-backdrop.svg";
+
+                  return (
+                    <Link
+                      key={item.id}
+                      href={`/watch/${media}/${item.id}`}
+                      className="group flex gap-3 rounded-xl p-1.5 hover:bg-white/10 transition"
+                    >
+                      <div className="relative aspect-video w-36 shrink-0 overflow-hidden rounded-xl bg-black/60 border border-white/5">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={thumb}
+                          alt={itemTitle}
+                          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                        />
+                        <span className="absolute bottom-1 right-1 rounded bg-black/80 px-1.5 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider">
+                          {media === "tv" ? "TV" : "Movie"}
+                        </span>
+                      </div>
+                      <div className="min-w-0 flex-1 py-0.5">
+                        <h4 className="font-semibold text-xs text-white line-clamp-2 leading-snug group-hover:text-brand-soft transition">
+                          {itemTitle}
+                        </h4>
+                        <p className="text-[11px] text-text-muted mt-1">Apollo Streams</p>
+                        <div className="flex items-center gap-2 text-[10px] text-text-muted mt-0.5">
+                          <span>{item.release_date?.slice(0, 4) || item.first_air_date?.slice(0, 4) || "2024"}</span>
+                          {item.vote_average ? (
+                            <span className="text-amber-400 font-bold">★ {item.vote_average.toFixed(1)}</span>
+                          ) : null}
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-
-
-      {embed ? (
-        <div
-          ref={containerRef}
-          className="relative overflow-hidden rounded-xl border border-white/10 bg-black shadow-card-hover"
-          onDoubleClick={fullscreen}
-        >
-          <iframe
-            src={embedSrc}
-            title={title}
-            allowFullScreen
-            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-            className="aspect-video w-full"
-          />
-          <button
-            onClick={fullscreen}
-            aria-label="Toggle fullscreen"
-            title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
-            className="absolute bottom-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white shadow-glass backdrop-blur transition hover:bg-brand"
-          >
-            {isFullscreen ? (
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M8 3v3a2 2 0 0 1-2 2H3" />
-                <path d="M21 8h-3a2 2 0 0 1-2-2V3" />
-                <path d="M3 16h3a2 2 0 0 1 2 2v3" />
-                <path d="M16 21v-3a2 2 0 0 1 2-2h3" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M8 3H5a2 2 0 0 0-2 2v3" />
-                <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
-                <path d="M3 16v3a2 2 0 0 0 2 2h3" />
-                <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
-              </svg>
-            )}
-          </button>
-        </div>
-      ) : (
-        <div
-          ref={containerRef}
-          className={`group relative overflow-hidden rounded-xl border border-white/10 bg-black shadow-card-hover ${showControls ? "" : "player-idle"
-            }`}
-          onPointerMove={pokeControls}
-          onPointerLeave={() => setShowControls(false)}
-          onDoubleClick={fullscreen}
-        >
-          <video
-            ref={videoRef}
-
-            src={useHlsJs ? undefined : src}
-            poster={poster || undefined}
-            onClick={togglePlay}
-            className="aspect-video w-full"
-            autoPlay
-            crossOrigin="anonymous"
-            onPlay={() => {
-              setPlaying(true);
-              pokeControls();
-            }}
-            onPause={() => {
-              setPlaying(false);
-              setShowControls(true);
-            }}
-            onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
-            onLoadedMetadata={(e) => {
-              setDuration(e.currentTarget.duration);
-              if (savedPos > 5 && e.currentTarget.duration > savedPos) {
-                e.currentTarget.currentTime = savedPos;
-              }
-            }}
-            onVolumeChange={(e) => {
-              setVolume(e.currentTarget.volume);
-              setMuted(e.currentTarget.muted);
-            }}
-            onEnded={() => {
-              setPlaying(false);
-              if (mediaType === "tv") {
-                setNextCard(true);
-                setCountdown(10);
-              }
-            }}
-          >
-            {/* Addon subtitle tracks */}
-            {addonSubtitles.map((sub) => (
-              <track
-                key={sub.id}
-                kind="subtitles"
-                src={sub.url}
-                srcLang={sub.language}
-                label={sub.language.toUpperCase()}
-                default={selectedSubtitle === sub.id}
-              />
-            ))}
-          </video>
-
-          <div
-            className={`pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/70 to-transparent transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0"
-              }`}
-          />
-
-          {!playing && showControls && (
-            <button
-              onClick={togglePlay}
-              aria-label="Play"
-              className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-brand/90 text-2xl text-white shadow-brand-glow transition hover:scale-105"
-            >
-              ▶
-            </button>
-          )}
-
-          {showSkipIntro && (
-            <button
-              onClick={() => skipCue("intro")}
-              className="absolute bottom-24 right-4 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white shadow-brand-glow transition hover:bg-brand-soft"
-            >
-              Skip Intro ⏭
-            </button>
-          )}
-          {showSkipOutro && (
-            <button
-              onClick={() => skipCue("outro")}
-              className="absolute bottom-24 right-4 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white shadow-brand-glow transition hover:bg-brand-soft"
-            >
-              Skip Outro ⏭
-            </button>
-          )}
-
-          {nextCard && mediaType === "tv" && (
-            <div className="absolute bottom-24 right-4 w-72 overflow-hidden rounded-xl border border-white/10 glass shadow-glass">
-              <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
-                <p className="text-xs font-semibold text-text-vivid">Up next</p>
-                <button
-                  onClick={() => setNextCard(false)}
-                  aria-label="Cancel next episode"
-                  className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-[10px] font-bold text-white"
-                >
-                  <span className="font-mono">{countdown}</span>
-                </button>
-              </div>
-              <div className="p-4">
-                <p className="font-mono text-xs text-text-muted">
-                  S{String(seasonNum).padStart(2, "0")} E{String(episodeNum + 1).padStart(2, "0")}
-                </p>
-                <button
-                  onClick={playNextEpisode}
-                  disabled={busyResolve}
-                  className="mt-2 w-full rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-soft disabled:opacity-50"
-                >
-                  {busyResolve ? "Loading…" : "▶ Play next episode"}
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div
-            className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-3 pb-2 pt-10 transition-opacity duration-300 ${showControls ? "opacity-100" : "pointer-events-none opacity-0"
-              }`}
-          >
-            <div className="relative">
-              <input
-                type="range"
-                min={0}
-                max={duration || 0}
-                step={0.1}
-                value={currentTime}
-                aria-label="Seek"
-                aria-valuetext={`${fmtTime(currentTime)} of ${fmtTime(duration)}`}
-                onChange={(e) => {
-                  const v = Number(e.target.value);
-                  setCurrentTime(v);
-                  if (videoRef.current) videoRef.current.currentTime = v;
-                  syncState({ time: v });
-                }}
-                className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-brand"
-              />
-              {duration > 0 &&
-                cue &&
-                (() => {
-                  const marks = [
-                    { t: cue.intro_start, kind: "intro" as const },
-                    { t: cue.intro_end, kind: "intro" as const },
-                    { t: cue.outro_start, kind: "outro" as const },
-                    { t: cue.outro_end, kind: "outro" as const },
-                  ].filter((m): m is { t: number; kind: "intro" | "outro" } => typeof m.t === "number");
-                  return (
-                    <div className="pointer-events-none absolute inset-x-0 top-0 flex h-full items-center" aria-hidden="true">
-                      {marks.map((m, i) => (
-                        <span
-                          key={i}
-                          title={m.kind === "intro" ? "Intro" : "Outro"}
-                          className={`absolute top-1/2 h-2.5 w-0.5 -translate-y-1/2 ${m.kind === "intro" ? "bg-accent-amber" : "bg-accent-emerald"
-                            }`}
-                          style={{ left: `${Math.min(100, Math.max(0, (m.t / duration) * 100))}%` }}
-                        />
-                      ))}
-                    </div>
-                  );
-                })()}
-            </div>
-            <div className="mt-1 flex items-center gap-2 text-sm">
-              <button onClick={togglePlay} aria-label={playing ? "Pause" : "Play"} className="p-1.5 text-white hover:text-brand-soft">
-                {playing ? "❚❚" : "▶"}
-              </button>
-              {mediaType === "tv" && (
-                <button
-                  onClick={playNextEpisode}
-                  aria-label="Next episode"
-                  className="p-1.5 text-white hover:text-brand-soft"
-                  disabled={busyResolve}
-                >
-                  ⏭
-                </button>
-              )}
-              <button onClick={toggleMute} aria-label="Mute" className="p-1.5 text-white hover:text-brand-soft">
-                {muted || volume === 0 ? "🔇" : volume < 0.5 ? "🔉" : "🔊"}
-              </button>
-              <span className="font-mono text-xs tabular-nums text-text-muted">
-                {fmtTime(currentTime)} / {fmtTime(duration)}
-              </span>
-
-              <div className="ml-auto flex items-center gap-2">
-                <button
-                  onClick={cycleRate}
-                  aria-label="Playback speed"
-                  className="rounded border border-white/10 px-2 py-0.5 font-mono text-[11px] text-text-muted hover:border-brand/50 hover:text-white"
-                >
-                  {rate.toFixed(2)}x
-                </button>
-
-                {isHls && levels.length > 1 && (
-                  <div className="relative">
-                    <button
-                      onClick={() => setQualityOpen((v) => !v)}
-                      aria-label="Quality"
-                      aria-expanded={qualityOpen}
-                      className="rounded border border-white/10 px-2 py-0.5 font-mono text-[11px] text-text-muted hover:border-brand/50 hover:text-white"
-                    >
-                      {curLevel === -1 ? "Auto" : levels.find((l) => l.index === curLevel)?.label ?? "Auto"}
-                    </button>
-                    {qualityOpen && (
-                      <div className="absolute bottom-full right-0 z-20 mb-2 w-32 overflow-hidden rounded-lg border border-white/10 glass shadow-glass">
-                        <button
-                          onClick={() => setQuality(-1)}
-                          className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${curLevel === -1 ? "font-semibold text-brand-soft" : "text-text-vivid"
-                            }`}
-                        >
-                          Auto
-                        </button>
-                        {levels.map((l) => (
-                          <button
-                            key={l.index}
-                            onClick={() => setQuality(l.index)}
-                            className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${curLevel === l.index ? "font-semibold text-brand-soft" : "text-text-vivid"
-                              }`}
-                          >
-                            {l.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {mediaType === "tv" && (
-                  <div className="relative">
-                    <button
-                      onClick={() => setCueMenuOpen((v) => !v)}
-                      aria-label="Skip intro/outro settings"
-                      aria-expanded={cueMenuOpen}
-                      className="rounded border border-white/10 px-2 py-0.5 font-mono text-[11px] text-text-muted hover:border-brand/50 hover:text-white"
-                    >
-                      Cues
-                    </button>
-                    {cueMenuOpen && (
-                      <div className="absolute bottom-full right-0 z-20 mb-2 w-60 overflow-hidden rounded-lg border border-white/10 glass shadow-glass">
-                        {marking === "intro" ? (
-                          <button
-                            onClick={() => markCueEnd("intro")}
-                            className="block w-full px-3 py-2 text-left text-xs text-text-vivid hover:bg-white/5"
-                          >
-                            Set intro end (start {fmtTime(markingStart)})
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => markCueStart("intro")}
-                            className="block w-full px-3 py-2 text-left text-xs text-text-vivid hover:bg-white/5"
-                          >
-                            Mark intro start
-                          </button>
-                        )}
-                        {cue?.intro_start != null && (
-                          <button
-                            onClick={() => clearCue("intro")}
-                            className="block w-full px-3 py-2 text-left text-xs text-brand-soft hover:bg-white/5"
-                          >
-                            Clear intro
-                          </button>
-                        )}
-                        <div className="border-t border-white/10" />
-                        {marking === "outro" ? (
-                          <button
-                            onClick={() => markCueEnd("outro")}
-                            className="block w-full px-3 py-2 text-left text-xs text-text-vivid hover:bg-white/5"
-                          >
-                            Set outro end (start {fmtTime(markingStart)})
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => markCueStart("outro")}
-                            className="block w-full px-3 py-2 text-left text-xs text-text-vivid hover:bg-white/5"
-                          >
-                            Mark outro start
-                          </button>
-                        )}
-                        {cue?.outro_start != null && (
-                          <button
-                            onClick={() => clearCue("outro")}
-                            className="block w-full px-3 py-2 text-left text-xs text-brand-soft hover:bg-white/5"
-                          >
-                            Clear outro
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Addon Stream Source Picker */}
-                {addonStreams.length > 0 && (
-                  <div className="relative">
-                    <button
-                      onClick={() => { setAddonStreamMenuOpen((v) => !v); setSubtitleMenuOpen(false); }}
-                      aria-label="Add-on sources"
-                      aria-expanded={addonStreamMenuOpen}
-                      className="rounded border border-white/10 px-2 py-0.5 font-mono text-[11px] text-text-muted hover:border-brand/50 hover:text-white"
-                    >
-                      Sources ({addonStreams.length})
-                    </button>
-                    {addonStreamMenuOpen && (
-                      <div className="absolute bottom-full right-0 z-20 mb-2 w-64 overflow-hidden rounded-lg border border-white/10 glass shadow-glass">
-                        <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-text-muted border-b border-white/10">Add-on Sources</p>
-                        {addonStreams.map((stream) => (
-                          <button
-                            key={stream.id}
-                            onClick={() => {
-                              if (stream.url) {
-                                if (stream.url.startsWith("magnet:")) {
-                                  window.open(stream.url, "_blank");
-                                } else {
-                                  setSrc(stream.url);
-                                  setSelectedAddonStream(stream);
-                                }
-                              }
-                              setAddonStreamMenuOpen(false);
-                            }}
-                            className={`block w-full px-3 py-2 text-left text-xs hover:bg-white/5 ${
-                              selectedAddonStream?.id === stream.id ? "text-brand-soft font-semibold" : "text-text-vivid"
-                            }`}
-                          >
-                            <span className="flex items-center justify-between gap-2">
-                              <span className="truncate">{stream.title || stream.addon_name}</span>
-                              <span className="flex shrink-0 gap-1">
-                                {stream.quality && (
-                                  <span className="rounded bg-white/10 px-1 py-0.5 text-[9px] font-bold">{stream.quality}</span>
-                                )}
-                                {stream.is_torrent && (
-                                  <span className="rounded bg-yellow-500/20 px-1 py-0.5 text-[9px] font-bold text-yellow-400">P2P</span>
-                                )}
-                                {stream.is_direct && (
-                                  <span className="rounded bg-emerald-500/20 px-1 py-0.5 text-[9px] font-bold text-emerald-400">Direct</span>
-                                )}
-                              </span>
-                            </span>
-                            <span className="mt-0.5 block text-[10px] text-text-muted/60">{stream.addon_name}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Addon Subtitle Picker */}
-                {addonSubtitles.length > 0 && (
-                  <div className="relative">
-                    <button
-                      onClick={() => { setSubtitleMenuOpen((v) => !v); setAddonStreamMenuOpen(false); }}
-                      aria-label="Subtitles"
-                      aria-expanded={subtitleMenuOpen}
-                      className={`rounded border px-2 py-0.5 font-mono text-[11px] transition hover:text-white ${
-                        selectedSubtitle ? "border-brand/50 text-brand-soft" : "border-white/10 text-text-muted hover:border-brand/50"
-                      }`}
-                    >
-                      CC
-                    </button>
-                    {subtitleMenuOpen && (
-                      <div className="absolute bottom-full right-0 z-20 mb-2 w-48 overflow-hidden rounded-lg border border-white/10 glass shadow-glass">
-                        <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-text-muted border-b border-white/10">Subtitles</p>
-                        <button
-                          onClick={() => { setSelectedSubtitle(null); setSubtitleMenuOpen(false); }}
-                          className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${
-                            !selectedSubtitle ? "font-semibold text-brand-soft" : "text-text-vivid"
-                          }`}
-                        >
-                          Off
-                        </button>
-                        {addonSubtitles.map((sub) => (
-                          <button
-                            key={sub.id}
-                            onClick={() => { setSelectedSubtitle(sub.id); setSubtitleMenuOpen(false); }}
-                            className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${
-                              selectedSubtitle === sub.id ? "font-semibold text-brand-soft" : "text-text-vivid"
-                            }`}
-                          >
-                            {sub.language.toUpperCase()}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Download Button — direct authorized streams only, never torrent */}
-                {selectedAddonStream && selectedAddonStream.is_direct && !selectedAddonStream.is_torrent && selectedAddonStream.url && (
-                  <a
-                    href={selectedAddonStream.url}
-                    download
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Download this stream"
-                    title="Download direct stream"
-                    className="rounded border border-white/10 px-2 py-0.5 font-mono text-[11px] text-text-muted transition hover:border-brand/50 hover:text-white"
-                  >
-                    ↓
-                  </a>
-                )}
-
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {mediaType === "tv" && (
-        <section aria-label="Episode guide" className="glass mt-3 overflow-hidden rounded-2xl shadow-glass">
-          <div className="flex flex-wrap items-center gap-2 border-b border-white/10 px-4 py-3">
-            <div>
-              <p className="text-sm font-semibold text-text-vivid">Episodes</p>
-              <p className="text-[11px] text-text-muted">Choose an episode without leaving the player.</p>
-            </div>
-            {seasons.length > 1 && (
-              <div className="ml-auto flex max-w-full flex-wrap gap-1.5">
-                {seasons.map((s) => (
-                  <button key={s.season_number} onClick={() => setSeasonNum(s.season_number)} className={`rounded-full px-2.5 py-1 text-xs transition ${s.season_number === seasonNum ? "bg-brand text-white" : "border border-white/10 text-text-muted hover:border-brand/50"}`}>
-                    {s.name || `Season ${s.season_number}`}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="thin-scroll max-h-[28rem] overflow-y-auto p-2 sm:p-3">
-            {episodesLoading ? (
-              <p className="px-3 py-4 text-xs text-text-muted">Loading episodes...</p>
-            ) : episodes.length === 0 ? (
-              <p className="px-3 py-4 text-xs text-text-muted">Episodes are not available for this season yet.</p>
-            ) : (
-              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                {episodes.map((ep) => {
-                  const current = ep.episode_number === episodeNum;
-                  return (
-                    <button key={ep.episode_number} onClick={() => switchEpisode(seasonNum, ep.episode_number)} disabled={busyResolve || current} className={`min-h-16 rounded-xl px-3 py-2.5 text-left text-xs transition ${current ? "border border-brand/50 bg-brand/15 font-semibold text-brand-soft shadow-brand-glow" : "border border-white/10 text-text-vivid hover:border-brand/50 hover:bg-white/5"} disabled:cursor-default`}>
-                      <span className="flex items-center justify-between gap-2">
-                        <span className="font-mono text-[10px] text-text-muted">E{String(ep.episode_number).padStart(2, "0")}</span>
-                        {current && <span className="text-[10px] font-bold uppercase tracking-wide">Playing</span>}
-                      </span>
-                      <span className="mt-1 block truncate text-sm">{ep.name || `Episode ${ep.episode_number}`}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </section>
-      )}
-
+      {/* Floating Movie Night Chat Drawer (when connected in room) */}
       {roomCode && chatOpen && (
-        <div className="fixed bottom-4 right-4 z-30 flex h-80 w-72 flex-col overflow-hidden rounded-2xl border border-white/10 glass shadow-glass">
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
-            <p className="text-xs font-semibold text-text-vivid">Movie Night chat · {room.code}</p>
-            <button onClick={() => setChatOpen(false)} className="text-text-muted hover:text-text-vivid" aria-label="Close chat">
+        <div className="fixed bottom-4 right-4 z-40 flex h-96 w-80 flex-col overflow-hidden rounded-2xl border border-white/10 glass shadow-2xl">
+          <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5 bg-black/40">
+            <p className="text-xs font-semibold text-white">Movie Night Chat · {room.code}</p>
+            <button onClick={() => setChatOpen(false)} className="text-text-muted hover:text-white" aria-label="Close chat">
               ✕
             </button>
           </div>
@@ -1307,7 +1732,7 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
             {room.messages.map((msg, i) => (
               <div key={i} className="text-xs">
                 <span className="font-semibold text-brand-soft">{msg.sender}: </span>
-                <span className="text-text-vivid">{msg.text}</span>
+                <span className="text-white">{msg.text}</span>
               </div>
             ))}
             {room.messages.length === 0 && <p className="text-xs text-text-muted">Say hi to the room 👋</p>}
@@ -1317,14 +1742,14 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
               e.preventDefault();
               sendChat();
             }}
-            className="flex gap-2 border-t border-white/10 p-2"
+            className="flex gap-2 border-t border-white/10 p-2 bg-black/40"
           >
             <input
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
-              placeholder="Message"
+              placeholder="Message..."
               aria-label="Chat message"
-              className="flex-1 rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-xs text-text-vivid outline-none focus:border-gray-500"
+              className="flex-1 rounded-full border border-white/10 bg-black/40 px-3 py-1.5 text-xs text-white outline-none focus:border-brand"
             />
             <button type="submit" className="rounded-full bg-brand px-3 py-1.5 text-xs font-semibold text-white" disabled={!chatInput.trim()}>
               Send
@@ -1332,8 +1757,6 @@ export function Player({ streamUrl, contentType, provider: providerProp, tmdbId,
           </form>
         </div>
       )}
-
-      <Ad300x250 />
 
       <div aria-live="polite" className="sr-only">
         {announcement}
