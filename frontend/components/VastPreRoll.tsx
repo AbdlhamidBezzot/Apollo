@@ -32,11 +32,11 @@ export function VastPreRoll({ adTagUrl, onAdComplete }: VastPreRollProps) {
     let active = true;
 
     const timer = setTimeout(() => {
-      // Safety timeout: if VAST tag does not load media within 4s, skip cleanly
+      // Safety timeout: if VAST tag does not load media within 1.5s, skip cleanly
       if (active && !mediaFileUrl) {
         finishAd();
       }
-    }, 4000);
+    }, 1500);
 
     const parseVast = async (targetUrl: string, depth = 0): Promise<void> => {
       if (depth > 3 || !active) return;

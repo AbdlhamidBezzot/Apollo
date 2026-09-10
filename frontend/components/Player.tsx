@@ -119,6 +119,14 @@ export function Player({
   const [autoplayNext, setAutoplayNext] = useState(true);
   const [showPreRollAd, setShowPreRollAd] = useState(true);
 
+  const handleAdComplete = useCallback(() => {
+    setShowPreRollAd(false);
+    const video = videoRef.current;
+    if (video) {
+      video.play().catch(() => {});
+    }
+  }, []);
+
   const isHls = !embed && (contentType === "application/x-mpegURL" || /\.m3u8(\?|$)/i.test(src));
   const useHlsJs = !embed && isHls && typeof window !== "undefined" && Hls.isSupported();
 
@@ -963,7 +971,7 @@ export function Player({
               className="relative overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl"
               onDoubleClick={fullscreen}
             >
-              {showPreRollAd && <VastPreRoll onAdComplete={() => setShowPreRollAd(false)} />}
+              {showPreRollAd && <VastPreRoll onAdComplete={handleAdComplete} />}
               <iframe
                 src={embedSrc}
                 title={displayTitle}
@@ -1004,7 +1012,7 @@ export function Player({
               onPointerLeave={() => setShowControls(false)}
               onDoubleClick={fullscreen}
             >
-              {showPreRollAd && <VastPreRoll onAdComplete={() => setShowPreRollAd(false)} />}
+              {showPreRollAd && <VastPreRoll onAdComplete={handleAdComplete} />}
               <video
                 ref={videoRef}
                 src={useHlsJs ? undefined : src}
