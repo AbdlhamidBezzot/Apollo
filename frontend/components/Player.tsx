@@ -6,7 +6,6 @@ import Hls from "hls.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { del, get, post, put } from "@/lib/http";
 import { Ad300x250 } from "@/components/Ad300x250";
-import { VastPreRoll } from "@/components/VastPreRoll";
 import { useAuth } from "@/components/AuthContext";
 import { useMovieNight } from "@/lib/useMovieNight";
 
@@ -117,15 +116,6 @@ export function Player({
   const [nextCard, setNextCard] = useState(false);
   const [countdown, setCountdown] = useState(10);
   const [autoplayNext, setAutoplayNext] = useState(true);
-  const [showPreRollAd, setShowPreRollAd] = useState(true);
-
-  const handleAdComplete = useCallback(() => {
-    setShowPreRollAd(false);
-    const video = videoRef.current;
-    if (video) {
-      video.play().catch(() => {});
-    }
-  }, []);
 
   const isHls = !embed && (contentType === "application/x-mpegURL" || /\.m3u8(\?|$)/i.test(src));
   const useHlsJs = !embed && isHls && typeof window !== "undefined" && Hls.isSupported();
@@ -970,9 +960,7 @@ export function Player({
               ref={containerRef}
               className="relative overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl"
               onDoubleClick={fullscreen}
-            >
-              {showPreRollAd && <VastPreRoll onAdComplete={handleAdComplete} />}
-              <iframe
+            >              <iframe
                 src={embedSrc}
                 title={displayTitle}
                 allowFullScreen
@@ -1011,9 +999,7 @@ export function Player({
               onPointerMove={pokeControls}
               onPointerLeave={() => setShowControls(false)}
               onDoubleClick={fullscreen}
-            >
-              {showPreRollAd && <VastPreRoll onAdComplete={handleAdComplete} />}
-              <video
+            >              <video
                 ref={videoRef}
                 src={useHlsJs ? undefined : src}
                 poster={posterProp || detail?.backdrop_path ? `https://image.tmdb.org/t/p/w1280${detail?.backdrop_path}` : undefined}
