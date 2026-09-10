@@ -98,6 +98,7 @@ export interface User {
   name: string;
   is_admin: boolean;
   email_verified: boolean;
+  avatar?: string | null;
 }
 
 export interface Genre {

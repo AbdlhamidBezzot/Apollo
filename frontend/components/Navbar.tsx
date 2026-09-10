@@ -506,8 +506,13 @@ export function Navbar() {
                   aria-expanded={menuOpen}
                   className="flex h-10 items-center gap-2 rounded-full border border-white/15 bg-[#161824] hover:bg-[#1f2233] pl-1 pr-3 transition shadow-sm"
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand font-bold text-white shadow">
-                    {initials}
+                  <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-brand font-bold text-white shadow">
+                    {user.avatar ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
+                    ) : (
+                      initials
+                    )}
                   </span>
                   <span className="hidden max-w-[7rem] truncate text-sm font-medium text-text-vivid sm:block">
                     {user.name || user.email}

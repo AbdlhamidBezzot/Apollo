@@ -14,7 +14,7 @@ interface UserProfile {
 }
 
 export function ProfileClient() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, refresh, signOut } = useAuth();
   const router = useRouter();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -26,6 +26,7 @@ export function ProfileClient() {
 
   useEffect(() => {
     if (user) {
+      if (user.avatar) setAvatarUrl(user.avatar);
       get<UserProfile[]>("/api/v1/me/profiles")
         .then((profiles) => {
           if (profiles && profiles.length > 0 && profiles[0].avatar) {
@@ -57,12 +58,14 @@ export function ProfileClient() {
     e.preventDefault();
     if (!avatarUrl.trim()) return;
     setSavingAvatar(true);
+    setAvatarMessage("");
     try {
       await put("/api/v1/me/avatar", { avatar: avatarUrl.trim() });
-      setAvatarMessage("Profile picture updated!");
+      await refresh();
+      setAvatarMessage("Profile picture saved successfully!");
       setTimeout(() => setAvatarMessage(""), 3000);
     } catch {
-      setAvatarMessage("Could not update avatar picture.");
+      setAvatarMessage("Could not save profile picture.");
     } finally {
       setSavingAvatar(false);
     }
@@ -71,14 +74,41 @@ export function ProfileClient() {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      setAvatarMessage("Image must be smaller than 2MB.");
+    if (file.size > 10 * 1024 * 1024) {
+      setAvatarMessage("Image must be smaller than 10MB.");
       return;
     }
     const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === "string") {
-        setAvatarUrl(reader.result);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_SIZE = 300;
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height = Math.round((height * MAX_SIZE) / width);
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width = Math.round((width * MAX_SIZE) / height);
+            height = MAX_SIZE;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const resizedDataUrl = canvas.toDataURL("image/jpeg", 0.85);
+          setAvatarUrl(resizedDataUrl);
+          setAvatarMessage("Image ready! Click 'Save Profile Picture' below to confirm.");
+        }
+      };
+      if (typeof event.target?.result === "string") {
+        img.src = event.target.result;
       }
     };
     reader.readAsDataURL(file);
@@ -135,7 +165,7 @@ export function ProfileClient() {
           <div>
             <label className="block text-xs uppercase tracking-wide text-text-muted mb-1">Or paste Avatar Image URL</label>
             <input
-              type="url"
+              type="text"
               value={avatarUrl}
               onChange={(e) => setAvatarUrl(e.target.value)}
               placeholder="https://example.com/my-photo.jpg"

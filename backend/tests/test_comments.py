@@ -58,3 +58,13 @@ def test_comments_and_reactions_flow():
         )
         assert avatar_res.status_code == 200
         assert avatar_res.json()["avatar"] == "https://example.com/avatar.png"
+
+        # 8. Delete Comment
+        del_res = client.delete(f"/api/v1/comments/{comment_id}")
+        assert del_res.status_code == 204
+
+        # 9. Verify comment list is empty after deletion
+        r_after = client.get("/api/v1/comments/movie/550")
+        assert r_after.status_code == 200
+        assert len(r_after.json()) == 0
+

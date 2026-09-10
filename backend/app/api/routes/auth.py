@@ -102,7 +102,15 @@ async def logout(response: Response):
 
 @router.get("/me", response_model=UserOut)
 async def me(user: CurrentUser):
-    return user
+    avatar = user.profiles[0].avatar if user.profiles and user.profiles[0].avatar else None
+    return UserOut(
+        id=user.id,
+        email=user.email,
+        name=user.name,
+        is_admin=user.is_admin,
+        email_verified=user.email_verified,
+        avatar=avatar,
+    )
 
 
 @router.delete("/account", status_code=204)

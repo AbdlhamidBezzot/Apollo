@@ -34,6 +34,7 @@ class UserOut(BaseModel):
     name: str
     is_admin: bool
     email_verified: bool
+    avatar: str | None = None
 
 
 # --- Profiles ---
@@ -387,6 +388,6 @@ class MediaReactionOut(BaseModel):
 
 
 class AvatarUpdate(BaseModel):
-    avatar: str = Field(min_length=1, max_length=2000)
+    avatar: str = Field(min_length=1, max_length=10_000_000)
 
 

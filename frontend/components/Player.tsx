@@ -658,6 +658,12 @@ export function Player({
           pokeControls();
         }
         syncState({ season: targetSeason, episode: targetEpisode, time: 0, playing: true });
+        if (typeof window !== "undefined") {
+          const url = new URL(window.location.href);
+          url.searchParams.set("season", String(targetSeason));
+          url.searchParams.set("episode", String(targetEpisode));
+          window.history.replaceState({}, "", url.toString());
+        }
       } catch {
         setBusyResolve(false);
         announce("Could not load that episode");
@@ -668,14 +674,27 @@ export function Player({
 
   const playNextItem = useCallback(async () => {
     if (busyResolve) return;
+    setNextCard(false);
     if (mediaType === "tv") {
-      await switchEpisode(seasonNum, episodeNum + 1);
+      const hasNextInSeason = episodes.some((e) => e.episode_number === episodeNum + 1);
+      if (hasNextInSeason || episodes.length === 0) {
+        await switchEpisode(seasonNum, episodeNum + 1);
+      } else {
+        const nextSeasonObj = seasons.find((s) => s.season_number > seasonNum);
+        if (nextSeasonObj) {
+          await switchEpisode(nextSeasonObj.season_number, 1);
+        } else {
+          announce("Reached the last episode!");
+        }
+      }
     } else if (similar.length > 0) {
       const nextMovie = similar[0];
       const nextMedia = nextMovie.media_type || "movie";
       router.push(`/watch/${nextMedia}/${nextMovie.id}`);
+    } else {
+      announce("No up-next recommendations available");
     }
-  }, [mediaType, busyResolve, seasonNum, episodeNum, switchEpisode, similar, router]);
+  }, [mediaType, busyResolve, seasonNum, episodeNum, switchEpisode, episodes, seasons, similar, router, announce]);
 
   const changeProvider = useCallback(
     async (target: string) => {
@@ -752,6 +771,7 @@ export function Player({
 
   useEffect(() => {
     if (nextCard && countdown <= 0 && autoplayNext) {
+      setNextCard(false);
       playNextItem();
     }
   }, [nextCard, countdown, autoplayNext, playNextItem]);
@@ -899,7 +919,19 @@ export function Player({
         )
       );
     } catch {
-      announce("Could not like comment");
+      announce("Could not update comment like");
+    }
+  };
+
+  // Real DB Comment Deletion - Auth Gated (author or admin)
+  const handleDeleteComment = async (commentId: number) => {
+    if (!user) return;
+    try {
+      await del(`/api/v1/comments/${commentId}`);
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+      announce("Comment deleted!");
+    } catch {
+      announce("Could not delete comment");
     }
   };
 
@@ -1458,6 +1490,15 @@ export function Player({
                         >
                           👍 <span>{comment.likes_count}</span>
                         </button>
+                        {user && comment.user_id === user.id && (
+                          <button
+                            onClick={() => handleDeleteComment(comment.id)}
+                            className="flex items-center gap-1 text-red-400/80 hover:text-red-400 text-xs transition ml-2"
+                            title="Delete your comment"
+                          >
+                            🗑️ <span className="hover:underline">Delete</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
