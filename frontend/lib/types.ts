@@ -245,3 +245,23 @@ export interface MediaSubtitlesResponse {
   media_type: string;
   subtitles: ApolloSubtitle[];
 }
+
+export interface MediaComment {
+  id: number;
+  user_id: number;
+  tmdb_id: number;
+  media_type: string;
+  text: string;
+  author_name: string;
+  author_avatar?: string | null;
+  created_at: string;
+  likes_count: number;
+  is_liked: boolean;
+}
+
+export interface MediaReactionResponse {
+  likes_count: number;
+  dislikes_count: number;
+  user_reaction?: "like" | "dislike" | null;
+}
+

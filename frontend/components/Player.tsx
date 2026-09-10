@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Hls from "hls.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { del, get, post, put } from "@/lib/http";
@@ -13,6 +14,8 @@ import type {
   ApolloSubtitle,
   ContentListResponse,
   Episode,
+  MediaComment,
+  MediaReactionResponse,
   MediaStreamsResponse,
   MediaSubtitlesResponse,
   PlaybackCue,
@@ -39,16 +42,6 @@ interface PlaybackSession {
   stream_url: string;
   content_type: string;
   expires_at: string;
-}
-
-interface CommentItem {
-  id: string;
-  author: string;
-  avatar: string;
-  text: string;
-  timestamp: string;
-  likes: number;
-  isLiked?: boolean;
 }
 
 const PROGRESS_KEY = "apollo:progress";
@@ -85,6 +78,7 @@ export function Player({
   roomCode,
 }: PlayerProps) {
   const { user } = useAuth();
+  const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -162,42 +156,20 @@ export function Player({
   const idleTimer = useRef<number>(0);
   const announceTimer = useRef<number>(0);
 
-  // YouTube Action States
-  const [userVote, setUserVote] = useState<"like" | "dislike" | null>(null);
-  const [likeCount, setLikeCount] = useState(1420);
+  // Real Database Reactions & Watchlist
+  const [userReaction, setUserReaction] = useState<"like" | "dislike" | null>(null);
+  const [likesCount, setLikesCount] = useState(0);
+  const [dislikesCount, setDislikesCount] = useState(0);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [watchlistLoading, setWatchlistLoading] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
 
-  // YouTube Comments
-  const [comments, setComments] = useState<CommentItem[]>([
-    {
-      id: "c1",
-      author: "Alex Rivers",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
-      text: "The cinematography and sound design in this release are absolutely phenomenal! 10/10 streaming experience.",
-      timestamp: "2 hours ago",
-      likes: 42,
-    },
-    {
-      id: "c2",
-      author: "Marcus Chen",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80",
-      text: "Awesome server speed and HD quality. Apollo never disappoints 🔥",
-      timestamp: "5 hours ago",
-      likes: 19,
-    },
-    {
-      id: "c3",
-      author: "Elena Rostova",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
-      text: "Can't wait to watch the next episode! Movie Night feature made watching with friends super smooth.",
-      timestamp: "1 day ago",
-      likes: 8,
-    },
-  ]);
-  const [newComment, setNewComment] = useState("");
+  // Real Database Comments
+  const [comments, setComments] = useState<MediaComment[]>([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [newCommentText, setNewCommentText] = useState("");
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
 
   // Movie Night sync room
   const room = useMovieNight({
@@ -251,24 +223,23 @@ export function Player({
     }
   }, [tmdbId, mediaType]);
 
-  // Load Title Details, Similar titles, and Watchlist status
+  // Load Title Details, Similar titles, Reactions, and Comments
   useEffect(() => {
     let cancelled = false;
+
+    // Title Detail
     get<TitleDetail>(`/api/v1/content/${mediaType}/${tmdbId}`)
       .then((d) => {
-        if (!cancelled && d) {
-          setDetail(d);
-          if (d.vote_count) setLikeCount(Math.floor(d.vote_count / 8) + 120);
-        }
+        if (!cancelled && d) setDetail(d);
       })
       .catch(() => {});
 
+    // Similar
     get<ContentListResponse>(`/api/v1/content/${mediaType}/${tmdbId}/similar`)
       .then((res) => {
         if (!cancelled && res?.results?.length) {
           setSimilar(res.results.slice(0, 10).map((t) => ({ ...t, media_type: mediaType })));
         } else {
-          // Fallback to popular content if similar returns empty
           get<ContentListResponse>(`/api/v1/content/popular?media_type=${mediaType}`)
             .then((pop) => {
               if (!cancelled && pop?.results) {
@@ -280,6 +251,31 @@ export function Player({
       })
       .catch(() => {});
 
+    // Real DB Reactions
+    get<MediaReactionResponse>(`/api/v1/reactions/${mediaType}/${tmdbId}`)
+      .then((rx) => {
+        if (!cancelled && rx) {
+          setLikesCount(rx.likes_count || 0);
+          setDislikesCount(rx.dislikes_count || 0);
+          setUserReaction(rx.user_reaction || null);
+        }
+      })
+      .catch(() => {});
+
+    // Real DB Comments
+    setCommentsLoading(true);
+    get<MediaComment[]>(`/api/v1/comments/${mediaType}/${tmdbId}`)
+      .then((list) => {
+        if (!cancelled && Array.isArray(list)) {
+          setComments(list);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setCommentsLoading(false);
+      });
+
+    // Watchlist state
     if (user) {
       get<{ tmdb_id: number; media_type: string }[]>("/api/v1/me/watchlist")
         .then((list) => {
@@ -634,50 +630,6 @@ export function Player({
   const showSkipIntro = inWindow("intro");
   const showSkipOutro = inWindow("outro");
 
-  const markCueStart = (kind: "intro" | "outro") => {
-    const video = videoRef.current;
-    if (!video) return;
-    setMarking(kind);
-    setMarkingStart(video.currentTime);
-  };
-
-  const markCueEnd = async (kind: "intro" | "outro") => {
-    const video = videoRef.current;
-    if (!video) return;
-    const next: PlaybackCue = { tmdb_id: tmdbId, media_type: mediaType, season: seasonNum, episode: episodeNum };
-    const start = markingStart;
-    const end = video.currentTime;
-    if (kind === "intro") {
-      next.intro_start = Math.min(start, end);
-      next.intro_end = Math.max(start, end);
-      if (cue?.outro_start) next.outro_start = cue.outro_start;
-      if (cue?.outro_end) next.outro_end = cue.outro_end;
-    } else {
-      next.outro_start = Math.min(start, end);
-      next.outro_end = Math.max(start, end);
-      if (cue?.intro_start) next.intro_start = cue.intro_start;
-      if (cue?.intro_end) next.intro_end = cue.intro_end;
-    }
-    setMarking(null);
-    setCueMenuOpen(false);
-    announce(`Skip ${kind} set`);
-    await saveCue(next);
-  };
-
-  const clearCue = async (kind: "intro" | "outro") => {
-    const next: PlaybackCue = { tmdb_id: tmdbId, media_type: mediaType, season: seasonNum, episode: episodeNum };
-    if (kind === "intro") {
-      next.outro_start = cue?.outro_start ?? null;
-      next.outro_end = cue?.outro_end ?? null;
-    } else {
-      next.intro_start = cue?.intro_start ?? null;
-      next.intro_end = cue?.intro_end ?? null;
-    }
-    setMarking(null);
-    setCueMenuOpen(false);
-    await saveCue(next);
-  };
-
   const switchEpisode = useCallback(
     async (targetSeason: number, targetEpisode: number) => {
       if (mediaType !== "tv" || busyResolve) return;
@@ -714,10 +666,16 @@ export function Player({
     [mediaType, busyResolve, tmdbId, announce, pokeControls, syncState, provider]
   );
 
-  const playNextEpisode = useCallback(async () => {
-    if (mediaType !== "tv" || busyResolve) return;
-    await switchEpisode(seasonNum, episodeNum + 1);
-  }, [mediaType, busyResolve, seasonNum, episodeNum, switchEpisode]);
+  const playNextItem = useCallback(async () => {
+    if (busyResolve) return;
+    if (mediaType === "tv") {
+      await switchEpisode(seasonNum, episodeNum + 1);
+    } else if (similar.length > 0) {
+      const nextMovie = similar[0];
+      const nextMedia = nextMovie.media_type || "movie";
+      router.push(`/watch/${nextMedia}/${nextMovie.id}`);
+    }
+  }, [mediaType, busyResolve, seasonNum, episodeNum, switchEpisode, similar, router]);
 
   const changeProvider = useCallback(
     async (target: string) => {
@@ -775,13 +733,13 @@ export function Player({
   }, []);
 
   useEffect(() => {
-    if (embed || mediaType !== "tv") return;
+    if (embed) return;
     if (duration > 0 && duration - currentTime <= NEXT_CARD_SECONDS && currentTime > 0) {
       setNextCard(true);
     } else if (duration > 0 && duration - currentTime > NEXT_CARD_SECONDS) {
       setNextCard(false);
     }
-  }, [embed, mediaType, duration, currentTime]);
+  }, [embed, duration, currentTime]);
 
   useEffect(() => {
     if (!nextCard) {
@@ -793,8 +751,10 @@ export function Player({
   }, [nextCard]);
 
   useEffect(() => {
-    if (nextCard && countdown <= 0 && autoplayNext) playNextEpisode();
-  }, [nextCard, countdown, autoplayNext, playNextEpisode]);
+    if (nextCard && countdown <= 0 && autoplayNext) {
+      playNextItem();
+    }
+  }, [nextCard, countdown, autoplayNext, playNextItem]);
 
   // Keyboard controls
   useEffect(() => {
@@ -833,29 +793,40 @@ export function Player({
         else if (showSkipIntro) skipCue("intro");
       } else if (e.key === "N" && e.shiftKey) {
         e.preventDefault();
-        playNextEpisode();
+        playNextItem();
       }
       pokeControls();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [embed, togglePlay, fullscreen, toggleMute, seek, volume, setVol, playNextEpisode, pokeControls, skipCue, showSkipIntro, showSkipOutro]);
+  }, [embed, togglePlay, fullscreen, toggleMute, seek, volume, setVol, playNextItem, pokeControls, skipCue, showSkipIntro, showSkipOutro]);
 
-  // YouTube Actions Handlers
-  const handleLike = (isLike: boolean) => {
-    if (userVote === (isLike ? "like" : "dislike")) {
-      setUserVote(null);
-      if (isLike) setLikeCount((c) => c - 1);
-    } else {
-      if (userVote === "like") setLikeCount((c) => c - 1);
-      if (isLike) setLikeCount((c) => c + 1);
-      setUserVote(isLike ? "like" : "dislike");
+  // Real DB Title Reaction (Like / Dislike) - Auth Gated
+  const handleMediaReaction = async (targetReaction: "like" | "dislike") => {
+    if (!user) {
+      announce("Please sign in to like or dislike titles.");
+      return;
+    }
+    const nextRx = userReaction === targetReaction ? "none" : targetReaction;
+    try {
+      const updated = await post<MediaReactionResponse>("/api/v1/reactions", {
+        tmdb_id: tmdbId,
+        media_type: mediaType,
+        reaction: nextRx,
+      });
+      setUserReaction(updated.user_reaction || null);
+      setLikesCount(updated.likes_count || 0);
+      setDislikesCount(updated.dislikes_count || 0);
+      announce(nextRx === "none" ? "Reaction removed" : `Marked as ${nextRx}`);
+    } catch {
+      announce("Could not save reaction");
     }
   };
 
+  // Watchlist Toggle
   const toggleWatchlist = async () => {
     if (!user) {
-      announce("Please log in to save to your watchlist");
+      announce("Please sign in to save to your watchlist");
       return;
     }
     setWatchlistLoading(true);
@@ -887,19 +858,49 @@ export function Player({
     }
   };
 
-  const handleAddComment = (e: React.FormEvent) => {
+  // Real DB Comment Submission - Auth Gated
+  const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
-    const added: CommentItem = {
-      id: `c-${Date.now()}`,
-      author: user?.name || user?.email || "Guest Viewer",
-      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80",
-      text: newComment.trim(),
-      timestamp: "Just now",
-      likes: 0,
-    };
-    setComments([added, ...comments]);
-    setNewComment("");
+    if (!user) {
+      announce("Please sign in to post a comment.");
+      return;
+    }
+    const text = newCommentText.trim();
+    if (!text || commentSubmitting) return;
+
+    setCommentSubmitting(true);
+    try {
+      const added = await post<MediaComment>("/api/v1/comments", {
+        tmdb_id: tmdbId,
+        media_type: mediaType,
+        text,
+      });
+      setComments([added, ...comments]);
+      setNewCommentText("");
+      announce("Comment posted!");
+    } catch {
+      announce("Could not post comment");
+    } finally {
+      setCommentSubmitting(false);
+    }
+  };
+
+  // Real DB Comment Upvoting - Auth Gated
+  const toggleCommentLike = async (commentId: number) => {
+    if (!user) {
+      announce("Please sign in to like comments.");
+      return;
+    }
+    try {
+      const res = await post<{ liked: boolean; likes_count: number }>(`/api/v1/comments/${commentId}/like`);
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === commentId ? { ...c, is_liked: res.liked, likes_count: res.likes_count } : c
+        )
+      );
+    } catch {
+      announce("Could not like comment");
+    }
   };
 
   const sendChat = () => {
@@ -997,10 +998,8 @@ export function Player({
                 }}
                 onEnded={() => {
                   setPlaying(false);
-                  if (mediaType === "tv") {
-                    setNextCard(true);
-                    setCountdown(10);
-                  }
+                  setNextCard(true);
+                  setCountdown(10);
                 }}
               >
                 {addonSubtitles.map((sub) => (
@@ -1049,28 +1048,42 @@ export function Player({
                 </button>
               )}
 
-              {nextCard && mediaType === "tv" && (
-                <div className="absolute bottom-24 right-4 w-72 overflow-hidden rounded-xl border border-white/10 glass shadow-glass">
+              {nextCard && (mediaType === "tv" || similar.length > 0) && (
+                <div className="absolute bottom-24 right-4 z-30 w-72 overflow-hidden rounded-2xl border border-white/15 bg-black/85 backdrop-blur-md shadow-2xl">
                   <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
-                    <p className="text-xs font-semibold text-text-vivid">Up next</p>
+                    <p className="text-xs font-bold text-white">Up next in {countdown}s</p>
                     <button
                       onClick={() => setNextCard(false)}
-                      aria-label="Cancel next episode"
-                      className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-[10px] font-bold text-white"
+                      aria-label="Cancel autoplay"
+                      className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 text-xs font-bold text-white hover:bg-white/30"
                     >
-                      <span className="font-mono">{countdown}</span>
+                      ✕
                     </button>
                   </div>
-                  <div className="p-4">
-                    <p className="font-mono text-xs text-text-muted">
-                      S{String(seasonNum).padStart(2, "0")} E{String(episodeNum + 1).padStart(2, "0")}
-                    </p>
+                  <div className="p-3.5 space-y-2">
+                    {mediaType === "tv" ? (
+                      <>
+                        <p className="font-mono text-xs text-brand-soft font-semibold">
+                          S{String(seasonNum).padStart(2, "0")} E{String(episodeNum + 1).padStart(2, "0")}
+                        </p>
+                        <p className="text-xs text-white line-clamp-1 font-medium">
+                          {episodes.find((e) => e.episode_number === episodeNum + 1)?.name || `Episode ${episodeNum + 1}`}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="font-mono text-xs text-brand-soft font-semibold">Recommended Movie</p>
+                        <p className="text-xs text-white line-clamp-1 font-medium">
+                          {similar[0]?.title || similar[0]?.name || "Next Movie"}
+                        </p>
+                      </>
+                    )}
                     <button
-                      onClick={playNextEpisode}
+                      onClick={playNextItem}
                       disabled={busyResolve}
-                      className="mt-2 w-full rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-soft disabled:opacity-50"
+                      className="mt-2 w-full rounded-lg bg-brand px-4 py-2 text-xs font-bold text-white shadow-brand-glow transition hover:bg-brand-soft disabled:opacity-50"
                     >
-                      {busyResolve ? "Loading…" : "▶ Play next episode"}
+                      {busyResolve ? "Loading..." : mediaType === "tv" ? "▶ Play next episode" : "▶ Play next movie"}
                     </button>
                   </div>
                 </div>
@@ -1099,30 +1112,6 @@ export function Player({
                     }}
                     className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-brand hover:h-2 transition-all"
                   />
-                  {duration > 0 &&
-                    cue &&
-                    (() => {
-                      const marks = [
-                        { t: cue.intro_start, kind: "intro" as const },
-                        { t: cue.intro_end, kind: "intro" as const },
-                        { t: cue.outro_start, kind: "outro" as const },
-                        { t: cue.outro_end, kind: "outro" as const },
-                      ].filter((m): m is { t: number; kind: "intro" | "outro" } => typeof m.t === "number");
-                      return (
-                        <div className="pointer-events-none absolute inset-x-0 top-0 flex h-full items-center" aria-hidden="true">
-                          {marks.map((m, i) => (
-                            <span
-                              key={i}
-                              title={m.kind === "intro" ? "Intro" : "Outro"}
-                              className={`absolute top-1/2 h-2.5 w-0.5 -translate-y-1/2 ${
-                                m.kind === "intro" ? "bg-amber-400" : "bg-emerald-400"
-                              }`}
-                              style={{ left: `${Math.min(100, Math.max(0, (m.t / duration) * 100))}%` }}
-                            />
-                          ))}
-                        </div>
-                      );
-                    })()}
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
@@ -1130,11 +1119,15 @@ export function Player({
                     <button onClick={togglePlay} aria-label={playing ? "Pause" : "Play"} className="text-white hover:text-brand-soft text-lg">
                       {playing ? "❚❚" : "▶"}
                     </button>
-                    {mediaType === "tv" && (
-                      <button onClick={playNextEpisode} aria-label="Next episode" className="text-white hover:text-brand-soft" disabled={busyResolve}>
-                        ⏭
-                      </button>
-                    )}
+                    <button
+                      onClick={playNextItem}
+                      aria-label="Next"
+                      title={mediaType === "tv" ? "Next episode" : "Next movie"}
+                      className="text-white hover:text-brand-soft text-sm p-1 disabled:opacity-40"
+                      disabled={busyResolve || (mediaType === "movie" && similar.length === 0)}
+                    >
+                      ⏭
+                    </button>
                     <button onClick={toggleMute} aria-label="Mute" className="text-white hover:text-brand-soft">
                       {muted || volume === 0 ? "🔇" : volume < 0.5 ? "🔉" : "🔊"}
                     </button>
@@ -1188,114 +1181,7 @@ export function Player({
                       </div>
                     )}
 
-                    {/* Addon Stream Picker */}
-                    {addonStreams.length > 0 && (
-                      <div className="relative">
-                        <button
-                          onClick={() => {
-                            setAddonStreamMenuOpen((v) => !v);
-                            setSubtitleMenuOpen(false);
-                          }}
-                          aria-label="Add-on sources"
-                          aria-expanded={addonStreamMenuOpen}
-                          className="rounded border border-white/10 px-2 py-0.5 font-mono text-[11px] text-text-muted hover:border-brand/50 hover:text-white"
-                        >
-                          Sources ({addonStreams.length})
-                        </button>
-                        {addonStreamMenuOpen && (
-                          <div className="absolute bottom-full right-0 z-20 mb-2 w-64 overflow-hidden rounded-lg border border-white/10 glass shadow-glass">
-                            <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-text-muted border-b border-white/10">
-                              Add-on Sources
-                            </p>
-                            {addonStreams.map((stream) => (
-                              <button
-                                key={stream.id}
-                                onClick={() => {
-                                  if (stream.url) {
-                                    if (stream.url.startsWith("magnet:")) {
-                                      window.open(stream.url, "_blank");
-                                    } else {
-                                      setSrc(stream.url);
-                                      setSelectedAddonStream(stream);
-                                    }
-                                  }
-                                  setAddonStreamMenuOpen(false);
-                                }}
-                                className={`block w-full px-3 py-2 text-left text-xs hover:bg-white/5 ${
-                                  selectedAddonStream?.id === stream.id ? "text-brand-soft font-semibold" : "text-text-vivid"
-                                }`}
-                              >
-                                <span className="flex items-center justify-between gap-2">
-                                  <span className="truncate">{stream.title || stream.addon_name}</span>
-                                  <span className="flex shrink-0 gap-1">
-                                    {stream.quality && (
-                                      <span className="rounded bg-white/10 px-1 py-0.5 text-[9px] font-bold">{stream.quality}</span>
-                                    )}
-                                  </span>
-                                </span>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Subtitles */}
-                    {addonSubtitles.length > 0 && (
-                      <div className="relative">
-                        <button
-                          onClick={() => {
-                            setSubtitleMenuOpen((v) => !v);
-                            setAddonStreamMenuOpen(false);
-                          }}
-                          aria-label="Subtitles"
-                          aria-expanded={subtitleMenuOpen}
-                          className={`rounded border px-2 py-0.5 font-mono text-[11px] transition hover:text-white ${
-                            selectedSubtitle ? "border-brand/50 text-brand-soft" : "border-white/10 text-text-muted hover:border-brand/50"
-                          }`}
-                        >
-                          CC
-                        </button>
-                        {subtitleMenuOpen && (
-                          <div className="absolute bottom-full right-0 z-20 mb-2 w-48 overflow-hidden rounded-lg border border-white/10 glass shadow-glass">
-                            <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-text-muted border-b border-white/10">
-                              Subtitles
-                            </p>
-                            <button
-                              onClick={() => {
-                                setSelectedSubtitle(null);
-                                setSubtitleMenuOpen(false);
-                              }}
-                              className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${
-                                !selectedSubtitle ? "font-semibold text-brand-soft" : "text-text-vivid"
-                              }`}
-                            >
-                              Off
-                            </button>
-                            {addonSubtitles.map((sub) => (
-                              <button
-                                key={sub.id}
-                                onClick={() => {
-                                  setSelectedSubtitle(sub.id);
-                                  setSubtitleMenuOpen(false);
-                                }}
-                                className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${
-                                  selectedSubtitle === sub.id ? "font-semibold text-brand-soft" : "text-text-vivid"
-                                }`}
-                              >
-                                {sub.language.toUpperCase()}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    <button
-                      onClick={fullscreen}
-                      aria-label="Toggle fullscreen"
-                      className="text-white hover:text-brand-soft"
-                    >
+                    <button onClick={fullscreen} aria-label="Toggle fullscreen" className="text-white hover:text-brand-soft">
                       ⛶
                     </button>
                   </div>
@@ -1340,26 +1226,27 @@ export function Player({
 
             {/* Action Pills Group */}
             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-              {/* Like / Dislike Pill */}
+              {/* Real DB Like / Dislike Pill (Auth Gated) */}
               <div className="flex items-center rounded-full bg-white/10 border border-white/5 divide-x divide-white/10 overflow-hidden">
                 <button
-                  onClick={() => handleLike(true)}
+                  onClick={() => handleMediaReaction("like")}
                   className={`flex items-center gap-1.5 px-3.5 py-2 transition hover:bg-white/15 ${
-                    userVote === "like" ? "text-brand-soft font-bold" : "text-white"
+                    userReaction === "like" ? "text-brand-soft font-bold bg-white/10" : "text-white"
                   }`}
-                  title="I like this"
+                  title={user ? "I like this" : "Sign in to like"}
                 >
                   <span className="text-sm">👍</span>
-                  <span>{likeCount.toLocaleString()}</span>
+                  <span>{likesCount}</span>
                 </button>
                 <button
-                  onClick={() => handleLike(false)}
-                  className={`px-3 py-2 transition hover:bg-white/15 ${
-                    userVote === "dislike" ? "text-brand-soft font-bold" : "text-white"
+                  onClick={() => handleMediaReaction("dislike")}
+                  className={`px-3 py-2 flex items-center gap-1 transition hover:bg-white/15 ${
+                    userReaction === "dislike" ? "text-brand-soft font-bold bg-white/10" : "text-white"
                   }`}
-                  title="I dislike this"
+                  title={user ? "I dislike this" : "Sign in to dislike"}
                 >
                   <span className="text-sm">👎</span>
+                  {dislikesCount > 0 && <span>{dislikesCount}</span>}
                 </button>
               </div>
 
@@ -1436,7 +1323,6 @@ export function Player({
             className="rounded-2xl bg-[#272727]/60 hover:bg-[#272727]/90 border border-white/5 p-4 transition cursor-pointer text-sm text-text-vivid"
           >
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-semibold text-xs text-white mb-2">
-              <span>{(detail?.vote_count ? detail.vote_count * 38 : 124500).toLocaleString()} views</span>
               <span>{detail?.release_date || detail?.first_air_date || "2024"}</span>
               {detail?.vote_average ? (
                 <span className="flex items-center gap-1 text-amber-400">★ {detail.vote_average.toFixed(1)}/10</span>
@@ -1475,7 +1361,7 @@ export function Player({
             </button>
           </div>
 
-          {/* YouTube Comments Section */}
+          {/* Real Database Comments Section */}
           <div className="pt-4 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
@@ -1484,77 +1370,99 @@ export function Player({
               </h2>
             </div>
 
-            {/* Comment Form */}
-            <form onSubmit={handleAddComment} className="flex gap-3 items-start">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-white font-bold text-sm">
-                {user?.name?.[0]?.toUpperCase() || "U"}
-              </div>
-              <div className="flex-1 space-y-2">
-                <input
-                  type="text"
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Add a comment..."
-                  className="w-full border-b border-white/20 bg-transparent px-1 py-1.5 text-sm text-white placeholder-text-muted outline-none focus:border-brand transition"
-                />
-                {newComment.trim() && (
-                  <div className="flex justify-end gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setNewComment("")}
-                      className="rounded-full px-4 py-1.5 text-xs font-medium text-text-muted hover:text-white transition"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="rounded-full bg-brand px-4 py-1.5 text-xs font-semibold text-white shadow-brand-glow transition hover:bg-brand-soft"
-                    >
-                      Comment
-                    </button>
-                  </div>
-                )}
-              </div>
-            </form>
-
-            {/* Comments List */}
-            <div className="space-y-4 pt-2">
-              {comments.map((comment) => (
-                <div key={comment.id} className="flex gap-3 text-sm">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={comment.avatar}
-                    alt={comment.author}
-                    className="h-9 w-9 rounded-full object-cover shrink-0"
-                  />
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-xs text-white">{comment.author}</span>
-                      <span className="text-[11px] text-text-muted">{comment.timestamp}</span>
-                    </div>
-                    <p className="text-sm text-text-vivid leading-normal">{comment.text}</p>
-                    <div className="flex items-center gap-3 text-xs text-text-muted pt-1">
-                      <button
-                        onClick={() => {
-                          setComments((prev) =>
-                            prev.map((c) =>
-                              c.id === comment.id
-                                ? { ...c, likes: c.isLiked ? c.likes - 1 : c.likes + 1, isLiked: !c.isLiked }
-                                : c
-                            )
-                          );
-                        }}
-                        className={`flex items-center gap-1 hover:text-white transition ${
-                          comment.isLiked ? "text-brand-soft font-bold" : ""
-                        }`}
-                      >
-                        👍 <span>{comment.likes}</span>
-                      </button>
-                      <button className="hover:text-white transition">Reply</button>
-                    </div>
-                  </div>
+            {/* Comment Submission Form (Auth Gated) */}
+            {user ? (
+              <form onSubmit={handleAddComment} className="flex gap-3 items-start">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-white font-bold text-sm shadow-md overflow-hidden">
+                  {user.name?.[0]?.toUpperCase() || "U"}
                 </div>
-              ))}
+                <div className="flex-1 space-y-2">
+                  <input
+                    type="text"
+                    value={newCommentText}
+                    onChange={(e) => setNewCommentText(e.target.value)}
+                    placeholder="Add a public comment..."
+                    disabled={commentSubmitting}
+                    className="w-full border-b border-white/20 bg-transparent px-1 py-1.5 text-sm text-white placeholder-text-muted outline-none focus:border-brand transition disabled:opacity-50"
+                  />
+                  {newCommentText.trim() && (
+                    <div className="flex justify-end gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setNewCommentText("")}
+                        className="rounded-full px-4 py-1.5 text-xs font-medium text-text-muted hover:text-white transition"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={commentSubmitting}
+                        className="rounded-full bg-brand px-4 py-1.5 text-xs font-semibold text-white shadow-brand-glow transition hover:bg-brand-soft disabled:opacity-50"
+                      >
+                        {commentSubmitting ? "Posting..." : "Comment"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </form>
+            ) : (
+              <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-center">
+                <p className="text-xs text-text-muted mb-2">Sign in to leave a comment and share your thoughts.</p>
+                <Link
+                  href="/login"
+                  className="inline-block rounded-full bg-brand px-5 py-1.5 text-xs font-semibold text-white shadow-brand-glow transition hover:bg-brand-soft"
+                >
+                  Sign In to Comment
+                </Link>
+              </div>
+            )}
+
+            {/* Real Comments Feed */}
+            <div className="space-y-4 pt-2">
+              {commentsLoading ? (
+                <div className="py-6 text-center text-xs text-text-muted animate-pulse">Loading comments...</div>
+              ) : comments.length === 0 ? (
+                <div className="rounded-2xl border border-white/5 bg-white/5 p-8 text-center text-sm text-text-muted">
+                  💬 No comments yet. Be the first to share your thoughts on this title!
+                </div>
+              ) : (
+                comments.map((comment) => (
+                  <div key={comment.id} className="flex gap-3 text-sm">
+                    {comment.author_avatar ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={comment.author_avatar}
+                        alt={comment.author_name}
+                        className="h-9 w-9 rounded-full object-cover shrink-0 border border-white/10"
+                      />
+                    ) : (
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-brand to-purple-600 text-white font-bold text-xs shadow-sm">
+                        {comment.author_name?.[0]?.toUpperCase() || "A"}
+                      </div>
+                    )}
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-xs text-white truncate">{comment.author_name}</span>
+                        <span className="text-[11px] text-text-muted">
+                          {new Date(comment.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-text-vivid leading-normal break-words">{comment.text}</p>
+                      <div className="flex items-center gap-3 text-xs text-text-muted pt-1">
+                        <button
+                          onClick={() => toggleCommentLike(comment.id)}
+                          className={`flex items-center gap-1 transition ${
+                            comment.is_liked ? "text-brand-soft font-bold" : "hover:text-white"
+                          }`}
+                          title={user ? "Like comment" : "Sign in to like"}
+                        >
+                          👍 <span>{comment.likes_count}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -1719,7 +1627,7 @@ export function Player({
         </div>
       </div>
 
-      {/* Floating Movie Night Chat Drawer (when connected in room) */}
+      {/* Floating Movie Night Chat Drawer */}
       {roomCode && chatOpen && (
         <div className="fixed bottom-4 right-4 z-40 flex h-96 w-80 flex-col overflow-hidden rounded-2xl border border-white/10 glass shadow-2xl">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5 bg-black/40">

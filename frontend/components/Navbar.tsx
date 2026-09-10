@@ -218,7 +218,7 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
           e.preventDefault();
           if (q.trim().length >= 2) go(`/search?q=${encodeURIComponent(q.trim())}`);
         }}
-        className="glass flex h-10 items-center gap-2.5 rounded-full px-3.5"
+        className="flex h-10 items-center gap-2.5 rounded-full px-3.5 bg-[#141722] border border-white/15 focus-within:bg-[#1a1d2b] focus-within:border-brand/60 shadow-md transition"
       >
         <Icon name="searchIcon" className="h-4 w-4 text-text-muted" />
         <input
@@ -230,13 +230,13 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
           aria-label="Search"
           className="w-full bg-transparent text-sm text-text-vivid outline-none placeholder:text-text-muted"
         />
-        <kbd className="hidden rounded-md border border-white/10 bg-white/5 px-1.5 py-0.5 font-mono text-[10px] text-text-muted sm:block">
+        <kbd className="hidden rounded-md border border-white/10 bg-white/10 px-1.5 py-0.5 font-mono text-[10px] text-text-muted sm:block">
           ⌘K
         </kbd>
       </form>
 
       {open && q.trim().length >= 2 && (
-        <div className="glass animate-rise absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl shadow-glass">
+        <div className="animate-rise absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl bg-[#12141d] border border-white/20 shadow-2xl">
           <div className="flex items-center gap-1 border-b border-white/10 p-2">
             {(
               [
@@ -504,9 +504,9 @@ export function Navbar() {
                   onClick={() => setMenuOpen((v) => !v)}
                   aria-haspopup="menu"
                   aria-expanded={menuOpen}
-                  className="flex h-10 items-center gap-2 rounded-full border border-white/10 bg-white/5 pl-1 pr-2 transition hover:border-white/20"
+                  className="flex h-10 items-center gap-2 rounded-full border border-white/15 bg-[#161824] hover:bg-[#1f2233] pl-1 pr-3 transition shadow-sm"
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand font-bold text-white">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand font-bold text-white shadow">
                     {initials}
                   </span>
                   <span className="hidden max-w-[7rem] truncate text-sm font-medium text-text-vivid sm:block">
@@ -516,7 +516,7 @@ export function Navbar() {
                 {menuOpen && (
                   <div
                     role="menu"
-                    className="glass animate-rise absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-2xl shadow-glass"
+                    className="animate-rise absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-2xl bg-[#12141d] border border-white/20 shadow-2xl"
                   >
                     {[
                       { href: "/my-list", label: "My List" },
@@ -529,7 +529,7 @@ export function Navbar() {
                         href={l.href}
                         onClick={() => setMenuOpen(false)}
                         role="menuitem"
-                        className="block px-4 py-2.5 text-sm text-text-muted transition hover:bg-white/5 hover:text-text-vivid"
+                        className="block px-4 py-2.5 text-sm text-text-muted transition hover:bg-white/10 hover:text-text-vivid"
                       >
                         {l.label}
                       </Link>
@@ -538,7 +538,7 @@ export function Navbar() {
                       <button
                         onClick={doSignOut}
                         role="menuitem"
-                        className="block w-full px-4 py-2.5 text-left text-sm text-brand-soft transition hover:bg-white/5"
+                        className="block w-full px-4 py-2.5 text-left text-sm text-brand-soft transition hover:bg-white/10"
                       >
                         Sign out
                       </button>
@@ -549,7 +549,7 @@ export function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="flex h-10 items-center rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-text-vivid transition hover:border-white/20"
+                className="flex h-10 items-center rounded-full border border-white/15 bg-[#161824] hover:bg-brand hover:border-brand px-4 text-sm font-semibold text-white transition shadow-sm"
               >
                 Sign in
               </Link>

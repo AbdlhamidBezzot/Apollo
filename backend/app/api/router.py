@@ -7,6 +7,7 @@ from .routes import (
     admin_addons,
     auth,
     chatbot,
+    comments,
     contact,
     content,
     football,
@@ -22,6 +23,7 @@ api_router.include_router(auth.router)
 api_router.include_router(content.router)
 api_router.include_router(football.router)
 api_router.include_router(me.router)
+api_router.include_router(comments.router)
 api_router.include_router(chatbot.router)
 api_router.include_router(playback.router)
 api_router.include_router(movie_night.router)

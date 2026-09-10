@@ -307,3 +307,55 @@ class UserAddonPreference(Base):
     catalog_addon: Mapped[AddonCatalog] = relationship(back_populates="user_preferences")
 
 
+class MediaComment(Base):
+    """User comments on titles (movies/TV)."""
+
+    __tablename__ = "media_comments"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id", ondelete="CASCADE"), index=True)
+    tmdb_id: Mapped[int] = mapped_column(Integer, index=True)
+    media_type: Mapped[str] = mapped_column(String(10), index=True)
+    text: Mapped[str] = mapped_column(String(2000), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+
+    user: Mapped[User] = relationship()
+    profile: Mapped[Profile] = relationship()
+    likes: Mapped[list[CommentLike]] = relationship(back_populates="comment", cascade="all, delete-orphan")
+
+
+class CommentLike(Base):
+    """Upvotes on individual comments."""
+
+    __tablename__ = "comment_likes"
+    __table_args__ = (
+        UniqueConstraint("user_id", "comment_id", name="uq_user_comment_like"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    comment_id: Mapped[int] = mapped_column(ForeignKey("media_comments.id", ondelete="CASCADE"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    comment: Mapped[MediaComment] = relationship(back_populates="likes")
+
+
+class MediaReaction(Base):
+    """Per-user like or dislike on a movie/TV title."""
+
+    __tablename__ = "media_reactions"
+    __table_args__ = (
+        UniqueConstraint("user_id", "tmdb_id", "media_type", name="uq_user_media_reaction"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id", ondelete="CASCADE"), index=True)
+    tmdb_id: Mapped[int] = mapped_column(Integer, index=True)
+    media_type: Mapped[str] = mapped_column(String(10), index=True)
+    reaction: Mapped[str] = mapped_column(String(10))  # "like" or "dislike"
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+

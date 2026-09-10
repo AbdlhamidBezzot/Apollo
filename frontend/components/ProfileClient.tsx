@@ -2,15 +2,39 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthContext";
-import { del } from "@/lib/http";
+import { del, get, put } from "@/lib/http";
+
+interface UserProfile {
+  id: number;
+  display_name: string;
+  avatar: string | null;
+  is_kids: boolean;
+}
 
 export function ProfileClient() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // Avatar states
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [savingAvatar, setSavingAvatar] = useState(false);
+  const [avatarMessage, setAvatarMessage] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      get<UserProfile[]>("/api/v1/me/profiles")
+        .then((profiles) => {
+          if (profiles && profiles.length > 0 && profiles[0].avatar) {
+            setAvatarUrl(profiles[0].avatar);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [user]);
 
   const doSignOut = async () => {
     await signOut();
@@ -27,6 +51,37 @@ export function ProfileClient() {
       setDeleting(false);
       setConfirmingDelete(false);
     }
+  };
+
+  const handleSaveAvatar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!avatarUrl.trim()) return;
+    setSavingAvatar(true);
+    try {
+      await put("/api/v1/me/avatar", { avatar: avatarUrl.trim() });
+      setAvatarMessage("Profile picture updated!");
+      setTimeout(() => setAvatarMessage(""), 3000);
+    } catch {
+      setAvatarMessage("Could not update avatar picture.");
+    } finally {
+      setSavingAvatar(false);
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarMessage("Image must be smaller than 2MB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === "string") {
+        setAvatarUrl(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   if (loading) {
@@ -50,9 +105,58 @@ export function ProfileClient() {
   }
 
   return (
-    <div className="mx-auto max-w-xl px-4 py-12">
-      <h1 className="mb-6 text-3xl font-extrabold tracking-tight text-text-vivid">Account Settings</h1>
-      <div className="glass space-y-4 rounded-3xl p-6 shadow-glass">
+    <div className="mx-auto max-w-xl px-4 py-12 space-y-8">
+      <h1 className="text-3xl font-extrabold tracking-tight text-text-vivid">Account Settings</h1>
+
+      {/* Profile Picture Section */}
+      <div className="glass space-y-4 rounded-3xl p-6 shadow-glass border border-white/10">
+        <h2 className="text-lg font-bold text-text-vivid">Profile Picture</h2>
+        <div className="flex items-center gap-4">
+          <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-brand/50 bg-gradient-to-tr from-brand to-purple-600 shadow-md">
+            {avatarUrl ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img src={avatarUrl} alt={user.name} className="h-full w-full object-cover" />
+            ) : (
+              <span className="text-3xl font-bold text-white">{user.name?.[0]?.toUpperCase() || "U"}</span>
+            )}
+          </div>
+          <div className="flex-1 min-w-0 space-y-2">
+            <p className="text-xs text-text-muted">
+              Add your image URL or upload a photo to display alongside your comments and reviews.
+            </p>
+            <label className="inline-block cursor-pointer rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-white/20">
+              <span>Choose Image File...</span>
+              <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+            </label>
+          </div>
+        </div>
+
+        <form onSubmit={handleSaveAvatar} className="space-y-3 pt-2">
+          <div>
+            <label className="block text-xs uppercase tracking-wide text-text-muted mb-1">Or paste Avatar Image URL</label>
+            <input
+              type="url"
+              value={avatarUrl}
+              onChange={(e) => setAvatarUrl(e.target.value)}
+              placeholder="https://example.com/my-photo.jpg"
+              className="w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2 text-sm text-text-vivid outline-none focus:border-brand"
+            />
+          </div>
+          {avatarMessage && (
+            <p className="text-xs font-semibold text-brand-soft">{avatarMessage}</p>
+          )}
+          <button
+            type="submit"
+            disabled={savingAvatar || !avatarUrl.trim()}
+            className="rounded-full bg-brand px-6 py-2 text-xs font-bold text-white shadow-brand-glow transition hover:bg-brand-soft disabled:opacity-50"
+          >
+            {savingAvatar ? "Saving..." : "Save Profile Picture"}
+          </button>
+        </form>
+      </div>
+
+      {/* Account Info Section */}
+      <div className="glass space-y-4 rounded-3xl p-6 shadow-glass border border-white/10">
         <div>
           <p className="text-xs uppercase tracking-wide text-text-muted">Display name</p>
           <p className="mt-1 text-lg font-semibold text-text-vivid">{user.name}</p>
@@ -74,7 +178,8 @@ export function ProfileClient() {
         </button>
       </div>
 
-      <div className="mt-8">
+      {/* Danger Zone */}
+      <div>
         {confirmingDelete ? (
           <div className="rounded-3xl border border-red-500/30 bg-red-500/5 p-6">
             <h2 className="mb-1 text-lg font-bold text-red-400">Delete your account?</h2>

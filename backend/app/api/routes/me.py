@@ -11,6 +11,7 @@ from app.core.ratelimit import rate_limited
 from app.db import get_db
 from app.models import Preferences, Profile, Rating, WatchHistory, WatchlistItem
 from app.schemas import (
+    AvatarUpdate,
     PreferencesUpdate,
     ProfileCreate,
     ProfileOut,
@@ -202,3 +203,12 @@ async def list_ratings(profile: CurrentProfile, db: DbDep):
         {"tmdb_id": r.tmdb_id, "media_type": r.media_type, "rating": r.rating}
         for r in db.query(Rating).filter(Rating.profile_id == profile.id).all()
     ]
+
+
+@router.put("/avatar", response_model=ProfileOut)
+async def update_avatar(payload: AvatarUpdate, profile: CurrentProfile, db: DbDep):
+    profile.avatar = payload.avatar.strip()
+    db.commit()
+    db.refresh(profile)
+    return profile
+

@@ -22,13 +22,6 @@ from app.core.diagnostics import DiagnosticsMiddleware
 from app.core.errors import sanitize_detail
 from app.core.ratelimit import get_rate_limiter
 from app.db import engine, init_db
-from app.api.router import api_router
-from app.core.cache import get_cache
-from app.core.config import get_settings
-from app.core.diagnostics import DiagnosticsMiddleware
-from app.core.errors import sanitize_detail
-from app.core.ratelimit import get_rate_limiter
-from app.db import engine, init_db
 from app.services.tmdb import TMDbError, tmdb
 
 settings = get_settings()

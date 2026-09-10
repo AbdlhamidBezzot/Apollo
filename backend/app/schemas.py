@@ -351,3 +351,42 @@ class MediaSubtitlesResponse(BaseModel):
     media_type: MediaType
     subtitles: list[ApolloSubtitle] = []
 
+
+# --- Comments & Reactions ---
+class CommentCreate(BaseModel):
+    tmdb_id: int
+    media_type: MediaType
+    text: str = Field(min_length=1, max_length=2000)
+
+
+class CommentOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    user_id: int
+    tmdb_id: int
+    media_type: str
+    text: str
+    author_name: str
+    author_avatar: str | None = None
+    created_at: datetime
+    likes_count: int = 0
+    is_liked: bool = False
+
+
+class MediaReactionCreate(BaseModel):
+    tmdb_id: int
+    media_type: MediaType
+    reaction: Literal["like", "dislike", "none"]
+
+
+class MediaReactionOut(BaseModel):
+    likes_count: int = 0
+    dislikes_count: int = 0
+    user_reaction: Literal["like", "dislike"] | None = None
+
+
+class AvatarUpdate(BaseModel):
+    avatar: str = Field(min_length=1, max_length=2000)
+
+
