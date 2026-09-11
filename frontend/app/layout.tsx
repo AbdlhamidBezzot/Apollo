@@ -98,49 +98,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </Suspense>
           <main className="min-h-screen pb-8 lg:pl-24">
             {children}
-            {/* Adsterra Native Banner */}
-            <Script
-              id="adsterra-native-banner"
-              async
-              data-cfasync="false"
-              src="https://heavenlysuspicious.com/57a45f319b0d3f47845ad8b9059b61de/invoke.js"
-              strategy="afterInteractive"
-            />
-            <div id="container-57a45f319b0d3f47845ad8b9059b61de"></div>
-            {/* Adsterra Banner 728x90 */}
-            <Script id="adsterra-banner-728x90-options" strategy="afterInteractive">
-              {`
-                atOptions = {
-                  'key' : 'fed15ec2b808ad78b95f3757737d2162',
-                  'format' : 'iframe',
-                  'height' : 90,
-                  'width' : 728,
-                  'params' : {}
-                };
-              `}
-            </Script>
-            <Script
-              id="adsterra-banner-728x90"
-              src="https://heavenlysuspicious.com/fed15ec2b808ad78b95f3757737d2162/invoke.js"
-              strategy="afterInteractive"
-            />
-            {/* Adsterra Banner 300x250 */}
-            <Script id="adsterra-banner-300x250-options" strategy="afterInteractive">
-              {`
-                atOptions = {
-                  'key' : '287263a21170b0b4fcc6f62ad64c9425',
-                  'format' : 'iframe',
-                  'height' : 250,
-                  'width' : 300,
-                  'params' : {}
-                };
-              `}
-            </Script>
-            <Script
-              id="adsterra-banner-300x250"
-              src="https://heavenlysuspicious.com/287263a21170b0b4fcc6f62ad64c9425/invoke.js"
-              strategy="afterInteractive"
-            />
           </main>
           <div className="lg:pl-24"><Footer /></div>
           <ChatBot />

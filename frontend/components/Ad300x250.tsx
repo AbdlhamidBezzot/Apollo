@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 
 interface AdBannerProps {
   className?: string;
-  label?: string;
   format?: string;
 }
 
@@ -19,31 +18,26 @@ export function Ad300x250({ className = "" }: AdBannerProps) {
     const wrapper = containerRef.current;
     wrapper.innerHTML = "";
 
-    const executeBanner = () => {
-      const script = document.createElement("script");
-      script.type = "text/javascript";
-      script.text = `
-        if (window.aclib && typeof window.aclib.runBanner === 'function') {
-          aclib.runBanner({
-            zoneId: '12133806',
-          });
-        }
-      `;
-      wrapper.appendChild(script);
-    };
+    // Set atOptions first, then load the invoke script — order matters
+    const optionsScript = document.createElement("script");
+    optionsScript.type = "text/javascript";
+    optionsScript.text = `
+      atOptions = {
+        'key' : 'fed15ec2b808ad78b95f3757737d2162',
+        'format' : 'iframe',
+        'height' : 90,
+        'width' : 728,
+        'params' : {}
+      };
+    `;
+    wrapper.appendChild(optionsScript);
 
-    if (typeof window !== "undefined" && (window as any).aclib && typeof (window as any).aclib.runBanner === "function") {
-      executeBanner();
-    } else {
-      const interval = setInterval(() => {
-        if ((window as any).aclib && typeof (window as any).aclib.runBanner === "function") {
-          clearInterval(interval);
-          executeBanner();
-        }
-      }, 100);
-
-      return () => clearInterval(interval);
-    }
+    const invokeScript = document.createElement("script");
+    invokeScript.type = "text/javascript";
+    invokeScript.src =
+      "https://heavenlysuspicious.com/fed15ec2b808ad78b95f3757737d2162/invoke.js";
+    invokeScript.async = true;
+    wrapper.appendChild(invokeScript);
   }, []);
 
   return (
