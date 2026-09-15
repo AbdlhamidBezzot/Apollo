@@ -21,7 +21,7 @@ const config: Config = {
           glow: "rgba(255, 10, 71, 0.35)",
         },
         "text-vivid": "#FFFFFF",
-        "text-muted": "#94A3B8",
+        "text-muted": "#B6C2D2",
         "accent-emerald": "#10B981",
         "accent-amber": "#F59E0B",
 

@@ -76,9 +76,9 @@ export function DiscoveryHub() {
 
   return (
     <section className="mx-auto max-w-7xl px-4">
-      <div className="glass rounded-3xl p-5">
+      <div className="glass rounded-2xl p-5 sm:p-6">
         <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-brand-soft">Made for your evening</p>
-        <h2 className="mb-4 mt-1 text-2xl font-extrabold tracking-tightest text-text-vivid">Explore every platform</h2>
+        <h2 className="mb-4 mt-1 text-2xl font-extrabold text-text-vivid">Explore every platform</h2>
         <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto pb-2">
           {PROVIDERS.map((item) => (
             <button
@@ -86,17 +86,17 @@ export function DiscoveryHub() {
               type="button"
               onClick={() => setProvider(item)}
               aria-pressed={provider.id === item.id}
-              className={`shrink-0 rounded-xl border px-4 py-2 text-sm font-bold transition ${
+              className={`shrink-0 rounded-xl border px-4 py-2.5 text-sm font-bold transition ${
                 provider.id === item.id
                   ? "border-brand bg-brand/15 text-white shadow-brand-glow"
-                  : "border-white/10 text-text-muted hover:border-white/30 hover:text-text-vivid"
+                  : "border-white/25 bg-white/[0.04] text-white/85 hover:border-white/50 hover:bg-white/[0.08] hover:text-white"
               }`}
             >
               {item.name}
             </button>
           ))}
         </div>
-        <p className="mb-3 text-xs text-text-muted">
+        <p className="mb-3 text-sm text-white/80">
           Streaming on <span className="font-semibold text-text-vivid">{provider.name}</span> in the United States
         </p>
         <div className="no-scrollbar flex min-h-[216px] gap-3 overflow-x-auto pb-2">
@@ -269,7 +269,7 @@ export function FeaturedEditorialSection() {
 
 export function Footer() {
   return (
-    <footer className="mx-auto max-w-7xl px-4 pb-12 pt-16 text-text-muted">
+    <footer className="mx-auto max-w-7xl px-4 pb-12 pt-12 text-white/75">
       <div className="border-t border-white/10 pt-10">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-5 mb-10">
           <div className="md:col-span-2">
@@ -283,7 +283,7 @@ export function Footer() {
 
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-text-vivid mb-3">Discovery</h3>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-3 text-sm">
               <li><Link href="/browse?kind=trending" className="hover:text-white transition">Trending Titles</Link></li>
               <li><Link href="/browse?media_type=movie" className="hover:text-white transition">Movies</Link></li>
               <li><Link href="/browse?media_type=tv" className="hover:text-white transition">TV Shows</Link></li>
@@ -294,7 +294,7 @@ export function Footer() {
 
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-text-vivid mb-3">Editorial & Content</h3>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-3 text-sm">
               <li><Link href="/editorial" className="font-semibold text-brand-soft hover:text-white transition">Editorial Hub</Link></li>
               <li><Link href="/editorial/top-sci-fi-masterpieces-2020s" className="hover:text-white transition">Sci-Fi Guides</Link></li>
               <li><Link href="/editorial/ultimate-anime-canon-filler-guide" className="hover:text-white transition">Anime Filler Guides</Link></li>
@@ -305,7 +305,7 @@ export function Footer() {
 
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-text-vivid mb-3">Legal & Company</h3>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-3 text-sm">
               <li><Link href="/about" className="hover:text-white transition">About Us</Link></li>
               <li><Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
               <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>

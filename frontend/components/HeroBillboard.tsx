@@ -86,6 +86,8 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
 
       <div className="relative mx-auto flex h-full max-w-7xl items-end px-4 pb-16 lg:px-8">
         <div className="max-w-2xl">
+          <p className="mb-2 text-sm font-semibold text-white/90">Discover what to watch next</p>
+          <h1 className="mb-3 text-4xl font-extrabold leading-[1.1] text-text-vivid sm:text-6xl">Find your next great watch.</h1>
           <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
             <span className="rounded-md bg-accent-emerald/90 px-2 py-0.5 font-bold text-black">{match}% Match</span>
             {item.vote_average ? (
@@ -100,7 +102,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
             </span>
           </div>
 
-          <h2 className="mb-3 text-4xl font-extrabold leading-[1.1] tracking-tightest text-text-vivid sm:text-6xl">
+          <h2 className="mb-3 text-xl font-bold leading-tight text-text-vivid sm:text-2xl">
             {shownTitle}
           </h2>
 
@@ -113,12 +115,12 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
             ))}
           </div>
 
-          <p className="mb-6 max-w-xl text-sm leading-relaxed text-text-muted line-clamp-3">{item.overview}</p>
+          <p className="mb-6 max-w-xl text-base leading-relaxed text-white/85 line-clamp-2">{item.overview}</p>
 
           <div className="flex flex-wrap items-center gap-3">
             <Link
               href={watchHref}
-              className="flex items-center gap-2 rounded-full bg-brand px-7 py-2.5 text-sm font-bold text-white shadow-brand-glow-lg transition hover:bg-brand-soft"
+              className="flex min-h-11 items-center gap-2 rounded-full bg-brand px-7 py-2.5 text-sm font-bold text-white shadow-brand-glow-lg transition hover:bg-brand-soft"
             >
               <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden="true">
                 <path d="M7 5l12 7-12 7V5z" />
@@ -127,35 +129,10 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
             </Link>
             <Link
               href={href}
-              className="glass rounded-full px-7 py-2.5 text-sm font-semibold text-text-vivid transition hover:bg-white/10"
+              className="glass flex min-h-11 items-center rounded-full px-7 py-2.5 text-sm font-semibold text-text-vivid transition hover:bg-white/10"
             >
               Details
             </Link>
-            <button
-              onClick={() => {
-                loadDetail();
-                setTrailerOpen(true);
-              }}
-              disabled={!trailerKey && !castOpen}
-              className="glass flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold text-text-vivid transition hover:bg-white/10 disabled:opacity-50"
-            >
-              <svg className="h-4 w-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-              Trailer
-            </button>
-            <button
-              onClick={() => {
-                loadDetail();
-                setCastOpen(true);
-              }}
-              className="glass flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold text-text-vivid transition hover:bg-white/10"
-            >
-              <svg className="h-4 w-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              Cast
-            </button>
           </div>
         </div>
       </div>

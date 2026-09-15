@@ -565,7 +565,7 @@ export function Navbar() {
               onClick={() => setMobileOpen((v) => !v)}
               aria-label="Toggle menu"
               aria-expanded={mobileOpen}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-text-muted hover:text-text-vivid lg:hidden"
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-white/85 hover:text-text-vivid lg:hidden"
             >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 {mobileOpen ? (

@@ -98,19 +98,13 @@ export function HomeClient() {
   const hasAnyItems = trending.length > 0 || popularMovies.length > 0 || popularTv.length > 0 || topRated.length > 0;
 
   return (
-    <div className="space-y-12 pb-4">
-      <h1 className="sr-only">Apollo — Discover Movies &amp; TV Shows</h1>
+    <div className="space-y-10 pb-4">
       {/* Hero Billboard */}
 
       {trending.length > 0 ? (
         <HeroBillboard slides={trending} />
       ) : loading ? (
-        <div className="relative mx-auto mt-6 h-[400px] sm:h-[520px] w-full max-w-7xl overflow-hidden rounded-3xl bg-surface-dark border border-white/5 animate-pulse flex items-center justify-center">
-          <div className="text-center px-4">
-            <div className="h-8 w-48 rounded bg-white/10 mx-auto mb-3" />
-            <p className="text-xs text-text-muted">Connecting to stream catalog…</p>
-          </div>
-        </div>
+        <section className="relative mx-auto mt-6 flex h-[400px] w-full max-w-7xl items-end overflow-hidden rounded-3xl border border-white/10 bg-bg-surface px-5 pb-14 sm:h-[520px] sm:px-8"><div className="max-w-2xl"><p className="mb-2 text-sm font-semibold text-white/90">Discover what to watch next</p><h1 className="text-4xl font-extrabold leading-[1.1] text-text-vivid sm:text-6xl">Find your next great watch.</h1><p className="mt-4 max-w-lg text-base leading-relaxed text-white/85">Browse movies and series across the streaming services you already use.</p><div className="mt-6 h-11 w-36 animate-pulse rounded-full bg-white/15" aria-label="Loading featured title" /></div></section>
       ) : null}
 
       <ContinueWatchingRow />
