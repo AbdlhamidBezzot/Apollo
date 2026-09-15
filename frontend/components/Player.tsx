@@ -961,6 +961,9 @@ export function Player({
               className="relative overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl"
               onDoubleClick={fullscreen}
             >              <iframe
+                // Embed providers do not always reliably reload when only src changes.
+                // Key the frame by the selected episode so a playlist click starts the requested stream.
+                key={`${tmdbId}-${seasonNum}-${episodeNum}-${embedSrc}`}
                 src={embedSrc}
                 title={displayTitle}
                 allowFullScreen
