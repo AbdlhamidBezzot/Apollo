@@ -136,7 +136,6 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
 
   return (
     <Player
-      key={`${mediaType}-${id}-${searchParams.get("season") || 1}-${searchParams.get("episode") || 1}`}
       streamUrl={session.stream_url}
       contentType={session.content_type}
       provider={session.provider}
