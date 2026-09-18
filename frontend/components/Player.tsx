@@ -82,19 +82,28 @@ export function Player({
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Add-ons & Subtitles
+  const [addonSubtitles, setAddonSubtitles] = useState<ApolloSubtitle[]>([]);
+  const [selectedSubtitle, setSelectedSubtitle] = useState<string | null>(null);
+  const [subtitleMenuOpen, setSubtitleMenuOpen] = useState(false);
+  const [addonStreams, setAddonStreams] = useState<ApolloStream[]>([]);
+  const [selectedAddonStream, setSelectedAddonStream] = useState<ApolloStream | null>(null);
+  const [addonStreamMenuOpen, setAddonStreamMenuOpen] = useState<boolean>(false);
+
   // Playback States
   const [rate, setRate] = useState(1);
   const [savedPos, setSavedPos] = useState(0);
   const lastReport = useRef(0);
-  const [provider, setProvider] = useState<string>(providerProp || "cinemaos");
-  const embed = isEmbed(contentType);
+  const [provider, setProvider] = useState<string>(providerProp || "videasy");
+  const [activeContentType, setActiveContentType] = useState<string>(contentType);
+  const embed = !selectedAddonStream && isEmbed(activeContentType);
   const embedGotRealProgress = useRef(false);
 
   const [src, setSrc] = useState(streamUrl);
   const [seasonNum, setSeasonNum] = useState(season ?? 1);
   const [episodeNum, setEpisodeNum] = useState(episode ?? 1);
   const [busyResolve, setBusyResolve] = useState(false);
-  const [providers, setProviders] = useState<string[]>(["cinemaos", "videasy", "vidsrc"]);
+  const [providers, setProviders] = useState<string[]>(["videasy", "vidsrc", "cinemaos"]);
 
   // Details & Recommendations
   const [detail, setDetail] = useState<TitleDetail | null>(null);
@@ -103,48 +112,7 @@ export function Player({
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [episodesLoading, setEpisodesLoading] = useState(false);
 
-  // Player controls
-  const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(false);
-  const [volume, setVolume] = useState(1);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [showControls, setShowControls] = useState(true);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [announcement, setAnnouncement] = useState("");
 
-  const [nextCard, setNextCard] = useState(false);
-  const [countdown, setCountdown] = useState(10);
-  const [autoplayNext, setAutoplayNext] = useState(true);
-
-  const isHls = !embed && (contentType === "application/x-mpegURL" || /\.m3u8(\?|$)/i.test(src));
-  const useHlsJs = !embed && isHls && typeof window !== "undefined" && Hls.isSupported();
-
-  // Embed provider URL
-  const embedSrc = useMemo(() => {
-    if (!embed) return src;
-    try {
-      const u = new URL(src, window.location.href);
-      if (!u.searchParams.has("color")) u.searchParams.set("color", "FF0A47");
-      if (savedPos > 5) u.searchParams.set("progress", String(Math.floor(savedPos)));
-      return u.toString();
-    } catch {
-      return src;
-    }
-  }, [embed, src, savedPos]);
-
-  const hlsRef = useRef<Hls | null>(null);
-  const [levels, setLevels] = useState<{ index: number; height: number; label: string }[]>([]);
-  const [curLevel, setCurLevel] = useState(-1);
-  const [qualityOpen, setQualityOpen] = useState(false);
-
-  // Add-ons & Subtitles
-  const [addonSubtitles, setAddonSubtitles] = useState<ApolloSubtitle[]>([]);
-  const [selectedSubtitle, setSelectedSubtitle] = useState<string | null>(null);
-  const [subtitleMenuOpen, setSubtitleMenuOpen] = useState(false);
-  const [addonStreams, setAddonStreams] = useState<ApolloStream[]>([]);
-  const [selectedAddonStream, setSelectedAddonStream] = useState<ApolloStream | null>(null);
-  const [addonStreamMenuOpen, setAddonStreamMenuOpen] = useState<boolean>(false);
 
   // Cues & Skip
   const [cue, setCue] = useState<PlaybackCue | null>(null);
@@ -165,11 +133,48 @@ export function Player({
   const [shareCopied, setShareCopied] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
 
+  // Player controls
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [showControls, setShowControls] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [announcement, setAnnouncement] = useState("");
+
+  const [nextCard, setNextCard] = useState(false);
+  const [countdown, setCountdown] = useState(10);
+  const [autoplayNext, setAutoplayNext] = useState(true);
+
+  const isHls = !embed && (activeContentType === "application/x-mpegURL" || /\.m3u8(\?|$)/i.test(src));
+  const useHlsJs = !embed && isHls && typeof window !== "undefined" && Hls.isSupported();
+
+  // Embed provider URL
+  const embedSrc = useMemo(() => {
+    if (!embed) return src;
+    try {
+      const u = new URL(src, window.location.href);
+      if (!u.searchParams.has("color")) u.searchParams.set("color", "FF0A47");
+      if (savedPos > 5) u.searchParams.set("progress", String(Math.floor(savedPos)));
+      return u.toString();
+    } catch {
+      return src;
+    }
+  }, [embed, src, savedPos]);
+
+  const hlsRef = useRef<Hls | null>(null);
+  const [levels, setLevels] = useState<{ index: number; height: number; label: string }[]>([]);
+  const [curLevel, setCurLevel] = useState(-1);
+  const [qualityOpen, setQualityOpen] = useState(false);
+
+
   // Real Database Comments
   const [comments, setComments] = useState<MediaComment[]>([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [newCommentText, setNewCommentText] = useState("");
   const [commentSubmitting, setCommentSubmitting] = useState(false);
+
 
   // Movie Night sync room
   const room = useMovieNight({
@@ -698,7 +703,7 @@ export function Player({
 
   const changeProvider = useCallback(
     async (target: string) => {
-      if (busyResolve || target === provider) return;
+      if (busyResolve || (target === provider && !selectedAddonStream)) return;
       setBusyResolve(true);
       try {
         const res = await post<PlaybackSession>("/api/v1/playback/resolve", {
@@ -708,6 +713,8 @@ export function Player({
           episode: episodeNum,
           provider: target,
         });
+        setSelectedAddonStream(null);
+        setActiveContentType(res.content_type || "text/html");
         setSrc(res.stream_url);
         setProvider(target);
         embedGotRealProgress.current = false;
@@ -723,7 +730,7 @@ export function Player({
         setBusyResolve(false);
       }
     },
-    [busyResolve, provider, tmdbId, mediaType, seasonNum, episodeNum, announce, providers]
+    [busyResolve, provider, selectedAddonStream, tmdbId, mediaType, seasonNum, episodeNum, announce, providers]
   );
 
   useEffect(() => {
@@ -738,7 +745,7 @@ export function Player({
         } catch {
           /* ignore */
         }
-        const current = providerProp || "cinemaos";
+        const current = providerProp || "videasy";
         if (pref && pref !== current && list.includes(pref)) {
           changeProvider(pref);
         } else if (!list.includes(current)) {
@@ -750,6 +757,7 @@ export function Player({
       cancelled = true;
     };
   }, []);
+
 
   useEffect(() => {
     if (embed) return;
@@ -1315,9 +1323,9 @@ export function Player({
                     <button
                       key={p}
                       onClick={() => changeProvider(p)}
-                      disabled={busyResolve || p === provider}
+                      disabled={busyResolve || (p === provider && !selectedAddonStream)}
                       className={`rounded-full px-3 py-1.5 text-xs font-semibold transition disabled:cursor-default ${
-                        p === provider ? "bg-brand text-white shadow-sm" : "text-text-muted hover:text-white"
+                        p === provider && !selectedAddonStream ? "bg-brand text-white shadow-sm" : "text-text-muted hover:text-white"
                       }`}
                     >
                       Server {idx + 1}
@@ -1325,6 +1333,75 @@ export function Player({
                   ))}
                 </div>
               )}
+
+              {/* Addon / Torrent Streams Dropdown Selector */}
+              {addonStreams.length > 0 && (
+                <div className="relative">
+                  <button
+                    onClick={() => setAddonStreamMenuOpen((v) => !v)}
+                    className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold border transition ${
+                      selectedAddonStream
+                        ? "bg-brand text-white border-brand shadow-brand-glow font-bold"
+                        : "bg-white/10 text-white border-white/5 hover:bg-white/15"
+                    }`}
+                  >
+                    <span>⚡</span>
+                    <span className="max-w-[140px] truncate">
+                      {selectedAddonStream
+                        ? selectedAddonStream.title || selectedAddonStream.addon_name
+                        : `Addon Streams (${addonStreams.length})`}
+                    </span>
+                    <span className="text-[10px]">▼</span>
+                  </button>
+                  {addonStreamMenuOpen && (
+                    <div className="absolute bottom-full right-0 z-40 mb-2 w-80 max-h-72 overflow-y-auto rounded-2xl border border-white/15 bg-black/90 p-2 shadow-2xl backdrop-blur-md">
+                      <div className="flex items-center justify-between border-b border-white/10 px-3 py-2 mb-1">
+                        <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted">
+                          Direct Addon Streams
+                        </p>
+                        <span className="text-[10px] text-brand-soft font-mono font-semibold">
+                          {addonStreams.length} found
+                        </span>
+                      </div>
+                      <div className="space-y-1">
+                        {addonStreams.map((st) => (
+                          <button
+                            key={st.id}
+                            onClick={() => {
+                              setSelectedAddonStream(st);
+                              setSrc(st.url || "");
+                              setActiveContentType(
+                                st.is_direct || st.url?.includes(".m3u8") ? "application/x-mpegURL" : "video/mp4"
+                              );
+                              setProvider(st.addon_name);
+                              setAddonStreamMenuOpen(false);
+                              announce(`Playing ${st.title || st.addon_name}`);
+                            }}
+                            className={`block w-full rounded-xl px-3 py-2 text-left text-xs transition hover:bg-white/10 ${
+                              selectedAddonStream?.id === st.id ? "bg-brand/25 font-bold text-brand-soft border border-brand/30" : "text-white"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="truncate font-semibold">{st.title || st.addon_name}</span>
+                              {st.quality && (
+                                <span className="shrink-0 rounded bg-brand/30 px-1.5 py-0.5 text-[10px] font-bold text-brand-soft">
+                                  {st.quality}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 mt-0.5 text-[10px] text-text-muted">
+                              <span>{st.addon_name}</span>
+                              {st.is_torrent && <span className="text-amber-400 font-medium">• Torrent</span>}
+                              {st.is_direct && <span className="text-emerald-400 font-medium">• Direct</span>}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
 
               {/* Watch Party Room */}
               {roomCode && (

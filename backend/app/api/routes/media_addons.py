@@ -51,14 +51,14 @@ async def get_media_streams(
     apollo_streams = [
         ApolloStream(
             id=s["id"],
-            addon_id=s["addonId"],
-            addon_name=s["addonName"],
+            addon_id=s["addon_id"],
+            addon_name=s["addon_name"],
             title=s.get("title"),
             quality=s.get("quality"),
             language=s.get("language"),
             url=s.get("url"),
-            is_direct=s.get("isDirect", False),
-            is_torrent=s.get("isTorrent", False),
+            is_direct=s.get("is_direct", False),
+            is_torrent=s.get("is_torrent", False),
             subtitles=[
                 ApolloSubtitle(id=sub["id"], language=sub["language"], url=sub["url"])
                 for sub in s.get("subtitles", [])

@@ -87,14 +87,14 @@ def classify_stream(raw_stream: dict[str, Any], addon_id: str, addon_name: str, 
 
     return {
         "id": stream_id,
-        "addonId": addon_id,
-        "addonName": addon_name,
+        "addon_id": addon_id,
+        "addon_name": addon_name,
         "title": title,
         "quality": quality,
         "language": raw_stream.get("language"),
         "url": url,
-        "isDirect": is_direct,
-        "isTorrent": is_torrent,
+        "is_direct": is_direct,
+        "is_torrent": is_torrent,
         "subtitles": subtitles,
         "metadata": {
             "behaviorHints": raw_stream.get("behaviorHints", {}),
