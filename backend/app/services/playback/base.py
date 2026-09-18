@@ -43,9 +43,9 @@ def get_provider_registry() -> dict[str, type[PlaybackProvider]]:
     from . import cinemaos, videasy, vidsrc
 
     return {
+        "cinemaos": cinemaos.CinemaOSPlaybackProvider,
         "videasy": videasy.VideasyPlaybackProvider,
         "vidsrc": vidsrc.VidsrcPlaybackProvider,
-        "cinemaos": cinemaos.CinemaOSPlaybackProvider,
     }
 
 
@@ -57,7 +57,7 @@ def available_providers() -> list[str]:
 def get_provider(name: str | None = None) -> PlaybackProvider:
     from app.core.config import get_settings
 
-    selected = (name or get_settings().playback_provider or "videasy").lower()
+    selected = (name or get_settings().playback_provider or "cinemaos").lower()
     provider_cls = get_provider_registry().get(selected)
     if provider_cls is None:
         raise ValueError(f"Unknown playback provider: {selected}")

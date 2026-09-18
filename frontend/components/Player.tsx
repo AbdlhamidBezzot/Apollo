@@ -94,7 +94,7 @@ export function Player({
   const [rate, setRate] = useState(1);
   const [savedPos, setSavedPos] = useState(0);
   const lastReport = useRef(0);
-  const [provider, setProvider] = useState<string>(providerProp || "videasy");
+  const [provider, setProvider] = useState<string>(providerProp || "cinemaos");
   const [activeContentType, setActiveContentType] = useState<string>(contentType);
   const embed = !selectedAddonStream && isEmbed(activeContentType);
   const embedGotRealProgress = useRef(false);
@@ -103,7 +103,7 @@ export function Player({
   const [seasonNum, setSeasonNum] = useState(season ?? 1);
   const [episodeNum, setEpisodeNum] = useState(episode ?? 1);
   const [busyResolve, setBusyResolve] = useState(false);
-  const [providers, setProviders] = useState<string[]>(["videasy", "vidsrc", "cinemaos"]);
+  const [providers, setProviders] = useState<string[]>(["cinemaos", "videasy", "vidsrc"]);
 
   // Details & Recommendations
   const [detail, setDetail] = useState<TitleDetail | null>(null);
@@ -745,7 +745,7 @@ export function Player({
         } catch {
           /* ignore */
         }
-        const current = providerProp || "videasy";
+        const current = providerProp || "cinemaos";
         if (pref && pref !== current && list.includes(pref)) {
           changeProvider(pref);
         } else if (!list.includes(current)) {
