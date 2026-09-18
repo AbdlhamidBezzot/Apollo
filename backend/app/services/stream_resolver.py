@@ -104,63 +104,86 @@ def classify_stream(raw_stream: dict[str, Any], addon_id: str, addon_name: str, 
 
 
 async def fetch_addon_streams(addon: AddonCatalog, media_type: str, stremio_id: str) -> list[dict[str, Any]]:
-    """Query a single add-on stream endpoint with isolation and timeout."""
+    """Query a single add-on stream endpoint with isolation, timeout, and mirror fallback."""
     manifest_base = addon.manifest_url.rstrip("/")
     if manifest_base.endswith("/manifest.json"):
         manifest_base = manifest_base[:-14]
 
     stremio_type = "series" if media_type == "tv" else media_type
-    endpoint_url = f"{manifest_base}/stream/{stremio_type}/{stremio_id}.json"
 
-    try:
-        raw_bytes = await safe_http_get(endpoint_url, max_bytes=1048576, timeout_seconds=5.0)
-        data = json.loads(raw_bytes.decode("utf-8"))
-        raw_streams = data.get("streams", [])
-        if not isinstance(raw_streams, list):
-            return []
+    bases = [manifest_base]
+    if "torrentio.strem.fun/lite" in manifest_base:
+        bases.append(manifest_base.replace("torrentio.strem.fun/lite", "torrentio.strem.fun"))
+    elif "torrentio.strem.fun" in manifest_base and "torrentio.strem.fun/lite" not in manifest_base:
+        bases.append(manifest_base.replace("torrentio.strem.fun", "torrentio.strem.fun/lite"))
 
-        normalized = []
-        for idx, item in enumerate(raw_streams):
-            if isinstance(item, dict):
-                normalized.append(classify_stream(item, addon.addon_id, addon.name, idx))
-        return normalized
+    last_error = None
+    for base in bases:
+        endpoint_url = f"{base}/stream/{stremio_type}/{stremio_id}.json"
+        try:
+            raw_bytes = await safe_http_get(endpoint_url, max_bytes=1048576, timeout_seconds=5.0)
+            data = json.loads(raw_bytes.decode("utf-8"))
+            raw_streams = data.get("streams", [])
+            if not isinstance(raw_streams, list) or not raw_streams:
+                continue
 
-    except (SSRFValidationError, json.JSONDecodeError, Exception) as exc:
-        logger.warning("Addon stream fetch failed for addon_name='%s' url='%s': %s", addon.name, endpoint_url, str(exc))
-        return []
+            normalized = []
+            for idx, item in enumerate(raw_streams):
+                if isinstance(item, dict):
+                    normalized.append(classify_stream(item, addon.addon_id, addon.name, idx))
+            if normalized:
+                return normalized
+
+        except (SSRFValidationError, json.JSONDecodeError, Exception) as exc:
+            last_error = exc
+            logger.warning("Addon stream fetch attempt failed for addon_name='%s' url='%s': %s", addon.name, endpoint_url, str(exc))
+
+    if last_error:
+        logger.warning("Addon stream fetch permanently failed for addon_name='%s': %s", addon.name, str(last_error))
+    return []
 
 
 async def fetch_addon_subtitles(addon: AddonCatalog, media_type: str, stremio_id: str) -> list[dict[str, Any]]:
-    """Query a single add-on subtitles endpoint with isolation and timeout."""
+    """Query a single add-on subtitles endpoint with isolation, timeout, and mirror fallback."""
     manifest_base = addon.manifest_url.rstrip("/")
     if manifest_base.endswith("/manifest.json"):
         manifest_base = manifest_base[:-14]
 
     stremio_type = "series" if media_type == "tv" else media_type
-    endpoint_url = f"{manifest_base}/subtitles/{stremio_type}/{stremio_id}.json"
 
-    try:
-        raw_bytes = await safe_http_get(endpoint_url, max_bytes=524288, timeout_seconds=5.0)
-        data = json.loads(raw_bytes.decode("utf-8"))
-        raw_subs = data.get("subtitles", [])
-        if not isinstance(raw_subs, list):
-            return []
+    bases = [manifest_base]
+    if "torrentio.strem.fun/lite" in manifest_base:
+        bases.append(manifest_base.replace("torrentio.strem.fun/lite", "torrentio.strem.fun"))
+    elif "torrentio.strem.fun" in manifest_base and "torrentio.strem.fun/lite" not in manifest_base:
+        bases.append(manifest_base.replace("torrentio.strem.fun", "torrentio.strem.fun/lite"))
 
-        normalized = []
-        for item in raw_subs:
-            if isinstance(item, dict) and item.get("url"):
-                sub_id = str(item.get("id") or item["url"])
-                lang = str(item.get("lang") or item.get("language") or "en")
-                normalized.append({
-                    "id": f"{addon.addon_id}:{sub_id}",
-                    "language": lang,
-                    "url": str(item["url"]),
-                })
-        return normalized
+    for base in bases:
+        endpoint_url = f"{base}/subtitles/{stremio_type}/{stremio_id}.json"
+        try:
+            raw_bytes = await safe_http_get(endpoint_url, max_bytes=524288, timeout_seconds=5.0)
+            data = json.loads(raw_bytes.decode("utf-8"))
+            raw_subs = data.get("subtitles", [])
+            if not isinstance(raw_subs, list) or not raw_subs:
+                continue
 
-    except (SSRFValidationError, json.JSONDecodeError, Exception) as exc:
-        logger.warning("Addon subtitle fetch failed for addon_name='%s' url='%s': %s", addon.name, endpoint_url, str(exc))
-        return []
+            normalized = []
+            for item in raw_subs:
+                if isinstance(item, dict) and item.get("url"):
+                    sub_id = str(item.get("id") or item["url"])
+                    lang = str(item.get("lang") or item.get("language") or "en")
+                    normalized.append({
+                        "id": f"{addon.addon_id}:{sub_id}",
+                        "language": lang,
+                        "url": str(item["url"]),
+                    })
+            if normalized:
+                return normalized
+
+        except (SSRFValidationError, json.JSONDecodeError, Exception) as exc:
+            logger.warning("Addon subtitle fetch attempt failed for addon_name='%s' url='%s': %s", addon.name, endpoint_url, str(exc))
+
+    return []
+
 
 
 async def resolve_streams_for_user(

@@ -85,24 +85,56 @@ def validate_url_security(url: str, allow_localhost_dev: bool = True) -> None:
             raise SSRFValidationError(f"Access to private/local IP address '{ip_str}' is forbidden.")
 
 
+DEFAULT_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Cache-Control": "no-cache",
+}
+
+FALLBACK_HEADERS = {
+    "User-Agent": "Stremio/4.4.168",
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "en-US,en;q=0.9",
+}
+
+
 async def safe_http_get(
     url: str,
     max_bytes: int = 204800,  # 200 KB
     timeout_seconds: float = 5.0,
     allow_localhost_dev: bool = True,
+    headers: dict[str, str] | None = None,
 ) -> bytes:
     """Safely fetch content from an external URL with SSRF guards and size limits."""
     current_url = url
     max_redirects = 5
+
+    req_headers = dict(DEFAULT_HEADERS)
+    if headers:
+        req_headers.update(headers)
 
     for _ in range(max_redirects):
         validate_url_security(current_url, allow_localhost_dev=allow_localhost_dev)
 
         async with httpx.AsyncClient(timeout=timeout_seconds, follow_redirects=False) as client:
             try:
-                resp = await client.get(current_url, headers={"User-Agent": "Apollo-AddonFetcher/1.0"})
+                resp = await client.get(current_url, headers=req_headers)
             except httpx.HTTPError as exc:
                 raise SSRFValidationError(f"HTTP request failed: {exc}") from exc
+
+            # Retry once with Stremio user-agent fallback if Cloudflare / server returns 403 Forbidden or 429 Rate Limit
+            if resp.status_code in (403, 429) and req_headers.get("User-Agent") != FALLBACK_HEADERS["User-Agent"]:
+                logger.info("Retrying fetch for url='%s' with Stremio fallback user-agent after status %d", current_url, resp.status_code)
+                try:
+                    fallback_req = dict(FALLBACK_HEADERS)
+                    if headers:
+                        for k, v in headers.items():
+                            if k.lower() != "user-agent":
+                                fallback_req[k] = v
+                    resp = await client.get(current_url, headers=fallback_req)
+                except httpx.HTTPError:
+                    pass
 
             if resp.status_code in (301, 302, 303, 307, 308):
                 redirect_target = resp.headers.get("Location")
@@ -127,3 +159,4 @@ async def safe_http_get(
             return content
 
     raise SSRFValidationError("Too many HTTP redirects.")
+
