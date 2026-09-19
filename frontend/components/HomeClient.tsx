@@ -5,7 +5,15 @@ import { useCallback, useEffect, useState } from "react";
 import { Ad300x250 } from "@/components/Ad300x250";
 import { ContinueWatchingRow } from "@/components/ContinueWatchingRow";
 import { HeroBillboard } from "@/components/HeroBillboard";
-import { DiscoveryHub, ProviderMarquee, Top10Carousel } from "@/components/HomeEnhancements";
+import {
+  DiscoveryHub,
+  EditorsPickSpotlight,
+  FeaturedEditorialSection,
+  GenreBrowseHub,
+  ProviderMarquee,
+  Top10Carousel,
+  TopRatedHub,
+} from "@/components/HomeEnhancements";
 import { MovieRow } from "@/components/MovieRow";
 import { PokePingsAd } from "@/components/PokePingsAd";
 import { RecommendationsRow } from "@/components/RecommendationsRow";
@@ -88,96 +96,85 @@ export function HomeClient() {
     loadData();
   }, [loadData]);
 
-  const rows = [
-    { title: "Trending this week", items: trending, seeAllHref: "/browse?kind=trending" },
-    { title: "Popular movies", items: popularMovies, seeAllHref: "/browse?media_type=movie&sort_by=popularity.desc" },
-    { title: "Popular series", items: popularTv, seeAllHref: "/browse?media_type=tv&sort_by=popularity.desc" },
-    { title: "Top rated", items: topRated, seeAllHref: "/browse?media_type=movie&sort_by=vote_average.desc" },
-  ];
-
   const hasAnyItems = trending.length > 0 || popularMovies.length > 0 || popularTv.length > 0 || topRated.length > 0;
 
   return (
-    <div className="space-y-[88px] pb-12">
-      {/* Hero Billboard */}
-
+    <div className="space-y-[64px] sm:space-y-[80px] pb-12">
+      {/* 1. Hero Billboard Banner */}
       {trending.length > 0 ? (
         <HeroBillboard slides={trending} />
       ) : loading ? (
-        <section className="relative mx-auto mt-4 flex h-[400px] w-full max-w-7xl items-end overflow-hidden rounded-3xl border border-white/[0.08] bg-[#1B1E27] px-6 pb-14 sm:h-[520px] sm:px-10">
+        <section className="relative mx-auto mt-4 flex h-[400px] w-full max-w-7xl items-end overflow-hidden rounded-3xl border border-white/[0.08] bg-[#121215] px-6 pb-14 sm:h-[520px] sm:px-10">
           <div className="max-w-2xl">
             <div className="h-4 w-28 animate-pulse rounded-full bg-white/10" />
-            <h1 className="mt-4 text-4xl font-extrabold tracking-[-0.03em] leading-none text-text-vivid sm:text-6xl">Find your next great watch.</h1>
-            <p className="mt-4 max-w-lg text-sm leading-relaxed text-text-muted sm:text-base">Browse movies and series across the streaming services you already use.</p>
+            <h1 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-6xl">Find your next great watch.</h1>
+            <p className="mt-4 max-w-lg text-sm leading-relaxed text-zinc-300 sm:text-base">Browse movies and series across the streaming services you already use.</p>
             <div className="mt-6 h-11 w-36 animate-pulse rounded-full bg-white/15" aria-label="Loading featured title" />
           </div>
         </section>
       ) : null}
 
+      {/* 2. Continue Watching Carousel */}
       <ContinueWatchingRow />
 
-      {topStreaming.length > 0 || trending.length > 0 ? (
-        <Top10Carousel items={topStreaming.length ? topStreaming : trending} />
+      {/* 3. TOP 10 Movies Carousel */}
+      {popularMovies.length > 0 || trending.length > 0 ? (
+        <Top10Carousel
+          title="TOP 10 Movies"
+          items={popularMovies.length ? popularMovies : trending}
+          seeAllHref="/browse?media_type=movie&sort_by=popularity.desc"
+        />
       ) : null}
+
+      {/* 4. TOP 10 Shows Carousel */}
+      {popularTv.length > 0 || trending.length > 0 ? (
+        <Top10Carousel
+          title="TOP 10 Shows"
+          items={popularTv.length ? popularTv : trending}
+          seeAllHref="/browse?media_type=tv&sort_by=popularity.desc"
+        />
+      ) : null}
+
+      {/* 5. Streaming Providers Hub */}
+      <DiscoveryHub />
 
       <Ad300x250 />
 
-      <DiscoveryHub />
-      <ProviderMarquee />
+      {/* 6. Top Rated Hub */}
+      <TopRatedHub />
+
+      {/* 7. Browse by Genre Hub */}
+      <GenreBrowseHub />
+
       <SignInNotice />
 
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 my-4">
         <PokePingsAd />
       </div>
 
+      {/* Additional Curated Rows */}
+      {trending.length > 0 && (
+        <MovieRow title="Trending This Week" items={trending} seeAllHref="/browse?kind=trending" />
+      )}
+
+      <ProviderMarquee />
+      <EditorsPickSpotlight />
+      <FeaturedEditorialSection />
+
       <RecommendationsRow />
 
       <Ad300x250 />
 
-      {/* Catalog Rows or Inline Retry Widget */}
-      {rows.map((row) => (
-        <div key={row.title} className="space-y-12">
-          {row.items.length > 0 ? (
-            <MovieRow title={row.title} items={row.items} seeAllHref={row.seeAllHref} />
-          ) : loading || retrying ? (
-            <div className="mx-auto max-w-7xl px-4 space-y-3">
-              <div className="h-5 w-40 rounded bg-white/10" />
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="aspect-[2/3] rounded-2xl bg-[#1B1E27] animate-pulse" />
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="mx-auto max-w-7xl px-4">
-              <div className="rounded-3xl border border-white/[0.08] bg-[#1B1E27]/60 p-6 text-center backdrop-blur-xl">
-                <p className="text-sm font-semibold text-text-vivid">{row.title}</p>
-                <p className="mt-1 text-xs text-text-muted">
-                  {error || "Stream servers are starting up or temporarily offline."}
-                </p>
-                <button
-                  onClick={() => loadData(true)}
-                  disabled={retrying}
-                  className="mt-3 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2 text-xs font-bold text-white shadow-brand-glow hover:bg-brand-soft disabled:opacity-50"
-                >
-                  {retrying ? "Connecting…" : "Retry Loading Catalog ▶"}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      ))}
-
       {!loading && !hasAnyItems && error && (
-        <div className="mx-auto max-w-xl rounded-2xl border border-brand/30 bg-brand/10 p-6 text-center shadow-glass">
-          <p className="text-sm font-bold text-text-vivid">Backend Service Notice</p>
+        <div className="mx-auto max-w-xl rounded-2xl border border-white/20 bg-white/5 p-6 text-center shadow-glass backdrop-blur-xl">
+          <p className="text-sm font-bold text-white">Backend Service Notice</p>
           <p className="mt-1 text-xs text-text-muted">
-            The Render backend API is currently waking up from a cold start. Click below to refresh content.
+            The backend stream catalog API is currently warming up from a cold start. Click below to refresh content.
           </p>
           <button
             onClick={() => loadData(true)}
             disabled={retrying}
-            className="mt-4 rounded-full bg-brand px-6 py-2.5 text-xs font-bold text-white shadow-brand-glow hover:bg-brand-soft disabled:opacity-50"
+            className="mt-4 cinema-btn-accent font-bold shadow-xl"
           >
             {retrying ? "Connecting…" : "Refresh Stream Catalog 🔄"}
           </button>

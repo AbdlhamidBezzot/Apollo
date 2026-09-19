@@ -126,8 +126,8 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
             )}
           </div>
 
-          {/* Overview / Description in CRISP WHITE (Not Black or Dim) */}
-          <p className="mb-6 max-w-xl text-sm font-normal leading-relaxed text-zinc-200 sm:text-base line-clamp-3 sm:line-clamp-4 drop-shadow-sm">
+          {/* Overview / Description in PURE BRIGHT WHITE */}
+          <p className="mb-6 max-w-xl text-sm font-medium leading-relaxed text-white sm:text-base line-clamp-3 sm:line-clamp-4 drop-shadow-md">
             {item.overview || "A hapless medical courier fights for his life amid an outbreak of a deadly mutagenic virus in an isolated mountain town."}
           </p>
 

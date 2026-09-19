@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactElement } from "react";
 import { useAuth } from "@/components/AuthContext";
+import { THEME_PRESETS, useTheme } from "@/components/ThemeContext";
 import { posterUrl, releaseYear, titleName } from "@/lib/api";
 import { get } from "@/lib/http";
 import type { ContentListResponse, Title } from "@/lib/types";
@@ -379,6 +380,70 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
   );
 }
 
+/* ---------- Theme Picker Dropdown ---------- */
+function ThemePickerDropdown() {
+  const { theme, setThemeId } = useTheme();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        title="Change Theme Accent Color"
+        aria-label="Change Theme Accent Color"
+        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 transition hover:bg-white/10 hover:border-white/30"
+      >
+        <span
+          className="h-4 w-4 rounded-full border border-white/40 shadow-sm"
+          style={{ backgroundColor: theme.primary }}
+        />
+      </button>
+
+      {open && (
+        <div className="animate-rise absolute right-0 top-full mt-2 z-50 w-56 rounded-2xl border border-white/15 bg-[#09090B]/95 p-3 backdrop-blur-2xl shadow-2xl">
+          <p className="mb-2 text-xs font-bold uppercase tracking-wider text-text-muted px-1">
+            Accent Theme Color
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            {THEME_PRESETS.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => {
+                  setThemeId(p.id);
+                  setOpen(false);
+                }}
+                className={`flex flex-col items-center gap-1 rounded-xl border p-2 transition ${
+                  theme.id === p.id
+                    ? "border-white/40 bg-white/15 scale-105"
+                    : "border-white/5 bg-white/5 hover:border-white/20 hover:bg-white/10"
+                }`}
+              >
+                <span
+                  className="h-5 w-5 rounded-full border border-white/30 shadow-md"
+                  style={{ backgroundColor: p.primary }}
+                />
+                <span className="text-[10px] font-semibold text-text-vivid truncate w-full text-center">
+                  {p.name.split(" ")[1] || p.name}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ---------- Main Navbar ---------- */
 export function Navbar() {
   const { user, loading, signOut } = useAuth();
@@ -500,6 +565,7 @@ export function Navbar() {
           <CommandSearch open={searchOpen} setOpen={setSearchOpen} />
 
           <div className="flex shrink-0 items-center gap-2">
+            <ThemePickerDropdown />
             {!mounted || loading ? (
               <div className="h-10 w-24 animate-pulse rounded-full border border-white/10 bg-white/5" aria-hidden="true" />
             ) : user ? (

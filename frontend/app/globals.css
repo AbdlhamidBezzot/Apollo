@@ -4,6 +4,11 @@
 
 :root {
   color-scheme: dark;
+  --brand-accent: #FACC15;
+  --brand-accent-hover: #EAB308;
+  --brand-accent-text: #000000;
+  --brand-accent-glow: rgba(250, 204, 21, 0.35);
+  --brand-accent-border: rgba(250, 204, 21, 0.4);
 }
 
 html,
@@ -21,9 +26,9 @@ body {
     @apply border border-[#262628] bg-[#09090b]/80 backdrop-blur-xl;
   }
 
-  /* Ambient gold backlight ring */
+  /* Ambient accent backlight ring */
   .glow-ring {
-    box-shadow: 0 0 35px 0px rgba(250, 204, 21, 0.25);
+    box-shadow: 0 0 35px 0px var(--brand-accent-glow);
   }
 
   /* Card hover lift - subtle, refined movement */
@@ -50,15 +55,23 @@ body {
     @apply inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-medium text-[#fafafa] backdrop-blur-md transition hover:border-white/40 hover:bg-white/15 active:scale-[0.98];
   }
 
-  /* Cinemaos gold pill button standard */
-  .cinema-btn-gold {
-    @apply inline-flex items-center justify-center rounded-full bg-[#FACC15] px-6 py-2.5 text-sm font-semibold text-[#0B0B0C] shadow-brand-glow transition hover:bg-[#FDE68B] active:scale-[0.98];
+  /* Cinemaos accent pill button standard */
+  .cinema-btn-gold,
+  .cinema-btn-accent {
+    background-color: var(--brand-accent);
+    color: var(--brand-accent-text);
+    box-shadow: 0 0 20px 0px var(--brand-accent-glow);
+    @apply inline-flex items-center justify-center rounded-full px-6 py-2.5 text-sm font-semibold transition active:scale-[0.98];
+  }
+  .cinema-btn-gold:hover,
+  .cinema-btn-accent:hover {
+    background-color: var(--brand-accent-hover);
   }
 }
 
-/* Accessible focus ring (WCAG 2.2 AA — Gold focus ring) */
+/* Accessible focus ring */
 :focus-visible {
-  outline: 2px solid #FACC15;
+  outline: 2px solid var(--brand-accent);
   outline-offset: 2px;
   border-radius: 9999px;
 }

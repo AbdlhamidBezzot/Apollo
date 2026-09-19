@@ -6,6 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { ChatBot } from "@/components/ChatBot";
 import { MovieNightModal } from "@/components/MovieNightModal";
 import { AuthProvider } from "@/components/AuthContext";
+import { ThemeProvider } from "@/components/ThemeContext";
 import { Footer } from "@/components/HomeEnhancements";
 
 import { Analytics } from "@vercel/analytics/next";
@@ -92,17 +93,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body suppressHydrationWarning>
-        <AuthProvider>
-          <Suspense fallback={null}>
-            <Navbar />
-          </Suspense>
-          <main className="min-h-screen pb-8 lg:pl-24">
-            {children}
-          </main>
-          <div className="lg:pl-24"><Footer /></div>
-          <ChatBot />
-          <MovieNightModal />
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <Suspense fallback={null}>
+              <Navbar />
+            </Suspense>
+            <main className="min-h-screen pb-8 lg:pl-24">
+              {children}
+            </main>
+            <div className="lg:pl-24"><Footer /></div>
+            <ChatBot />
+            <MovieNightModal />
+          </AuthProvider>
+        </ThemeProvider>
         <Analytics />
         {/* Adsterra Social Bar */}
         <Script id="adsterra-social-bar" src="https://heavenlysuspicious.com/a7/af/9d/a7af9dd53724b72f361ecca2360aad8a.js" strategy="afterInteractive" />
