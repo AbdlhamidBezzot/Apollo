@@ -110,19 +110,19 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
       <div className="mx-auto max-w-[1750px] px-3 sm:px-6 py-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8 space-y-4">
-            <div className="skeleton aspect-video w-full rounded-2xl" />
-            <div className="skeleton h-8 w-3/4 rounded-lg" />
-            <div className="skeleton h-12 w-full rounded-full" />
-            <div className="skeleton h-28 w-full rounded-2xl" />
+            <div className="aspect-video w-full rounded-2xl border border-white/[0.08] bg-[#1B1E27]/60 animate-pulse" />
+            <div className="h-8 w-3/4 rounded-lg bg-white/10 animate-pulse" />
+            <div className="h-12 w-full rounded-full border border-white/[0.08] bg-white/[0.04] animate-pulse" />
+            <div className="h-28 w-full rounded-2xl border border-white/[0.08] bg-[#1B1E27]/50 animate-pulse" />
           </div>
           <div className="lg:col-span-4 space-y-3">
-            <div className="skeleton h-6 w-28 rounded" />
+            <div className="h-6 w-28 rounded bg-white/10 animate-pulse" />
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="flex gap-3">
-                <div className="skeleton aspect-video w-36 rounded-xl shrink-0" />
+              <div key={i} className="flex gap-3 rounded-xl border border-white/[0.06] bg-[#1B1E27]/40 p-1.5">
+                <div className="aspect-video w-36 rounded-lg bg-white/10 shrink-0 animate-pulse" />
                 <div className="flex-1 space-y-2 py-1">
-                  <div className="skeleton h-3.5 w-full rounded" />
-                  <div className="skeleton h-3 w-2/3 rounded" />
+                  <div className="h-3.5 w-full rounded bg-white/10 animate-pulse" />
+                  <div className="h-3 w-2/3 rounded bg-white/5 animate-pulse" />
                 </div>
               </div>
             ))}

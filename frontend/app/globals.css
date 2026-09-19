@@ -34,6 +34,16 @@ body {
   .card-lift:hover {
     transform: translateY(-4px) scale(1.015);
   }
+
+  /* Cinemaos small uppercase tracking label */
+  .cinema-label {
+    @apply font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-text-muted border border-white/10 bg-white/[0.04] rounded-full px-2.5 py-0.5 backdrop-blur-md;
+  }
+
+  /* Cinemaos layered semi-transparent surface */
+  .cinema-surface {
+    @apply border border-white/[0.08] bg-[#1B1E27]/60 backdrop-blur-xl rounded-2xl;
+  }
 }
 
 /* Accessible focus ring (WCAG 2.2 AA â€” cyan) */

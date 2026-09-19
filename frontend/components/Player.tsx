@@ -966,11 +966,10 @@ export function Player({
           {embed ? (
             <div
               ref={containerRef}
-              className="relative overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl"
+              className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#08090C]"
               onDoubleClick={fullscreen}
-            >              <iframe
-                // Embed providers do not always reliably reload when only src changes.
-                // Key the frame by the selected episode so a playlist click starts the requested stream.
+            >
+              <iframe
                 key={`${tmdbId}-${seasonNum}-${episodeNum}-${embedSrc}`}
                 src={embedSrc}
                 title={displayTitle}
@@ -982,17 +981,17 @@ export function Player({
                 onClick={fullscreen}
                 aria-label="Toggle fullscreen"
                 title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
-                className="absolute bottom-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/70 text-white shadow-lg backdrop-blur transition hover:bg-brand"
+                className="absolute bottom-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md transition hover:bg-brand"
               >
                 {isFullscreen ? (
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M8 3v3a2 2 0 0 1-2 2H3" />
                     <path d="M21 8h-3a2 2 0 0 1-2-2V3" />
                     <path d="M3 16h3a2 2 0 0 1 2 2v3" />
                     <path d="M16 21v-3a2 2 0 0 1 2-2h3" />
                   </svg>
                 ) : (
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M8 3H5a2 2 0 0 0-2 2v3" />
                     <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
                     <path d="M3 16v3a2 2 0 0 0 2 2h3" />
@@ -1004,13 +1003,14 @@ export function Player({
           ) : (
             <div
               ref={containerRef}
-              className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl ${
+              className={`group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#08090C] ${
                 showControls ? "" : "player-idle"
               }`}
               onPointerMove={pokeControls}
               onPointerLeave={() => setShowControls(false)}
               onDoubleClick={fullscreen}
-            >              <video
+            >
+              <video
                 ref={videoRef}
                 src={useHlsJs ? undefined : src}
                 poster={posterProp || detail?.backdrop_path ? `https://image.tmdb.org/t/p/w1280${detail?.backdrop_path}` : undefined}
@@ -1055,9 +1055,9 @@ export function Player({
                 ))}
               </video>
 
-              {/* Gradient overlays */}
+              {/* Dark Gradient Overlay for video controls */}
               <div
-                className={`pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/80 to-transparent transition-opacity duration-300 ${
+                className={`pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#08090C]/80 to-transparent transition-opacity duration-300 ${
                   showControls ? "opacity-100" : "opacity-0"
                 }`}
               />
@@ -1066,7 +1066,7 @@ export function Player({
                 <button
                   onClick={togglePlay}
                   aria-label="Play"
-                  className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-brand/90 text-2xl text-white shadow-brand-glow transition hover:scale-110"
+                  className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-brand text-xl text-white shadow-brand-glow transition hover:scale-105"
                 >
                   ▶
                 </button>
@@ -1075,7 +1075,7 @@ export function Player({
               {showSkipIntro && (
                 <button
                   onClick={() => skipCue("intro")}
-                  className="absolute bottom-24 right-4 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white shadow-brand-glow transition hover:bg-brand-soft"
+                  className="absolute bottom-24 right-4 rounded-full bg-brand px-4 py-2 text-xs font-bold text-white shadow-brand-glow transition hover:bg-brand-soft"
                 >
                   Skip Intro ⏭
                 </button>
@@ -1083,20 +1083,20 @@ export function Player({
               {showSkipOutro && (
                 <button
                   onClick={() => skipCue("outro")}
-                  className="absolute bottom-24 right-4 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white shadow-brand-glow transition hover:bg-brand-soft"
+                  className="absolute bottom-24 right-4 rounded-full bg-brand px-4 py-2 text-xs font-bold text-white shadow-brand-glow transition hover:bg-brand-soft"
                 >
                   Skip Outro ⏭
                 </button>
               )}
 
               {nextCard && (mediaType === "tv" || similar.length > 0) && (
-                <div className="absolute bottom-24 right-4 z-30 w-72 overflow-hidden rounded-2xl border border-white/15 bg-black/85 backdrop-blur-md shadow-2xl">
+                <div className="absolute bottom-24 right-4 z-30 w-72 overflow-hidden rounded-2xl border border-white/15 bg-[#08090C]/90 backdrop-blur-md shadow-2xl">
                   <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
                     <p className="text-xs font-bold text-white">Up next in {countdown}s</p>
                     <button
                       onClick={() => setNextCard(false)}
                       aria-label="Cancel autoplay"
-                      className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 text-xs font-bold text-white hover:bg-white/30"
+                      className="flex h-6 w-6 items-center justify-center rounded-full bg-white/15 text-xs font-bold text-white hover:bg-white/25"
                     >
                       ✕
                     </button>
@@ -1122,7 +1122,7 @@ export function Player({
                     <button
                       onClick={playNextItem}
                       disabled={busyResolve}
-                      className="mt-2 w-full rounded-lg bg-brand px-4 py-2 text-xs font-bold text-white shadow-brand-glow transition hover:bg-brand-soft disabled:opacity-50"
+                      className="mt-2 w-full rounded-full bg-brand px-4 py-2 text-xs font-bold text-white shadow-brand-glow transition hover:bg-brand-soft disabled:opacity-50"
                     >
                       {busyResolve ? "Loading..." : mediaType === "tv" ? "▶ Play next episode" : "▶ Play next movie"}
                     </button>
@@ -1132,7 +1132,7 @@ export function Player({
 
               {/* Bottom Video Controls Bar */}
               <div
-                className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-4 pb-3 pt-12 transition-opacity duration-300 ${
+                className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#08090C]/95 via-[#08090C]/70 to-transparent px-4 pb-3 pt-12 transition-opacity duration-300 ${
                   showControls ? "opacity-100" : "pointer-events-none opacity-0"
                 }`}
               >
@@ -1181,7 +1181,7 @@ export function Player({
                     <button
                       onClick={cycleRate}
                       aria-label="Playback speed"
-                      className="rounded border border-white/10 px-2 py-0.5 font-mono text-[11px] text-text-muted hover:border-brand/50 hover:text-white"
+                      className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 font-mono text-[11px] text-text-muted hover:border-white/20 hover:text-white"
                     >
                       {rate.toFixed(2)}x
                     </button>
@@ -1192,15 +1192,15 @@ export function Player({
                           onClick={() => setQualityOpen((v) => !v)}
                           aria-label="Quality"
                           aria-expanded={qualityOpen}
-                          className="rounded border border-white/10 px-2 py-0.5 font-mono text-[11px] text-text-muted hover:border-brand/50 hover:text-white"
+                          className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 font-mono text-[11px] text-text-muted hover:border-white/20 hover:text-white"
                         >
                           {curLevel === -1 ? "Auto" : levels.find((l) => l.index === curLevel)?.label ?? "Auto"}
                         </button>
                         {qualityOpen && (
-                          <div className="absolute bottom-full right-0 z-20 mb-2 w-32 overflow-hidden rounded-lg border border-white/10 glass shadow-glass">
+                          <div className="absolute bottom-full right-0 z-20 mb-2 w-32 overflow-hidden rounded-xl border border-white/10 bg-[#08090C]/90 backdrop-blur-xl shadow-2xl">
                             <button
                               onClick={() => setQuality(-1)}
-                              className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${
+                              className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/10 ${
                                 curLevel === -1 ? "font-semibold text-brand-soft" : "text-text-vivid"
                               }`}
                             >
@@ -1210,7 +1210,7 @@ export function Player({
                               <button
                                 key={l.index}
                                 onClick={() => setQuality(l.index)}
-                                className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5 ${
+                                className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/10 ${
                                   curLevel === l.index ? "font-semibold text-brand-soft" : "text-text-vivid"
                                 }`}
                               >
@@ -1233,33 +1233,33 @@ export function Player({
 
           {/* Title Heading */}
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">{displayTitle}</h1>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">{displayTitle}</h1>
             {mediaType === "tv" && (
-              <p className="text-sm text-text-muted font-medium mt-1">
-                Season {seasonNum} Episode {episodeNum} {currentEpisodeObj?.name ? `• ${currentEpisodeObj.name}` : ""}
+              <p className="text-xs font-mono tracking-[0.14em] uppercase text-text-muted mt-1 font-semibold">
+                Season {seasonNum} • Episode {episodeNum} {currentEpisodeObj?.name ? `• ${currentEpisodeObj.name}` : ""}
               </p>
             )}
           </div>
 
           {/* YouTube Channel & Actions Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-4 py-1 border-b border-white/10 pb-4">
+          <div className="flex flex-wrap items-center justify-between gap-4 py-2 border-b border-white/[0.08] pb-4">
             {/* Channel Info */}
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-brand to-purple-600 text-white font-bold text-lg shadow-md">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-white font-bold text-sm shadow-sm">
                 A
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="font-semibold text-sm text-white">Apollo Cinema</span>
-                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[9px] font-bold text-white" title="Verified Streamer">
+                  <span className="font-bold text-xs text-white">Apollo Cinema</span>
+                  <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-brand text-[8px] font-bold text-white" title="Verified Streamer">
                     ✓
                   </span>
                 </div>
-                <p className="text-xs text-text-muted">1.2M subscribers • Free HD Stream</p>
+                <p className="text-[11px] font-mono text-text-muted">1.2M subscribers • Free HD Stream</p>
               </div>
               <button
                 onClick={() => announce("Subscribed to Apollo Cinema")}
-                className="ml-2 rounded-full bg-white px-4 py-2 text-xs font-semibold text-black transition hover:bg-gray-200"
+                className="ml-2 rounded-full bg-brand px-4 py-1.5 text-xs font-bold text-white shadow-brand-glow transition hover:bg-brand-soft"
               >
                 Subscribe
               </button>
@@ -1268,25 +1268,25 @@ export function Player({
             {/* Action Pills Group */}
             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
               {/* Real DB Like / Dislike Pill (Auth Gated) */}
-              <div className="flex items-center rounded-full bg-white/10 border border-white/5 divide-x divide-white/10 overflow-hidden">
+              <div className="flex items-center rounded-full border border-white/10 bg-white/[0.04] backdrop-blur-md divide-x divide-white/10 overflow-hidden">
                 <button
                   onClick={() => handleMediaReaction("like")}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 transition hover:bg-white/15 ${
-                    userReaction === "like" ? "text-brand-soft font-bold bg-white/10" : "text-white"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 transition hover:bg-white/10 ${
+                    userReaction === "like" ? "text-brand-soft font-bold bg-white/10" : "text-text-muted hover:text-white"
                   }`}
                   title={user ? "I like this" : "Sign in to like"}
                 >
-                  <span className="text-sm">👍</span>
+                  <span className="text-xs">👍</span>
                   <span>{likesCount}</span>
                 </button>
                 <button
                   onClick={() => handleMediaReaction("dislike")}
-                  className={`px-3 py-2 flex items-center gap-1 transition hover:bg-white/15 ${
-                    userReaction === "dislike" ? "text-brand-soft font-bold bg-white/10" : "text-white"
+                  className={`px-3 py-1.5 flex items-center gap-1 transition hover:bg-white/10 ${
+                    userReaction === "dislike" ? "text-brand-soft font-bold bg-white/10" : "text-text-muted hover:text-white"
                   }`}
                   title={user ? "I dislike this" : "Sign in to dislike"}
                 >
-                  <span className="text-sm">👎</span>
+                  <span className="text-xs">👎</span>
                   {dislikesCount > 0 && <span>{dislikesCount}</span>}
                 </button>
               </div>
@@ -1294,7 +1294,7 @@ export function Player({
               {/* Share Pill */}
               <button
                 onClick={copyShareLink}
-                className="flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-2 text-white border border-white/5 transition hover:bg-white/15"
+                className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-text-muted backdrop-blur-md transition hover:border-white/20 hover:text-white"
                 title="Share link"
               >
                 <span>🔗</span>
@@ -1305,10 +1305,10 @@ export function Player({
               <button
                 onClick={toggleWatchlist}
                 disabled={watchlistLoading}
-                className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 border border-white/5 transition ${
+                className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 border backdrop-blur-md transition ${
                   inWatchlist
-                    ? "bg-brand/20 text-brand-soft border-brand/40 font-bold"
-                    : "bg-white/10 text-white hover:bg-white/15"
+                    ? "bg-brand/15 text-brand-soft border-brand/40 font-bold"
+                    : "border-white/10 bg-white/[0.04] text-text-muted hover:border-white/20 hover:text-white"
                 }`}
                 title="Save to watchlist"
               >
@@ -1318,14 +1318,16 @@ export function Player({
 
               {/* Server / Source Selector Pill */}
               {providers.length > 1 && (
-                <div className="relative flex items-center rounded-full bg-white/10 border border-white/5 p-0.5">
+                <div className="relative flex items-center rounded-full border border-white/10 bg-white/[0.04] backdrop-blur-md p-0.5">
                   {providers.map((p, idx) => (
                     <button
                       key={p}
                       onClick={() => changeProvider(p)}
                       disabled={busyResolve || (p === provider && !selectedAddonStream)}
-                      className={`rounded-full px-3 py-1.5 text-xs font-semibold transition disabled:cursor-default ${
-                        p === provider && !selectedAddonStream ? "bg-brand text-white shadow-sm" : "text-text-muted hover:text-white"
+                      className={`rounded-full px-3 py-1 text-xs font-semibold transition disabled:cursor-default ${
+                        p === provider && !selectedAddonStream
+                          ? "bg-brand text-white font-bold shadow-brand-glow"
+                          : "text-text-muted hover:text-white"
                       }`}
                     >
                       Server {idx + 1}
@@ -1339,10 +1341,10 @@ export function Player({
                 <div className="relative">
                   <button
                     onClick={() => setAddonStreamMenuOpen((v) => !v)}
-                    className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold border transition ${
+                    className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold border backdrop-blur-md transition ${
                       selectedAddonStream
                         ? "bg-brand text-white border-brand shadow-brand-glow font-bold"
-                        : "bg-white/10 text-white border-white/5 hover:bg-white/15"
+                        : "border-white/10 bg-white/[0.04] text-text-muted hover:border-white/20 hover:text-white"
                     }`}
                   >
                     <span>⚡</span>
@@ -1354,7 +1356,7 @@ export function Player({
                     <span className="text-[10px]">▼</span>
                   </button>
                   {addonStreamMenuOpen && (
-                    <div className="absolute bottom-full right-0 z-40 mb-2 w-80 max-h-72 overflow-y-auto rounded-2xl border border-white/15 bg-black/90 p-2 shadow-2xl backdrop-blur-md">
+                    <div className="absolute bottom-full right-0 z-40 mb-2 w-80 max-h-72 overflow-y-auto rounded-2xl border border-white/15 bg-[#08090C]/95 p-2 shadow-2xl backdrop-blur-xl">
                       <div className="flex items-center justify-between border-b border-white/10 px-3 py-2 mb-1">
                         <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted">
                           Direct Addon Streams
@@ -1402,13 +1404,12 @@ export function Player({
                 </div>
               )}
 
-
               {/* Watch Party Room */}
               {roomCode && (
                 <button
                   onClick={() => setChatOpen((v) => !v)}
-                  className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 border transition ${
-                    chatOpen ? "bg-accent/20 border-accent text-brand-soft" : "bg-white/10 border-white/5 text-white hover:bg-white/15"
+                  className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 border backdrop-blur-md transition ${
+                    chatOpen ? "bg-brand/15 border-brand/40 text-brand-soft font-bold" : "border-white/10 bg-white/[0.04] text-text-muted hover:border-white/20 hover:text-white"
                   }`}
                 >
                   <span>👥</span>
@@ -1419,7 +1420,7 @@ export function Player({
               {/* Back to details */}
               <Link
                 href={mediaType === "tv" ? `/tv/${tmdbId}` : `/movie/${tmdbId}`}
-                className="flex items-center gap-1 rounded-full bg-white/10 px-3.5 py-2 text-white border border-white/5 transition hover:bg-white/15"
+                className="flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-text-muted backdrop-blur-md transition hover:border-white/20 hover:text-white"
               >
                 <span>←</span>
                 <span>Details</span>
@@ -1427,20 +1428,25 @@ export function Player({
             </div>
           </div>
 
-          {/* YouTube Expandable Description Card */}
+          {/* Expandable Description Card */}
           <div
             onClick={() => setShowFullDescription((v) => !v)}
-            className="rounded-2xl bg-[#272727]/60 hover:bg-[#272727]/90 border border-white/5 p-4 transition cursor-pointer text-sm text-text-vivid"
+            className="rounded-2xl border border-white/[0.08] bg-[#1B1E27]/60 p-5 backdrop-blur-xl transition hover:bg-[#1B1E27]/80 cursor-pointer text-sm"
           >
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-semibold text-xs text-white mb-2">
-              <span>{detail?.release_date || detail?.first_air_date || "2024"}</span>
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className="font-mono text-[11px] font-semibold text-text-muted uppercase tracking-[0.14em] rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5">
+                {detail?.release_date?.slice(0, 4) || detail?.first_air_date?.slice(0, 4) || "2024"}
+              </span>
               {detail?.vote_average ? (
-                <span className="flex items-center gap-1 text-amber-400">★ {detail.vote_average.toFixed(1)}/10</span>
+                <span className="flex items-center gap-1 rounded-full border border-[#FFD166]/30 bg-black/60 px-2.5 py-0.5 font-mono text-[11px] font-bold text-[#FFD166] backdrop-blur-md">
+                  <svg className="h-3 w-3 fill-[#FFD166] text-[#FFD166]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  {detail.vote_average.toFixed(1)}
+                </span>
               ) : null}
               {detail?.genres && detail.genres.length > 0 && (
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1.5">
                   {detail.genres.map((g) => (
-                    <span key={g.id} className="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-medium text-text-muted">
+                    <span key={g.id} className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-text-muted rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5">
                       {g.name}
                     </span>
                   ))}
@@ -1448,17 +1454,17 @@ export function Player({
               )}
             </div>
 
-            <p className={showFullDescription ? "leading-relaxed" : "line-clamp-2 leading-relaxed text-text-muted"}>
+            <p className={showFullDescription ? "leading-relaxed text-text-muted" : "line-clamp-2 leading-relaxed text-text-muted"}>
               {detail?.overview || currentEpisodeObj?.overview || "No detailed description available for this title."}
             </p>
 
             {showFullDescription && detail?.credits?.cast && detail.credits.cast.length > 0 && (
               <div className="mt-4 border-t border-white/10 pt-3">
-                <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Cast & Crew</p>
+                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-text-muted mb-2">Cast & Crew</p>
                 <div className="flex flex-wrap gap-2">
                   {detail.credits.cast.slice(0, 6).map((actor) => (
-                    <div key={actor.id} className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-xs">
-                      <span className="font-semibold text-white">{actor.name}</span>
+                    <div key={actor.id} className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs">
+                      <span className="font-semibold text-text-vivid">{actor.name}</span>
                       <span className="text-[11px] text-text-muted">as {actor.character}</span>
                     </div>
                   ))}
@@ -1466,7 +1472,7 @@ export function Player({
               </div>
             )}
 
-            <button className="mt-2 font-bold text-xs text-white hover:underline block">
+            <button className="mt-3 font-mono text-xs font-semibold text-brand-soft hover:underline block">
               {showFullDescription ? "Show less" : "...Show more"}
             </button>
           </div>
@@ -1474,16 +1480,16 @@ export function Player({
           {/* Real Database Comments Section */}
           <div className="pt-4 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <h2 className="text-lg font-extrabold text-white flex items-center gap-2">
                 <span>Comments</span>
-                <span className="text-sm font-normal text-text-muted">({comments.length})</span>
+                <span className="font-mono text-xs font-semibold text-text-muted">({comments.length})</span>
               </h2>
             </div>
 
             {/* Comment Submission Form (Auth Gated) */}
             {user ? (
               <form onSubmit={handleAddComment} className="flex gap-3 items-start">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-white font-bold text-sm shadow-md overflow-hidden">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-white font-bold text-xs shadow-sm overflow-hidden">
                   {user.name?.[0]?.toUpperCase() || "U"}
                 </div>
                 <div className="flex-1 space-y-2">
@@ -1493,21 +1499,21 @@ export function Player({
                     onChange={(e) => setNewCommentText(e.target.value)}
                     placeholder="Add a public comment..."
                     disabled={commentSubmitting}
-                    className="w-full border-b border-white/20 bg-transparent px-1 py-1.5 text-sm text-white placeholder-text-muted outline-none focus:border-brand transition disabled:opacity-50"
+                    className="w-full border-b border-white/10 bg-transparent px-1 py-1.5 text-sm text-text-vivid placeholder-text-muted outline-none focus:border-brand/60 transition disabled:opacity-50"
                   />
                   {newCommentText.trim() && (
                     <div className="flex justify-end gap-2 pt-1">
                       <button
                         type="button"
                         onClick={() => setNewCommentText("")}
-                        className="rounded-full px-4 py-1.5 text-xs font-medium text-text-muted hover:text-white transition"
+                        className="rounded-full px-4 py-1.5 text-xs font-semibold text-text-muted hover:text-white transition"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         disabled={commentSubmitting}
-                        className="rounded-full bg-brand px-4 py-1.5 text-xs font-semibold text-white shadow-brand-glow transition hover:bg-brand-soft disabled:opacity-50"
+                        className="rounded-full bg-brand px-5 py-1.5 text-xs font-bold text-white shadow-brand-glow transition hover:bg-brand-soft disabled:opacity-50"
                       >
                         {commentSubmitting ? "Posting..." : "Comment"}
                       </button>
@@ -1516,11 +1522,11 @@ export function Player({
                 </div>
               </form>
             ) : (
-              <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-center">
+              <div className="rounded-2xl border border-white/[0.08] bg-[#1B1E27]/60 p-4 text-center backdrop-blur-xl">
                 <p className="text-xs text-text-muted mb-2">Sign in to leave a comment and share your thoughts.</p>
                 <Link
                   href="/login"
-                  className="inline-block rounded-full bg-brand px-5 py-1.5 text-xs font-semibold text-white shadow-brand-glow transition hover:bg-brand-soft"
+                  className="inline-block rounded-full bg-brand px-5 py-1.5 text-xs font-bold text-white shadow-brand-glow transition hover:bg-brand-soft"
                 >
                   Sign In to Comment
                 </Link>
@@ -1530,9 +1536,9 @@ export function Player({
             {/* Real Comments Feed */}
             <div className="space-y-4 pt-2">
               {commentsLoading ? (
-                <div className="py-6 text-center text-xs text-text-muted animate-pulse">Loading comments...</div>
+                <div className="py-6 text-center text-xs font-mono text-text-muted animate-pulse">Loading comments...</div>
               ) : comments.length === 0 ? (
-                <div className="rounded-2xl border border-white/5 bg-white/5 p-8 text-center text-sm text-text-muted">
+                <div className="rounded-2xl border border-white/[0.08] bg-[#1B1E27]/40 p-8 text-center text-xs text-text-muted backdrop-blur-xl">
                   💬 No comments yet. Be the first to share your thoughts on this title!
                 </div>
               ) : (
@@ -1543,21 +1549,21 @@ export function Player({
                       <img
                         src={comment.author_avatar}
                         alt={comment.author_name}
-                        className="h-9 w-9 rounded-full object-cover shrink-0 border border-white/10"
+                        className="h-8 w-8 rounded-full object-cover shrink-0 border border-white/10"
                       />
                     ) : (
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-brand to-purple-600 text-white font-bold text-xs shadow-sm">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-white font-bold text-xs shadow-sm">
                         {comment.author_name?.[0]?.toUpperCase() || "A"}
                       </div>
                     )}
                     <div className="space-y-1 min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-xs text-white truncate">{comment.author_name}</span>
-                        <span className="text-[11px] text-text-muted">
+                        <span className="font-mono text-[11px] text-text-muted">
                           {new Date(comment.created_at).toLocaleDateString()}
                         </span>
                       </div>
-                      <p className="text-sm text-text-vivid leading-normal break-words">{comment.text}</p>
+                      <p className="text-sm text-text-muted leading-normal break-words">{comment.text}</p>
                       <div className="flex items-center gap-3 text-xs text-text-muted pt-1">
                         <button
                           onClick={() => toggleCommentLike(comment.id)}
@@ -1590,22 +1596,22 @@ export function Player({
 
         {/* RIGHT COLUMN: Up Next Sidebar & TV Episode Playlist */}
         <div className="lg:col-span-4 xl:col-span-4 2xl:col-span-3 space-y-6">
-          {/* TV Episodes Playlist Box (YouTube Playlist format) */}
+          {/* TV Episodes Playlist Box */}
           {mediaType === "tv" && (
-            <div className="rounded-2xl border border-white/10 bg-[#1f1f1f]/80 overflow-hidden shadow-lg">
-              <div className="p-3.5 border-b border-white/10 bg-white/5 flex items-center justify-between">
+            <div className="rounded-2xl border border-white/[0.08] bg-[#1B1E27]/60 backdrop-blur-xl overflow-hidden">
+              <div className="p-3.5 border-b border-white/[0.08] bg-white/[0.03] flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold text-sm text-white">Episodes Playlist</h3>
-                  <p className="text-[11px] text-text-muted">Season {seasonNum} • {episodes.length} episodes</p>
+                  <h3 className="font-extrabold text-sm text-white">Episodes Playlist</h3>
+                  <p className="font-mono text-[11px] text-text-muted">Season {seasonNum} • {episodes.length} episodes</p>
                 </div>
                 {seasons.length > 1 && (
                   <select
                     value={seasonNum}
                     onChange={(e) => setSeasonNum(Number(e.target.value))}
-                    className="rounded-lg bg-black/50 border border-white/10 px-2.5 py-1 text-xs text-white outline-none"
+                    className="rounded-full bg-black/60 border border-white/10 px-3 py-1 font-mono text-xs text-text-vivid outline-none backdrop-blur-md"
                   >
                     {seasons.map((s) => (
-                      <option key={s.season_number} value={s.season_number} className="bg-neutral-900 text-white">
+                      <option key={s.season_number} value={s.season_number} className="bg-[#08090C] text-white">
                         {s.name || `Season ${s.season_number}`}
                       </option>
                     ))}
@@ -1614,9 +1620,9 @@ export function Player({
               </div>
 
               {/* Scrollable Episodes List */}
-              <div className="thin-scroll max-h-[420px] overflow-y-auto divide-y divide-white/5 p-2 space-y-1">
+              <div className="thin-scroll max-h-[420px] overflow-y-auto divide-y divide-white/[0.05] p-2 space-y-1">
                 {episodesLoading ? (
-                  <div className="p-4 text-center text-xs text-text-muted">Loading episodes...</div>
+                  <div className="p-4 text-center font-mono text-xs text-text-muted">Loading episodes...</div>
                 ) : episodes.length === 0 ? (
                   <div className="p-4 text-center text-xs text-text-muted">No episodes found for this season.</div>
                 ) : (
@@ -1629,8 +1635,8 @@ export function Player({
                         disabled={busyResolve || isCurrent}
                         className={`w-full group flex gap-3 p-2 rounded-xl text-left transition ${
                           isCurrent
-                            ? "bg-brand/20 border border-brand/40 font-semibold"
-                            : "hover:bg-white/5 border border-transparent"
+                            ? "bg-brand/15 border border-brand/40 font-semibold"
+                            : "hover:bg-white/[0.04] border border-transparent"
                         }`}
                       >
                         <div className="relative aspect-video w-24 shrink-0 overflow-hidden rounded-lg bg-black/60">
@@ -1646,7 +1652,7 @@ export function Player({
                             alt={ep.name || `Episode ${ep.episode_number}`}
                             className="h-full w-full object-cover transition group-hover:scale-105"
                           />
-                          <span className="absolute bottom-1 right-1 rounded bg-black/80 px-1 py-0.5 text-[9px] font-mono font-bold text-white">
+                          <span className="absolute bottom-1 right-1 rounded bg-black/80 px-1 py-0.5 font-mono text-[9px] font-bold text-white">
                             E{String(ep.episode_number).padStart(2, "0")}
                           </span>
                           {isCurrent && (
@@ -1656,7 +1662,7 @@ export function Player({
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className={`text-xs truncate font-medium ${isCurrent ? "text-brand-soft" : "text-white group-hover:text-brand-soft"}`}>
+                          <p className={`text-xs truncate font-semibold ${isCurrent ? "text-brand-soft" : "text-white group-hover:text-brand-soft"}`}>
                             {ep.episode_number}. {ep.name || `Episode ${ep.episode_number}`}
                           </p>
                           <p className="text-[11px] text-text-muted line-clamp-1 mt-0.5">{ep.overview || "No overview"}</p>
@@ -1669,14 +1675,14 @@ export function Player({
             </div>
           )}
 
-          {/* YouTube "Up Next" / Recommended Sidebar */}
+          {/* Up Next / Recommended Sidebar */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between pb-1 border-b border-white/10">
-              <h3 className="font-bold text-base text-white">Up next</h3>
+            <div className="flex items-center justify-between pb-1 border-b border-white/[0.08]">
+              <h3 className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-text-muted">Up next</h3>
             </div>
 
             {/* Recommended Video Cards */}
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {/* For TV Shows: Show upcoming episodes of current show FIRST */}
               {mediaType === "tv" && episodes.length > 0 && (
                 <>
@@ -1696,20 +1702,20 @@ export function Player({
                           key={`next-ep-${ep.episode_number}`}
                           onClick={() => switchEpisode(seasonNum, ep.episode_number)}
                           disabled={busyResolve}
-                          className="group w-full flex gap-3 text-left rounded-xl p-1.5 hover:bg-white/10 transition border border-transparent hover:border-white/10 disabled:opacity-50"
+                          className="group w-full flex gap-3 text-left rounded-2xl p-2 hover:bg-white/[0.06] transition border border-white/[0.06] bg-[#1B1E27]/40 backdrop-blur-md disabled:opacity-50"
                         >
-                          <div className="relative aspect-video w-36 shrink-0 overflow-hidden rounded-xl bg-black/60 border border-white/5">
+                          <div className="relative aspect-video w-32 shrink-0 overflow-hidden rounded-xl bg-black/60 border border-white/10">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={thumb}
                               alt={ep.name || `Episode ${ep.episode_number}`}
                               className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                             />
-                            <span className="absolute bottom-1 right-1 rounded bg-black/80 px-1.5 py-0.5 text-[9px] font-bold text-brand-soft uppercase tracking-wider">
+                            <span className="absolute bottom-1 right-1 rounded bg-black/80 px-1.5 py-0.5 font-mono text-[9px] font-bold text-brand-soft uppercase tracking-wider">
                               S{seasonNum} E{ep.episode_number}
                             </span>
                             {isNextEp && (
-                              <span className="absolute top-1 left-1 rounded bg-brand px-1.5 py-0.5 text-[9px] font-extrabold text-white shadow uppercase tracking-wider">
+                              <span className="absolute top-1 left-1 rounded bg-brand px-1.5 py-0.5 font-mono text-[9px] font-extrabold text-white shadow uppercase tracking-wider">
                                 UP NEXT
                               </span>
                             )}
@@ -1732,8 +1738,8 @@ export function Player({
               {similar.length === 0 ? (
                 <div className="space-y-2">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="flex gap-3 animate-pulse">
-                      <div className="w-36 aspect-video rounded-xl bg-white/10 shrink-0" />
+                    <div key={i} className="flex gap-3 animate-pulse rounded-2xl border border-white/[0.06] bg-[#1B1E27]/40 p-2">
+                      <div className="w-32 aspect-video rounded-xl bg-white/10 shrink-0" />
                       <div className="flex-1 space-y-2 py-1">
                         <div className="h-3 bg-white/10 rounded w-3/4" />
                         <div className="h-2.5 bg-white/10 rounded w-1/2" />
@@ -1755,16 +1761,16 @@ export function Player({
                     <Link
                       key={item.id}
                       href={`/watch/${media}/${item.id}`}
-                      className="group flex gap-3 rounded-xl p-1.5 hover:bg-white/10 transition"
+                      className="group flex gap-3 rounded-2xl p-2 hover:bg-white/[0.06] transition border border-white/[0.06] bg-[#1B1E27]/40 backdrop-blur-md"
                     >
-                      <div className="relative aspect-video w-36 shrink-0 overflow-hidden rounded-xl bg-black/60 border border-white/5">
+                      <div className="relative aspect-video w-32 shrink-0 overflow-hidden rounded-xl bg-black/60 border border-white/10">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={thumb}
                           alt={itemTitle}
                           className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                         />
-                        <span className="absolute bottom-1 right-1 rounded bg-black/80 px-1.5 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider">
+                        <span className="absolute bottom-1 right-1 rounded bg-black/80 px-1.5 py-0.5 font-mono text-[9px] font-bold text-white uppercase tracking-wider">
                           {media === "tv" ? "TV" : "Movie"}
                         </span>
                       </div>
@@ -1772,11 +1778,13 @@ export function Player({
                         <h4 className="font-semibold text-xs text-white line-clamp-2 leading-snug group-hover:text-brand-soft transition">
                           {itemTitle}
                         </h4>
-                        <p className="text-[11px] text-text-muted mt-1">Apollo Streams</p>
-                        <div className="flex items-center gap-2 text-[10px] text-text-muted mt-0.5">
-                          <span>{item.release_date?.slice(0, 4) || item.first_air_date?.slice(0, 4) || "2024"}</span>
+                        <p className="text-[11px] text-text-muted mt-0.5 font-mono">Apollo Streams</p>
+                        <div className="flex items-center gap-2 text-[10px] text-text-muted mt-1">
+                          <span className="font-mono">{item.release_date?.slice(0, 4) || item.first_air_date?.slice(0, 4) || "2024"}</span>
                           {item.vote_average ? (
-                            <span className="text-amber-400 font-bold">★ {item.vote_average.toFixed(1)}</span>
+                            <span className="text-[#FFD166] font-mono font-bold flex items-center gap-0.5">
+                              ★ {item.vote_average.toFixed(1)}
+                            </span>
                           ) : null}
                         </div>
                       </div>
@@ -1791,9 +1799,9 @@ export function Player({
 
       {/* Floating Movie Night Chat Drawer */}
       {roomCode && chatOpen && (
-        <div className="fixed bottom-4 right-4 z-40 flex h-96 w-80 flex-col overflow-hidden rounded-2xl border border-white/10 glass shadow-2xl">
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5 bg-black/40">
-            <p className="text-xs font-semibold text-white">Movie Night Chat · {room.code}</p>
+        <div className="fixed bottom-4 right-4 z-40 flex h-96 w-80 flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#08090C]/90 backdrop-blur-xl shadow-2xl">
+          <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5 bg-white/[0.03]">
+            <p className="text-xs font-extrabold text-white">Movie Night Chat · <span className="font-mono text-brand-soft">{room.code}</span></p>
             <button onClick={() => setChatOpen(false)} className="text-text-muted hover:text-white" aria-label="Close chat">
               ✕
             </button>
@@ -1801,8 +1809,8 @@ export function Player({
           <div className="thin-scroll flex-1 space-y-2 overflow-y-auto px-3 py-2">
             {room.messages.map((msg, i) => (
               <div key={i} className="text-xs">
-                <span className="font-semibold text-brand-soft">{msg.sender}: </span>
-                <span className="text-white">{msg.text}</span>
+                <span className="font-bold text-brand-soft">{msg.sender}: </span>
+                <span className="text-text-vivid">{msg.text}</span>
               </div>
             ))}
             {room.messages.length === 0 && <p className="text-xs text-text-muted">Say hi to the room 👋</p>}
@@ -1812,16 +1820,16 @@ export function Player({
               e.preventDefault();
               sendChat();
             }}
-            className="flex gap-2 border-t border-white/10 p-2 bg-black/40"
+            className="flex gap-2 border-t border-white/10 p-2.5 bg-white/[0.03]"
           >
             <input
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               placeholder="Message..."
               aria-label="Chat message"
-              className="flex-1 rounded-full border border-white/10 bg-black/40 px-3 py-1.5 text-xs text-white outline-none focus:border-brand"
+              className="flex-1 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs text-text-vivid outline-none focus:border-brand/60"
             />
-            <button type="submit" className="rounded-full bg-brand px-3 py-1.5 text-xs font-semibold text-white" disabled={!chatInput.trim()}>
+            <button type="submit" className="rounded-full bg-brand px-4 py-1.5 text-xs font-bold text-white shadow-brand-glow transition hover:bg-brand-soft disabled:opacity-50" disabled={!chatInput.trim()}>
               Send
             </button>
           </form>
