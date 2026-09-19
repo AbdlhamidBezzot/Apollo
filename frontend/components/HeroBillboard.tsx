@@ -66,7 +66,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
 
   return (
     <section
-      className="relative mx-auto mt-4 h-[580px] w-full max-w-7xl overflow-hidden rounded-3xl border border-white/[0.08] bg-[#09090B]"
+      className="relative w-full min-h-[85vh] lg:min-h-[90vh] -mt-20 pt-28 pb-16 flex flex-col justify-end overflow-hidden bg-[#09090B]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -78,24 +78,24 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
         fill
         priority
         sizes="100vw"
-        className="hero-fade object-cover object-center"
+        className="hero-fade object-cover object-center w-full h-full"
       />
 
-      {/* CinemaOS precise gradients for pristine white text contrast on the left */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#09090B] via-[#09090B]/85 via-50% to-transparent z-10" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#09090B] via-[#09090B]/30 to-transparent z-10" />
-      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#09090B] to-transparent z-10" />
+      {/* CinemaOS Vignette Gradients for Maximum Contrast */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#09090B] via-[#09090B]/85 via-45% to-transparent z-10" />
+      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#09090B] via-[#09090B]/60 to-transparent z-10" />
+      <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-[#09090B]/80 via-[#09090B]/30 to-transparent z-10" />
 
       {/* Main Hero Content */}
-      <div className="relative z-20 mx-auto flex h-full max-w-7xl items-center px-6 pt-12 pb-16 lg:px-12">
-        <div className="max-w-xl sm:max-w-2xl">
+      <div className="relative z-20 mx-auto w-full max-w-7xl px-6 lg:px-12 pt-16 pb-8">
+        <div className="max-w-xl sm:max-w-2xl lg:max-w-3xl space-y-4">
           {/* CinemaOS Title */}
-          <h1 className="mb-3 text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-7xl drop-shadow-lg leading-[1.05]">
+          <h1 className="text-4xl font-black uppercase tracking-tight text-white sm:text-6xl lg:text-8xl drop-shadow-2xl leading-[0.95] max-w-3xl">
             {shownTitle}
           </h1>
 
-          {/* CinemaOS 5-Star Rating & Percentage Row */}
-          <div className="mb-4 flex items-center gap-2">
+          {/* CinemaOS 5-Star Rating & Details Row */}
+          <div className="flex flex-wrap items-center gap-2 pt-1">
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((s) => (
                 <svg
@@ -109,39 +109,39 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
                 </svg>
               ))}
             </div>
-            <span className="font-semibold text-sm text-white drop-shadow-sm ml-1">
+            <span className="font-bold text-sm text-white drop-shadow-md ml-1">
               {percentage}%
             </span>
 
             {releaseYear(item) && (
-              <span className="ml-2 font-mono text-xs text-white/70">
+              <span className="font-mono text-xs text-white/80">
                 · {releaseYear(item)}
               </span>
             )}
 
             {genreNames.length > 0 && (
-              <span className="hidden sm:inline-block ml-2 text-xs text-white/70">
+              <span className="hidden sm:inline-block text-xs font-medium text-white/80">
                 · {genreNames.join(", ")}
               </span>
             )}
           </div>
 
           {/* Overview / Description in PURE BRIGHT WHITE */}
-          <p className="mb-6 max-w-xl text-sm font-medium leading-relaxed text-white sm:text-base line-clamp-3 sm:line-clamp-4 drop-shadow-md">
+          <p className="max-w-xl sm:max-w-2xl text-sm sm:text-base font-normal leading-relaxed text-white/95 line-clamp-3 sm:line-clamp-4 drop-shadow-lg">
             {item.overview || "A hapless medical courier fights for his life amid an outbreak of a deadly mutagenic virus in an isolated mountain town."}
           </p>
 
           {/* CinemaOS Control Buttons */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 pt-2">
             {/* White Solid Pill Play Button */}
             <Link
               href={watchHref}
-              className="group flex h-11 items-center gap-2 rounded-full bg-white px-7 font-bold text-black transition-all hover:bg-white/90 hover:scale-[1.02] active:scale-95 shadow-xl"
+              className="group flex h-12 items-center gap-2.5 rounded-full bg-white px-8 font-extrabold text-black transition-all hover:bg-white/90 hover:scale-[1.03] active:scale-95 shadow-2xl"
             >
               <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden="true">
                 <path d="M7 5l12 7-12 7V5z" />
               </svg>
-              <span className="text-sm">Play</span>
+              <span className="text-sm tracking-wide">Play</span>
             </Link>
 
             {/* Bookmark Circle Button */}
@@ -151,7 +151,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
                 setCastOpen(true);
               }}
               aria-label="Add to Bookmark"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white backdrop-blur-md transition-all hover:bg-white/20 hover:border-white/30 hover:scale-105 active:scale-95"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md transition-all hover:bg-white/20 hover:border-white/40 hover:scale-105 active:scale-95 shadow-lg"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
@@ -162,7 +162,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
             <Link
               href={href}
               aria-label="View Details"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white backdrop-blur-md transition-all hover:bg-white/20 hover:border-white/30 hover:scale-105 active:scale-95"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md transition-all hover:bg-white/20 hover:border-white/40 hover:scale-105 active:scale-95 shadow-lg"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -172,72 +172,20 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
         </div>
       </div>
 
-      {/* CinemaOS Right Vertical Slide Indicator */}
+      {/* CinemaOS Right Vertical Slide Indicator Bar */}
       {count > 1 && (
-        <div className="absolute right-6 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-2 sm:flex">
-          <div className="flex h-36 w-1.5 flex-col justify-between rounded-full bg-white/10 p-0.5 backdrop-blur-md">
+        <div className="absolute right-6 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-1.5 sm:flex">
+          <div className="flex h-40 w-1 flex-col justify-between rounded-full bg-white/10 p-0.5 backdrop-blur-md">
             {slides.map((_, i) => (
               <button
                 key={i}
                 onClick={() => go(i)}
                 aria-label={`Slide ${i + 1}`}
-                className={`w-full rounded-full transition-all ${
-                  i === index ? "h-8 bg-white" : "h-2 bg-white/30 hover:bg-white/60"
+                className={`w-full rounded-full transition-all duration-300 ${
+                  i === index ? "h-9 bg-white" : "h-2 bg-white/30 hover:bg-white/60"
                 }`}
               />
             ))}
-          </div>
-        </div>
-      )}
-
-      {/* Slide selector dock */}
-      {count > 1 && (
-        <div className="absolute inset-x-0 bottom-4 z-20">
-          <div className="mx-auto max-w-7xl px-6 lg:px-10">
-            <div className="flex items-end gap-2">
-              <button
-                onClick={() => go(index - 1)}
-                aria-label="Previous slide"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-text-muted backdrop-blur-md transition hover:text-white hover:border-white/40"
-              >
-                ‹
-              </button>
-              {slides.map((s, i) => (
-                <button
-                  key={`${s.media_type}-${s.id}`}
-                  onClick={() => go(i)}
-                  aria-label={`Go to ${titleName(s)}`}
-                  aria-current={i === index}
-                  className={`group relative flex-1 overflow-hidden rounded-xl border transition ${
-                    i === index ? "border-[var(--brand-accent)]" : "border-white/10 opacity-50 hover:opacity-100"
-                  }`}
-                >
-                  <div className="relative aspect-[21/9] w-full sm:aspect-video">
-                    <Image
-                      src={backdropUrl(s.backdrop_path, "w500")}
-                      alt=""
-                      fill
-                      sizes="200px"
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#09090B]/90 to-transparent" />
-                    <span className="absolute bottom-1 left-2 truncate pr-2 font-mono text-[10px] font-bold text-white">
-                      {String(i + 1).padStart(2, "0")} · {titleName(s)}
-                    </span>
-                    {i === index && (
-                      <span className="hero-progress absolute bottom-0 left-0 h-0.5 bg-[var(--brand-accent)]" aria-hidden="true" />
-                    )}
-                  </div>
-                </button>
-              ))}
-              <button
-                onClick={() => go(index + 1)}
-                aria-label="Next slide"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-text-muted backdrop-blur-md transition hover:text-text-vivid"
-              >
-                ›
-              </button>
-            </div>
           </div>
         </div>
       )}

@@ -104,12 +104,12 @@ export function HomeClient() {
       {trending.length > 0 ? (
         <HeroBillboard slides={trending} />
       ) : loading ? (
-        <section className="relative mx-auto mt-4 flex h-[400px] w-full max-w-7xl items-end overflow-hidden rounded-3xl border border-white/[0.08] bg-[#121215] px-6 pb-14 sm:h-[520px] sm:px-10">
-          <div className="max-w-2xl">
+        <section className="relative w-full min-h-[80vh] -mt-20 pt-28 pb-16 flex items-end overflow-hidden bg-[#121215] px-6 lg:px-12">
+          <div className="max-w-2xl space-y-4">
             <div className="h-4 w-28 animate-pulse rounded-full bg-white/10" />
-            <h1 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-6xl">Find your next great watch.</h1>
-            <p className="mt-4 max-w-lg text-sm leading-relaxed text-zinc-300 sm:text-base">Browse movies and series across the streaming services you already use.</p>
-            <div className="mt-6 h-11 w-36 animate-pulse rounded-full bg-white/15" aria-label="Loading featured title" />
+            <h1 className="text-4xl font-black tracking-tight text-white sm:text-6xl">Find your next great watch.</h1>
+            <p className="max-w-lg text-sm leading-relaxed text-zinc-300 sm:text-base">Browse movies and series across the streaming services you already use.</p>
+            <div className="h-12 w-36 animate-pulse rounded-full bg-white/15" aria-label="Loading featured title" />
           </div>
         </section>
       ) : null}
