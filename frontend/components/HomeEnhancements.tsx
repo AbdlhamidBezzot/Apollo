@@ -544,8 +544,9 @@ export function Footer() {
               <li><Link href="/about" className="hover:text-white transition">About Us</Link></li>
               <li><Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
               <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>
-              <li><Link href="/faq" className="hover:text-white transition">FAQ & Help</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition">DMCA Notice</Link></li>
+              <li><Link href="/dmca" className="hover:text-white transition font-semibold text-white">DMCA Policy &amp; Notice</Link></li>
+              <li><Link href="/faq" className="hover:text-white transition">FAQ &amp; Help</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition">Contact &amp; Takedowns</Link></li>
             </ul>
           </div>
         </div>
