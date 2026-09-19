@@ -46,13 +46,13 @@ export function MovieCard({ item, onRemove }: { item: Title; onRemove?: (item: T
 
         <div className="absolute inset-0 bg-gradient-to-t from-[#09090B]/95 via-[#09090B]/30 to-transparent" />
 
-        {/* Gold Play overlay */}
+        {/* Accent Play overlay */}
         <div
           className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${
             hovered ? "opacity-100" : "opacity-0"
           }`}
         >
-          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FACC15] text-[#0B0B0C] shadow-brand-glow transition-transform duration-300 group-hover:scale-110">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--brand-accent)] text-[var(--brand-accent-text)] shadow-brand-glow transition-transform duration-300 group-hover:scale-110">
             <svg viewBox="0 0 24 24" fill="currentColor" className="ml-0.5 h-5 w-5" aria-hidden="true">
               <path d="M7 5l12 7-12 7V5z" />
             </svg>
@@ -60,10 +60,10 @@ export function MovieCard({ item, onRemove }: { item: Title; onRemove?: (item: T
         </div>
 
         {/* Rating badge */}
-        <div className="absolute left-2 top-2 flex items-center gap-1 rounded-full border border-white/10 bg-black/70 px-2.5 py-0.5 font-mono text-[11px] font-bold text-[#FACC15] backdrop-blur-md">
+        <div className="absolute left-2 top-2 flex items-center gap-1 rounded-full border border-white/10 bg-black/70 px-2.5 py-0.5 font-mono text-[11px] font-bold text-[var(--brand-accent)] backdrop-blur-md">
           {rating ? (
             <>
-              <svg className="h-3 w-3 fill-[#FACC15] text-[#FACC15]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg className="h-3 w-3 fill-[var(--brand-accent)] text-[var(--brand-accent)]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
               {rating}
             </>
           ) : mediaType === "tv" ? "TV" : "MOVIE"}
@@ -79,7 +79,7 @@ export function MovieCard({ item, onRemove }: { item: Title; onRemove?: (item: T
               e.stopPropagation();
               onRemove(item);
             }}
-            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/70 text-xs text-white backdrop-blur transition hover:bg-[#FACC15] hover:text-[#0B0B0C]"
+            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/70 text-xs text-white backdrop-blur transition hover:bg-[var(--brand-accent)] hover:text-[var(--brand-accent-text)]"
           >
             ✕
           </button>

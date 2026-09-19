@@ -138,7 +138,7 @@ export function DetailTabs({ mediaType, tmdbId, number_of_seasons, trailerKey, c
             onClick={() => setTab(t)}
             className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
               tab === t
-                ? "bg-[#FACC15] text-[#0B0B0C] shadow-brand-glow"
+                ? "bg-[var(--brand-accent)] text-[var(--brand-accent-text)] shadow-brand-glow"
                 : "border border-white/10 bg-white/5 text-[#A1A1AA] hover:border-white/25 hover:text-white"
             }`}
           >
@@ -156,7 +156,7 @@ export function DetailTabs({ mediaType, tmdbId, number_of_seasons, trailerKey, c
                 <select
                   value={season}
                   onChange={(e) => setSeason(Number(e.target.value))}
-                  className="ml-2 rounded-full border border-white/15 bg-[#09090B] px-4 py-1.5 text-sm text-[#FAFAFA] focus:border-[#FACC15] outline-none"
+                  className="ml-2 rounded-full border border-white/15 bg-[#09090B] px-4 py-1.5 text-sm text-[#FAFAFA] focus:border-[var(--brand-accent)] outline-none"
                 >
                   {seasons.map((s) => (
                     <option key={s} value={s}>
@@ -173,7 +173,7 @@ export function DetailTabs({ mediaType, tmdbId, number_of_seasons, trailerKey, c
                     value={arc}
                     onChange={(e) => setArc(e.target.value)}
                     aria-label="Filter by story arc"
-                    className="ml-2 rounded-full border border-white/15 bg-[#09090B] px-4 py-1.5 text-sm text-[#FAFAFA] focus:border-[#FACC15] outline-none"
+                    className="ml-2 rounded-full border border-white/15 bg-[#09090B] px-4 py-1.5 text-sm text-[#FAFAFA] focus:border-[var(--brand-accent)] outline-none"
                   >
                     <option value="">All arcs</option>
                     {arcs.map((a) => (
@@ -199,7 +199,7 @@ export function DetailTabs({ mediaType, tmdbId, number_of_seasons, trailerKey, c
                       onClick={() => setAudio(opt.value)}
                       aria-pressed={audioPref === opt.value}
                       className={`rounded-full px-3 py-1 transition ${
-                        audioPref === opt.value ? "bg-[#FACC15] font-bold text-[#0B0B0C]" : "text-[#A1A1AA] hover:text-white"
+                        audioPref === opt.value ? "bg-[var(--brand-accent)] font-bold text-[var(--brand-accent-text)]" : "text-[#A1A1AA] hover:text-white"
                       }`}
                     >
                       {opt.label}
@@ -214,8 +214,8 @@ export function DetailTabs({ mediaType, tmdbId, number_of_seasons, trailerKey, c
                   aria-pressed={hideFiller}
                   className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition ${
                     hideFiller
-                      ? "border-[#FACC15] bg-[#FACC15]/15 text-[#FACC15]"
-                      : "border-white/10 bg-white/5 text-[#A1A1AA] hover:border-[#FACC15]/40"
+                      ? "border-[var(--brand-accent)] bg-[var(--brand-accent)]/15 text-[var(--brand-accent)]"
+                      : "border-white/10 bg-white/5 text-[#A1A1AA] hover:border-[var(--brand-accent)]/40"
                   }`}
                 >
                   {hideFiller ? "Filler hidden" : "Hide Filler"}
@@ -261,7 +261,7 @@ export function DetailTabs({ mediaType, tmdbId, number_of_seasons, trailerKey, c
                           </span>
                         )}
                         <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition duration-300 group-hover:bg-black/40 group-hover:opacity-100">
-                          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FACC15] text-[#0B0B0C] shadow-brand-glow">
+                          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--brand-accent)] text-[var(--brand-accent-text)] shadow-brand-glow">
                             <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                           </span>
                         </div>
@@ -271,7 +271,7 @@ export function DetailTabs({ mediaType, tmdbId, number_of_seasons, trailerKey, c
                           {ep.episode_number}. {ep.name || `Episode ${ep.episode_number}`}
                         </p>
                         {ep.meta?.arc_name ? (
-                          <p className="mt-0.5 text-[11px] font-semibold text-[#FACC15]">{ep.meta.arc_name}</p>
+                          <p className="mt-0.5 text-[11px] font-semibold text-[var(--brand-accent)]">{ep.meta.arc_name}</p>
                         ) : null}
                         {ep.overview ? (
                           <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[#A1A1AA]">{ep.overview}</p>

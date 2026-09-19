@@ -68,7 +68,7 @@ export function HistoryClient() {
     return (
       <div className="mx-auto max-w-xl px-4 py-24 text-center">
         <p className="mb-4 text-[#A1A1AA]">Sign in to see your viewing history.</p>
-        <Link href="/login" className="rounded-full bg-[#FACC15] px-6 py-2 text-sm font-extrabold text-black shadow-brand-glow transition hover:bg-[#FDE68B]">
+        <Link href="/login" className="inline-block cinema-btn-accent px-6 py-2 text-sm font-extrabold shadow-brand-glow">
           Sign in
         </Link>
       </div>
@@ -108,7 +108,7 @@ export function HistoryClient() {
               <Link
                 key={entry.id}
                 href={href}
-                className="group flex items-center gap-4 overflow-hidden rounded-2xl border border-white/10 bg-[#121215]/60 p-3 transition duration-300 hover:border-[#FACC15]/30 backdrop-blur-xl"
+                className="group flex items-center gap-4 overflow-hidden rounded-2xl border border-white/10 bg-[#121215]/60 p-3 transition duration-300 hover:border-[var(--brand-accent)]/30 backdrop-blur-xl"
               >
                 <div className="relative h-20 w-36 shrink-0 overflow-hidden rounded-lg bg-black">
                   <Image
@@ -124,13 +124,13 @@ export function HistoryClient() {
                     {entry.detail ? titleName(entry.detail) : `${entry.media_type} #${entry.tmdb_id}`}
                   </p>
                   <div className="mt-1.5 h-1.5 w-full max-w-md overflow-hidden rounded-full bg-white/10">
-                    <div className="h-full rounded-full bg-[#FACC15]" style={{ width: `${pct}%` }} />
+                    <div className="h-full rounded-full bg-[var(--brand-accent)]" style={{ width: `${pct}%` }} />
                   </div>
                   <p className="mt-1 font-mono text-[11px] text-[#A1A1AA]">
                     {entry.completed ? "Completed" : `${Math.round(entry.progress_seconds / 60)} min watched`}
                   </p>
                 </div>
-                <span className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-[#A1A1AA] transition group-hover:border-[#FACC15]/40 group-hover:text-[#FACC15] sm:block">
+                <span className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-[#A1A1AA] transition group-hover:border-[var(--brand-accent)]/40 group-hover:text-[var(--brand-accent)] sm:block">
                   {entry.completed ? "Watch again" : "Resume"}
                 </span>
                 <button

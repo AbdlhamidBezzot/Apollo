@@ -69,8 +69,8 @@ export function DetailViewClient({
               className="aspect-[2/3] w-full object-cover"
             />
             {rating && (
-              <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full border border-white/10 bg-black/70 px-3 py-1 font-mono text-xs font-bold text-[#FACC15] backdrop-blur-md shadow-lg">
-                <span className="text-[#FACC15]">★</span> {rating}
+              <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full border border-white/10 bg-black/70 px-3 py-1 font-mono text-xs font-bold text-[var(--brand-accent)] backdrop-blur-md shadow-lg">
+                <span className="text-[var(--brand-accent)]">★</span> {rating}
               </div>
             )}
           </div>
@@ -78,7 +78,7 @@ export function DetailViewClient({
           {/* Title Info Header */}
           <div className="flex-1 pt-6 md:pt-10">
             <div className="mb-3 flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-[#FACC15]/40 bg-[#FACC15]/15 px-3.5 py-0.5 text-xs font-bold uppercase tracking-wider text-[#FACC15]">
+              <span className="rounded-full border border-[var(--brand-accent)]/40 bg-[var(--brand-accent)]/15 px-3.5 py-0.5 text-xs font-bold uppercase tracking-wider text-[var(--brand-accent)]">
                 {mediaType === "tv" ? "TV Series" : "Movie"}
               </span>
               <span className="rounded-full border border-white/10 bg-white/5 px-3 py-0.5 font-mono text-xs font-bold text-white/90 backdrop-blur-md">
@@ -99,8 +99,8 @@ export function DetailViewClient({
 
             <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-[#A1A1AA]">
               {rating ? (
-                <span className="flex items-center gap-1 font-bold text-[#FACC15]">
-                  <svg className="h-3.5 w-3.5 fill-[#FACC15] text-[#FACC15]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> {rating} <span className="text-xs font-normal text-[#A1A1AA]">/ 10</span>
+                <span className="flex items-center gap-1 font-bold text-[var(--brand-accent)]">
+                  <svg className="h-3.5 w-3.5 fill-[var(--brand-accent)] text-[var(--brand-accent)]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> {rating} <span className="text-xs font-normal text-[#A1A1AA]">/ 10</span>
                 </span>
               ) : null}
               {runtime ? (
@@ -122,14 +122,14 @@ export function DetailViewClient({
               ) : null}
             </div>
 
-            {genres && <p className="mt-3 text-sm font-semibold tracking-wide text-[#FACC15]">{genres}</p>}
+            {genres && <p className="mt-3 text-sm font-semibold tracking-wide text-[var(--brand-accent)]">{genres}</p>}
 
             <p className="mt-4 max-w-3xl text-sm leading-relaxed text-[#FAFAFA]/90 drop-shadow-sm sm:text-base">
               {item.overview || "No synopsis available for this title."}
             </p>
 
             {item.tagline ? (
-              <p className="mt-3 border-l-2 border-[#FACC15]/60 pl-3 text-sm italic text-[#A1A1AA]">
+              <p className="mt-3 border-l-2 border-[var(--brand-accent)]/60 pl-3 text-sm italic text-[#A1A1AA]">
                 &ldquo;{item.tagline}&rdquo;
               </p>
             ) : null}
@@ -140,10 +140,10 @@ export function DetailViewClient({
               return (
                 <div className="mt-6 rounded-3xl border border-white/10 bg-[#09090B]/60 p-5 sm:p-6 shadow-glass backdrop-blur-xl">
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#FACC15]/20 text-xs font-bold text-[#FACC15]">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--brand-accent)]/20 text-xs font-bold text-[var(--brand-accent)]">
                       A
                     </span>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#FACC15]">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--brand-accent)]">
                       Apollo Film Analysis & Editorial Take
                     </h3>
                   </div>
@@ -155,7 +155,7 @@ export function DetailViewClient({
                       Target Audience: <strong className="text-white font-semibold">{take.audience}</strong>
                     </span>
                     <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[#A1A1AA]">
-                      Pacing & Tone: <strong className="text-[#FACC15] font-semibold">{take.pacing}</strong>
+                      Pacing & Tone: <strong className="text-[var(--brand-accent)] font-semibold">{take.pacing}</strong>
                     </span>
                     <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[#A1A1AA]">
                       CinemaOS Context: <strong className="text-white font-semibold">{take.tone}</strong>
@@ -170,7 +170,7 @@ export function DetailViewClient({
               <Link
                 href={`/watch/${mediaType}/${item.id}`}
                 onClick={() => setPlaying(true)}
-                className="cinema-btn-gold min-h-[48px] gap-2.5 px-8 text-base font-bold shadow-brand-glow"
+                className="cinema-btn-accent min-h-[48px] gap-2.5 px-8 text-base font-bold shadow-brand-glow"
               >
                 {playing ? (
                   <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#0B0B0C] border-t-transparent" />

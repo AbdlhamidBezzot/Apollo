@@ -270,14 +270,14 @@ export function MovieNightRoomClient() {
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="APLO-K3F9"
               aria-label="Room code"
-              className="w-full rounded-full border border-white/15 bg-[#09090B] px-4 py-2 font-mono text-sm uppercase text-[#FAFAFA] outline-none placeholder:text-[#A1A1AA] focus:border-[#FACC15]"
+              className="w-full rounded-full border border-white/15 bg-[#09090B] px-4 py-2 font-mono text-sm uppercase text-[#FAFAFA] outline-none placeholder:text-[#A1A1AA] focus:border-[var(--brand-accent)]"
             />
             <input
               value={guestName}
               onChange={(e) => setGuestName(e.target.value)}
               placeholder="Your name (optional)"
               aria-label="Guest name"
-              className="w-full rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] outline-none placeholder:text-[#A1A1AA] focus:border-[#FACC15]"
+              className="w-full rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] outline-none placeholder:text-[#A1A1AA] focus:border-[var(--brand-accent)]"
             />
             <button
               type="submit"
@@ -288,7 +288,7 @@ export function MovieNightRoomClient() {
             </button>
           </form>
 
-          {error && <p className="mt-3 text-xs text-[#FACC15]">{error}</p>}
+          {error && <p className="mt-3 text-xs text-[var(--brand-accent)]">{error}</p>}
         </div>
       </div>
     );
@@ -303,7 +303,7 @@ export function MovieNightRoomClient() {
         <p className="cinema-label text-[10px]">Movie Night Room</p>
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-black tracking-tight text-[#FAFAFA]">Room {room?.code}</h1>
-          {isHost && <span className="rounded-full border border-[#FACC15]/40 bg-[#FACC15]/15 px-3 py-0.5 text-[11px] font-bold text-[#FACC15]">host</span>}
+          {isHost && <span className="rounded-full border border-[var(--brand-accent)]/40 bg-[var(--brand-accent)]/15 px-3 py-0.5 text-[11px] font-bold text-[var(--brand-accent)]">host</span>}
         </div>
         <p className="mt-1 text-sm text-[#A1A1AA]">
           {isHost ? `Waiting on the group… ${readyCount}/${total} preferences in.` : `Host: ${room?.host_name}`}
@@ -326,7 +326,7 @@ export function MovieNightRoomClient() {
           </h2>
           <div className="mb-4 flex h-2 w-full overflow-hidden rounded-full bg-white/10">
             <div
-              className="bg-[#FACC15] transition-all duration-500"
+              className="bg-[var(--brand-accent)] transition-all duration-500"
               style={{ width: total ? `${(readyCount / total) * 100}%` : "0%" }}
             />
           </div>
@@ -334,7 +334,7 @@ export function MovieNightRoomClient() {
             {(room?.participants || []).map((p, i) => (
               <li key={i} className="flex items-center justify-between text-sm">
                 <span className="flex items-center gap-2 text-[#FAFAFA]">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#FACC15] text-[10px] font-bold text-[#0B0B0C]">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--brand-accent)] text-[10px] font-bold text-[var(--brand-accent-text)]">
                     {p.name.charAt(0).toUpperCase()}
                   </span>
                   {p.name}
@@ -370,7 +370,7 @@ export function MovieNightRoomClient() {
                 type="button"
                 onClick={() => toggle(fav, setFav, g.id)}
                 className={`rounded-full px-3 py-1 text-xs transition ${
-                  fav.includes(g.id) ? "bg-[#FACC15] text-[#0B0B0C] font-semibold" : "border border-white/10 bg-white/5 text-[#A1A1AA] hover:border-[#FACC15]/40"
+                  fav.includes(g.id) ? "bg-[var(--brand-accent)] text-[var(--brand-accent-text)] font-semibold" : "border border-white/10 bg-white/5 text-[#A1A1AA] hover:border-[var(--brand-accent)]/40"
                 }`}
               >
                 {g.name}
@@ -402,7 +402,7 @@ export function MovieNightRoomClient() {
                 type="button"
                 onClick={() => setMood(m.value)}
                 className={`rounded-full px-3 py-1 text-xs transition ${
-                  mood === m.value ? "bg-[#FACC15] text-[#0B0B0C] font-semibold" : "border border-white/10 bg-white/5 text-[#A1A1AA] hover:border-[#FACC15]/40"
+                  mood === m.value ? "bg-[var(--brand-accent)] text-[var(--brand-accent-text)] font-semibold" : "border border-white/10 bg-white/5 text-[#A1A1AA] hover:border-[var(--brand-accent)]/40"
                 }`}
               >
                 {m.label}
@@ -418,7 +418,7 @@ export function MovieNightRoomClient() {
                 value={runtime}
                 onChange={(e) => setRuntime(e.target.value === "" ? "" : Number(e.target.value))}
                 placeholder="120"
-                className="w-full rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] outline-none focus:border-[#FACC15]"
+                className="w-full rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] outline-none focus:border-[var(--brand-accent)]"
               />
             </div>
             <div>
@@ -430,7 +430,7 @@ export function MovieNightRoomClient() {
                 value={intensity}
                 onChange={(e) => setIntensity(e.target.value === "" ? "" : Number(e.target.value))}
                 placeholder="3"
-                className="w-full rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] outline-none focus:border-[#FACC15]"
+                className="w-full rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] outline-none focus:border-[var(--brand-accent)]"
               />
             </div>
           </div>
@@ -447,7 +447,7 @@ export function MovieNightRoomClient() {
             <button
               onClick={suggest}
               disabled={busySuggest || readyCount < 1}
-              className="mt-3 w-full rounded-full border border-[#FACC15]/40 bg-[#FACC15]/10 px-5 py-2.5 text-sm font-bold text-[#FACC15] transition hover:bg-[#FACC15]/20 disabled:opacity-40"
+              className="mt-3 w-full rounded-full border border-[var(--brand-accent)]/40 bg-[var(--brand-accent)]/10 px-5 py-2.5 text-sm font-bold text-[var(--brand-accent)] transition hover:bg-[var(--brand-accent)]/20 disabled:opacity-40"
             >
               {busySuggest ? "Finding a pick…" : "Propose a pick for the group"}
             </button>
@@ -455,7 +455,7 @@ export function MovieNightRoomClient() {
         </section>
       </div>
 
-      {error && <p className="mt-4 text-center text-xs text-[#FACC15]">{error}</p>}
+      {error && <p className="mt-4 text-center text-xs text-[var(--brand-accent)]">{error}</p>}
 
       {suggestion && (
         <section className="rounded-3xl border border-white/10 bg-[#09090B]/60 p-6 shadow-glass backdrop-blur-xl mt-6">
@@ -472,8 +472,8 @@ export function MovieNightRoomClient() {
                     <p className="truncate text-sm font-semibold text-[#FAFAFA]">{s.title}</p>
                     <div className="mt-1 flex items-center gap-1.5 text-[11px] text-[#A1A1AA]">
                       {typeof s.vote_average === "number" && s.vote_average > 0 ? (
-                        <span className="flex items-center gap-1 rounded-full border border-white/10 bg-black/70 px-2 py-0.5 font-mono text-[10px] font-bold text-[#FACC15]">
-                          <svg className="h-3 w-3 fill-[#FACC15] text-[#FACC15]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <span className="flex items-center gap-1 rounded-full border border-white/10 bg-black/70 px-2 py-0.5 font-mono text-[10px] font-bold text-[var(--brand-accent)]">
+                          <svg className="h-3 w-3 fill-[var(--brand-accent)] text-[var(--brand-accent)]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                           {s.vote_average.toFixed(1)}
                         </span>
                       ) : null}
@@ -486,9 +486,9 @@ export function MovieNightRoomClient() {
                   <button
                     onClick={() => playPick(s)}
                     disabled={busy}
-                    className="flex w-full items-center gap-2 border-t border-white/10 px-4 py-2.5 text-left text-xs font-bold text-[#FACC15] transition hover:bg-white/5 disabled:opacity-40"
+                    className="flex w-full items-center gap-2 border-t border-white/10 px-4 py-2.5 text-left text-xs font-bold text-[var(--brand-accent)] transition hover:bg-white/5 disabled:opacity-40"
                   >
-                    <svg className="h-3.5 w-3.5 fill-current text-[#FACC15]" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg className="h-3.5 w-3.5 fill-current text-[var(--brand-accent)]" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                     Confirm & launch for the room
                   </button>
                 )}

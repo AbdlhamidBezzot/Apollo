@@ -292,7 +292,7 @@ export function BrowseClient({
               onClick={() => update({ media_type: tab.media })}
               className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
                 activeMedia === tab.media
-                  ? "bg-[#FACC15] text-[#0B0B0C] shadow-brand-glow"
+                  ? "bg-[var(--brand-accent)] text-[var(--brand-accent-text)] shadow-brand-glow"
                   : "border border-white/10 bg-white/5 text-[#A1A1AA] hover:border-white/25 hover:text-white"
               }`}
             >
@@ -309,7 +309,7 @@ export function BrowseClient({
             <select
               value={f.genre}
               onChange={(e) => update({ genre: e.target.value })}
-              className="mt-1 block rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[#FACC15] outline-none"
+              className="mt-1 block rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[var(--brand-accent)] outline-none"
             >
               <option value="">All genres</option>
               {genres.map((g) => (
@@ -328,7 +328,7 @@ export function BrowseClient({
               value={f.year}
               onChange={(e) => update({ year: e.target.value })}
               placeholder="Any"
-              className="mt-1 block w-28 rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[#FACC15] outline-none"
+              className="mt-1 block w-28 rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[var(--brand-accent)] outline-none"
             />
           </label>
           <label className="text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
@@ -341,7 +341,7 @@ export function BrowseClient({
               value={f.min_rating}
               onChange={(e) => update({ min_rating: e.target.value })}
               placeholder="Any"
-              className="mt-1 block w-28 rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[#FACC15] outline-none"
+              className="mt-1 block w-28 rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[var(--brand-accent)] outline-none"
             />
           </label>
           <label className="text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
@@ -349,7 +349,7 @@ export function BrowseClient({
             <select
               value={f.language}
               onChange={(e) => update({ language: e.target.value })}
-              className="mt-1 block rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[#FACC15] outline-none"
+              className="mt-1 block rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[var(--brand-accent)] outline-none"
             >
               <option value="">All languages</option>
               {LANGUAGES.map((l) => (
@@ -364,7 +364,7 @@ export function BrowseClient({
             <select
               value={f.country}
               onChange={(e) => update({ country: e.target.value })}
-              className="mt-1 block rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[#FACC15] outline-none"
+              className="mt-1 block rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[var(--brand-accent)] outline-none"
             >
               <option value="">All countries</option>
               {COUNTRIES.map((c) => (
@@ -379,7 +379,7 @@ export function BrowseClient({
             <select
               value={f.sort_by}
               onChange={(e) => update({ sort_by: e.target.value })}
-              className="mt-1 block rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[#FACC15] outline-none"
+              className="mt-1 block rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[var(--brand-accent)] outline-none"
             >
               {SORTS.map((s) => (
                 <option key={s.value} value={s.value}>

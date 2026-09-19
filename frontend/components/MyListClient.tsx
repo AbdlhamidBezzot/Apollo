@@ -46,7 +46,7 @@ export function MyListClient() {
     return (
       <div className="mx-auto max-w-xl px-4 py-24 text-center">
         <p className="mb-4 text-[#A1A1AA]">Sign in to see your list.</p>
-        <Link href="/login" className="rounded-full bg-[#FACC15] px-6 py-2 text-sm font-extrabold text-black shadow-brand-glow transition hover:bg-[#FDE68B]">
+        <Link href="/login" className="inline-block cinema-btn-accent px-6 py-2 text-sm font-extrabold shadow-brand-glow">
           Sign in
         </Link>
       </div>

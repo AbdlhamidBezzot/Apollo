@@ -124,16 +124,16 @@ function ApolloLogo({ compact }: { compact: boolean }) {
   return (
     <Link href="/" className="flex items-center gap-3" aria-label="Apollo home">
       <span className="relative flex h-9 w-9 shrink-0 items-center justify-center">
-        <span className="absolute inset-0 rounded-full bg-[#FACC15]/25 blur-md" aria-hidden="true" />
+        <span className="absolute inset-0 rounded-full bg-[var(--brand-accent)]/25 blur-md" aria-hidden="true" />
         <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true" className="relative">
-          <circle cx="16" cy="16" r="14" stroke="#FACC15" strokeWidth="2.5" />
-          <circle cx="16" cy="16" r="6" fill="#FACC15" />
-          <path d="M16 2v6M16 24v6M2 16h6M24 16h6" stroke="#FACC15" strokeWidth="2" strokeLinecap="round" />
+          <circle cx="16" cy="16" r="14" stroke="var(--brand-accent)" strokeWidth="2.5" />
+          <circle cx="16" cy="16" r="6" fill="var(--brand-accent)" />
+          <path d="M16 2v6M16 24v6M2 16h6M24 16h6" stroke="var(--brand-accent)" strokeWidth="2" strokeLinecap="round" />
         </svg>
       </span>
       {!compact && (
         <span className="text-lg font-black tracking-tight text-text-vivid">
-          Apollo<span className="text-[#FACC15]">.</span>
+          Apollo<span className="text-[var(--brand-accent)]">.</span>
         </span>
       )}
     </Link>
@@ -219,7 +219,7 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
           e.preventDefault();
           if (q.trim().length >= 2) go(`/search?q=${encodeURIComponent(q.trim())}`);
         }}
-        className="flex h-10 items-center gap-2.5 rounded-full px-4 bg-[#09090B]/80 border border-white/10 focus-within:bg-[#09090B] focus-within:border-[#FACC15]/60 transition"
+        className="flex h-10 items-center gap-2.5 rounded-full px-4 bg-[#09090B]/80 border border-white/10 focus-within:bg-[#09090B] focus-within:border-[var(--brand-accent)]/60 transition"
       >
         <Icon name="searchIcon" className="h-4 w-4 text-text-muted" />
         <input
@@ -250,7 +250,7 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
                 key={c.value}
                 onClick={() => setCat(c.value)}
                 aria-pressed={cat === c.value}
-                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${cat === c.value ? "bg-[#FACC15] text-[#0B0B0C]" : "text-text-muted hover:text-text-vivid"
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${cat === c.value ? "bg-[var(--brand-accent)] text-[var(--brand-accent-text)]" : "text-text-muted hover:text-text-vivid"
                   }`}
               >
                 {c.label}
@@ -259,7 +259,7 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
           </div>
           {busy ? (
             <div className="flex items-center gap-2 px-4 py-3 text-sm text-text-muted">
-              <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#FACC15] border-t-transparent" />
+              <span className="h-3 w-3 animate-spin rounded-full border-2 border-[var(--brand-accent)] border-t-transparent" />
               Searching...
             </div>
           ) : res.length === 0 ? (
@@ -285,13 +285,13 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
                     <p className="truncate text-sm font-semibold text-text-vivid">{titleName(item)}</p>
                     <p className="flex items-center gap-2 text-xs text-text-muted">
                       <span
-                        className={`rounded-full px-2 py-0.5 font-mono text-[10px] uppercase ${mt === "tv" ? "bg-[#FACC15]/15 text-[#FACC15] border border-[#FACC15]/30" : "bg-white/10 text-text-muted"
+                        className={`rounded-full px-2 py-0.5 font-mono text-[10px] uppercase ${mt === "tv" ? "bg-[var(--brand-accent)]/15 text-[var(--brand-accent)] border border-[var(--brand-accent)]/30" : "bg-white/10 text-text-muted"
                           }`}
                       >
                         {mt}
                       </span>
                       {releaseYear(item)}
-                      {item.vote_average ? <span className="text-[#FACC15]">★ {item.vote_average.toFixed(1)}</span> : null}
+                      {item.vote_average ? <span className="text-[var(--brand-accent)]">★ {item.vote_average.toFixed(1)}</span> : null}
                     </p>
                   </div>
                 </button>
@@ -300,7 +300,7 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
           )}
           <button
             onClick={() => go(`/search?q=${encodeURIComponent(q.trim())}`)}
-            className="block w-full border-t border-white/10 px-4 py-2.5 text-left text-sm font-medium text-[#FACC15] transition hover:bg-white/5"
+            className="block w-full border-t border-white/10 px-4 py-2.5 text-left text-sm font-medium text-[var(--brand-accent)] transition hover:bg-white/5"
           >
             See all results for "{q}" →
           </button>
@@ -361,7 +361,7 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
               onClick={() => go("/profile")}
               className="flex w-full items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-left text-sm text-text-muted transition hover:bg-white/10 hover:text-white"
             >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FACC15] font-bold text-[#0B0B0C]">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--brand-accent)] font-bold text-[var(--brand-accent-text)]">
                 {(user.name || user.email).charAt(0).toUpperCase()}
               </span>
               {user.name || user.email}
@@ -528,10 +528,10 @@ export function Navbar() {
                 }`}
               >
                 {isActive(link) && (
-                  <span className="absolute left-0 h-5 w-1 rounded-r-full bg-[#FACC15]" aria-hidden="true" />
+                  <span className="absolute left-0 h-5 w-1 rounded-r-full bg-[var(--brand-accent)]" aria-hidden="true" />
                 )}
                 <span className="flex w-6 shrink-0 items-center justify-center">
-                  <Icon name={link.icon} className={`h-5 w-5 ${isActive(link) ? "text-[#FACC15]" : ""}`} />
+                  <Icon name={link.icon} className={`h-5 w-5 ${isActive(link) ? "text-[var(--brand-accent)]" : ""}`} />
                 </span>
                 {hover && (
                   <span className="whitespace-pre text-sm font-semibold">{link.label}</span>
@@ -548,7 +548,7 @@ export function Navbar() {
                 hover ? "px-4" : "justify-center px-0"
               } text-text-muted hover:bg-white/[0.05] hover:text-text-vivid`}
             >
-              <span className="flex w-6 shrink-0 items-center justify-center text-[#FACC15]">
+              <span className="flex w-6 shrink-0 items-center justify-center text-[var(--brand-accent)]">
                 <Icon name="people" className="h-5 w-5" />
               </span>
               {hover && <span className="text-sm font-semibold">Movie Night Room</span>}
@@ -576,7 +576,7 @@ export function Navbar() {
                   aria-expanded={menuOpen}
                   className="flex h-10 items-center gap-2 rounded-full border border-white/20 bg-white/10 hover:bg-white/15 pl-1 pr-3 transition"
                 >
-                  <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#FACC15] font-bold text-[#0B0B0C]">
+                  <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[var(--brand-accent)] font-bold text-[var(--brand-accent-text)]">
                     {user.avatar ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
@@ -613,7 +613,7 @@ export function Navbar() {
                       <button
                         onClick={doSignOut}
                         role="menuitem"
-                        className="block w-full px-4 py-2.5 text-left text-sm text-[#FACC15] transition hover:bg-white/10"
+                        className="block w-full px-4 py-2.5 text-left text-sm text-[var(--brand-accent)] transition hover:bg-white/10"
                       >
                         Sign out
                       </button>

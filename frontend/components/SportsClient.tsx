@@ -102,14 +102,14 @@ export function SportsClient() {
 
         {/* Hero Header */}
         <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#09090B]/80 p-8 sm:p-10 shadow-2xl backdrop-blur-xl">
-          <div className="absolute -right-10 -top-10 h-64 w-64 rounded-full bg-[#FACC15]/10 blur-3xl" />
+          <div className="absolute -right-10 -top-10 h-64 w-64 rounded-full bg-[var(--brand-accent)]/10 blur-3xl" />
           <div className="relative z-10 max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#FACC15]/30 bg-[#FACC15]/10 px-3.5 py-1 text-xs font-bold text-[#FACC15] mb-4">
-              <span className="h-2 w-2 rounded-full bg-[#FACC15] animate-pulse" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--brand-accent)]/30 bg-[var(--brand-accent)]/10 px-3.5 py-1 text-xs font-bold text-[var(--brand-accent)] mb-4">
+              <span className="h-2 w-2 rounded-full bg-[var(--brand-accent)] animate-pulse" />
               LIVE FOOTBALL STREAMING
             </div>
             <h1 className="text-3xl font-black tracking-tight text-[#FAFAFA] sm:text-5xl">
-              Watch Football Matches <span className="text-[#FACC15]">Live</span>
+              Watch Football Matches <span className="text-[var(--brand-accent)]">Live</span>
             </h1>
             <p className="mt-3 text-sm text-[#A1A1AA] sm:text-base">
               Real-time streams from Premier League, La Liga, Serie A, Champions League, and more. Multiple
@@ -130,11 +130,11 @@ export function SportsClient() {
                 }}
                 className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition ${
                   activeTab === "live"
-                    ? "bg-[#FACC15] text-[#0B0B0C] shadow-brand-glow"
+                    ? "bg-[var(--brand-accent)] text-[var(--brand-accent-text)] shadow-brand-glow"
                     : "text-[#A1A1AA] hover:text-white"
                 }`}
               >
-                <span className="h-2 w-2 rounded-full bg-[#0B0B0C] animate-ping" />
+                <span className="h-2 w-2 rounded-full bg-[var(--brand-accent-text)] animate-ping" />
                 LIVE NOW ({liveCount})
               </button>
               <button
@@ -173,7 +173,7 @@ export function SportsClient() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search team or league..."
-                  className="w-full rounded-full border border-white/15 bg-[#09090B]/80 px-4 py-2 pl-9 text-xs text-white placeholder:text-[#A1A1AA] outline-none focus:border-[#FACC15]"
+                  className="w-full rounded-full border border-white/15 bg-[#09090B]/80 px-4 py-2 pl-9 text-xs text-white placeholder:text-[#A1A1AA] outline-none focus:border-[var(--brand-accent)]"
                 />
                 <span className="absolute left-3 top-2.5 text-xs text-[#A1A1AA]">🔍</span>
               </div>
@@ -187,7 +187,7 @@ export function SportsClient() {
                 onClick={() => setSelectedLeague("all")}
                 className={`rounded-full px-3.5 py-1 text-xs font-semibold whitespace-nowrap transition ${
                   selectedLeague === "all"
-                    ? "bg-[#FACC15] text-[#0B0B0C]"
+                    ? "bg-[var(--brand-accent)] text-[var(--brand-accent-text)]"
                     : "bg-[#09090B]/60 text-[#A1A1AA] border border-white/10 hover:text-white"
                 }`}
               >
@@ -199,7 +199,7 @@ export function SportsClient() {
                   onClick={() => setSelectedLeague(lg)}
                   className={`rounded-full px-3.5 py-1 text-xs font-semibold whitespace-nowrap transition ${
                     selectedLeague === lg
-                      ? "bg-[#FACC15]/20 text-[#FACC15] border border-[#FACC15]/40"
+                      ? "bg-[var(--brand-accent)]/20 text-[var(--brand-accent)] border border-[var(--brand-accent)]/40"
                       : "bg-[#09090B]/60 text-[#A1A1AA] border border-white/10 hover:text-white"
                   }`}
                 >
@@ -249,7 +249,7 @@ export function SportsClient() {
                 return (
                   <div
                     key={match.match_id || idx}
-                    className="card-lift group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#09090B]/60 p-5 shadow-glass backdrop-blur-xl transition duration-300 hover:border-[#FACC15]/40"
+                    className="card-lift group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#09090B]/60 p-5 shadow-glass backdrop-blur-xl transition duration-300 hover:border-[var(--brand-accent)]/40"
                   >
                     {/* Card Top Row */}
                     <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
@@ -257,8 +257,8 @@ export function SportsClient() {
                         {match.league_name || "Match"}
                       </span>
                       {isMatchLive ? (
-                        <span className="flex items-center gap-1.5 rounded-full bg-[#FACC15]/15 px-2.5 py-0.5 text-[11px] font-bold text-[#FACC15] border border-[#FACC15]/30">
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#FACC15] animate-ping" />
+                        <span className="flex items-center gap-1.5 rounded-full bg-[var(--brand-accent)]/15 px-2.5 py-0.5 text-[11px] font-bold text-[var(--brand-accent)] border border-[var(--brand-accent)]/30">
+                          <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand-accent)] animate-ping" />
                           LIVE
                         </span>
                       ) : (
@@ -280,7 +280,7 @@ export function SportsClient() {
                             onError={(e) => ((e.target as HTMLElement).style.display = "none")}
                           />
                         ) : (
-                          <div className="h-8 w-8 rounded bg-[#FACC15]/15 flex items-center justify-center font-bold text-[#FACC15] text-xs shrink-0 border border-[#FACC15]/30">
+                          <div className="h-8 w-8 rounded bg-[var(--brand-accent)]/15 flex items-center justify-center font-bold text-[var(--brand-accent)] text-xs shrink-0 border border-[var(--brand-accent)]/30">
                             {match.home_team_name.charAt(0)}
                           </div>
                         )}
@@ -309,7 +309,7 @@ export function SportsClient() {
                             onError={(e) => ((e.target as HTMLElement).style.display = "none")}
                           />
                         ) : (
-                          <div className="h-8 w-8 rounded bg-[#FACC15]/15 flex items-center justify-center font-bold text-[#FACC15] text-xs shrink-0 border border-[#FACC15]/30">
+                          <div className="h-8 w-8 rounded bg-[var(--brand-accent)]/15 flex items-center justify-center font-bold text-[var(--brand-accent)] text-xs shrink-0 border border-[var(--brand-accent)]/30">
                             {match.away_team_name.charAt(0)}
                           </div>
                         )}

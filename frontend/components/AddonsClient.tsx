@@ -221,7 +221,7 @@ function CatalogCard({
         isBroken
           ? "border-red-500/20 bg-red-500/5 opacity-60"
           : addon.user_enabled
-          ? "border-[#FACC15]/30 bg-[#FACC15]/5 shadow-brand-glow/10"
+          ? "border-[var(--brand-accent)]/30 bg-[var(--brand-accent)]/5 shadow-brand-glow/10"
           : "border-white/10 bg-[#121215]/60 opacity-80 hover:border-white/20 hover:opacity-100"
       } backdrop-blur-xl`}
     >
@@ -293,7 +293,7 @@ function CatalogCard({
               isBroken
                 ? "bg-white/5 cursor-not-allowed"
                 : addon.user_enabled
-                ? "bg-[#FACC15]"
+                ? "bg-[var(--brand-accent)]"
                 : "bg-white/15 hover:bg-white/25"
             } ${busy ? "opacity-50" : ""}`}
           >
@@ -392,7 +392,7 @@ export function AddonsClient() {
       <section>
         {fetching ? (
           <div className="flex items-center gap-3 text-sm text-[#A1A1AA] py-12">
-            <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#FACC15] border-t-transparent" />
+            <span className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--brand-accent)] border-t-transparent" />
             Chargement du catalogue d'add-ons…
           </div>
         ) : addons.length === 0 ? (

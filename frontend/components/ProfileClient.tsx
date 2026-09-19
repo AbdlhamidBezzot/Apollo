@@ -164,12 +164,12 @@ export function ProfileClient() {
       <div className="rounded-3xl border border-white/10 bg-[#09090B]/60 p-6 shadow-glass backdrop-blur-xl space-y-4">
         <h2 className="text-lg font-bold text-[#FAFAFA]">Profile Picture</h2>
         <div className="flex items-center gap-4">
-          <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[#FACC15] bg-[#09090B] shadow-md">
+          <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--brand-accent)] bg-[#09090B] shadow-md">
             {avatarUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img src={avatarUrl} alt={user.name} className="h-full w-full object-cover" />
             ) : (
-              <span className="text-3xl font-bold text-[#FACC15]">{user.name?.[0]?.toUpperCase() || "U"}</span>
+              <span className="text-3xl font-bold text-[var(--brand-accent)]">{user.name?.[0]?.toUpperCase() || "U"}</span>
             )}
           </div>
           <div className="flex-1 min-w-0 space-y-2">
@@ -191,11 +191,11 @@ export function ProfileClient() {
               value={avatarUrl}
               onChange={(e) => setAvatarUrl(e.target.value)}
               placeholder="https://example.com/my-photo.jpg"
-              className="w-full rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] outline-none focus:border-[#FACC15]"
+              className="w-full rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] outline-none focus:border-[var(--brand-accent)]"
             />
           </div>
           {avatarMessage && (
-            <p className="text-xs font-semibold text-[#FACC15]">{avatarMessage}</p>
+            <p className="text-xs font-semibold text-[var(--brand-accent)]">{avatarMessage}</p>
           )}
           <button
             type="submit"
@@ -219,7 +219,7 @@ export function ProfileClient() {
         </div>
         <div className="flex gap-2">
           {user.is_admin ? (
-            <span className="rounded-full border border-[#FACC15]/30 bg-[#FACC15]/15 px-3 py-0.5 text-[11px] font-bold text-[#FACC15]">Admin</span>
+            <span className="rounded-full border border-[var(--brand-accent)]/30 bg-[var(--brand-accent)]/15 px-3 py-0.5 text-[11px] font-bold text-[var(--brand-accent)]">Admin</span>
           ) : null}
         </div>
         <button

@@ -69,7 +69,7 @@ export function LoginClient() {
       <div className="w-full max-w-sm">
         {/* Logo mark */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#FACC15] text-black font-black text-xl shadow-brand-glow">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--brand-accent)] text-[var(--brand-accent-text)] font-black text-xl shadow-brand-glow">
             A
           </div>
           <h1 className="text-3xl font-black tracking-tight text-white">
@@ -87,7 +87,7 @@ export function LoginClient() {
                 name="name"
                 required
                 placeholder="Display name"
-                className="w-full rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white outline-none placeholder:text-[#A1A1AA] focus:border-[#FACC15]/50 transition"
+                className="w-full rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white outline-none placeholder:text-[#A1A1AA] focus:border-[var(--brand-accent)]/50 transition"
               />
             )}
             <input
@@ -95,7 +95,7 @@ export function LoginClient() {
               type="email"
               required
               placeholder="Email address"
-              className="w-full rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white outline-none placeholder:text-[#A1A1AA] focus:border-[#FACC15]/50 transition"
+              className="w-full rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white outline-none placeholder:text-[#A1A1AA] focus:border-[var(--brand-accent)]/50 transition"
             />
             <input
               name="password"
@@ -103,7 +103,7 @@ export function LoginClient() {
               required
               minLength={mode === "register" ? 8 : 1}
               placeholder={mode === "register" ? "Password (min 8 chars)" : "Password"}
-              className="w-full rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white outline-none placeholder:text-[#A1A1AA] focus:border-[#FACC15]/50 transition"
+              className="w-full rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white outline-none placeholder:text-[#A1A1AA] focus:border-[var(--brand-accent)]/50 transition"
             />
             {error && (
               <p className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400" role="alert">
@@ -118,7 +118,7 @@ export function LoginClient() {
             <button
               type="submit"
               disabled={busy}
-              className="w-full rounded-full bg-[#FACC15] py-2.5 text-sm font-extrabold text-black shadow-brand-glow transition hover:bg-[#FDE68B] disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full rounded-full bg-[var(--brand-accent)] py-2.5 text-sm font-extrabold text-[var(--brand-accent-text)] shadow-brand-glow transition hover:bg-[var(--brand-accent-hover)] disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}
             </button>
@@ -129,7 +129,7 @@ export function LoginClient() {
             <button
               type="button"
               onClick={() => switchMode(mode === "login" ? "register" : "login")}
-              className="font-semibold text-[#FACC15] hover:underline"
+              className="font-semibold text-[var(--brand-accent)] hover:underline"
             >
               {mode === "login" ? "Create an account" : "Sign in"}
             </button>

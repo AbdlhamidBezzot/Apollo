@@ -392,8 +392,8 @@ export function EditorsPickSpotlight() {
               fill
               className="object-cover"
             />
-            <span className="absolute left-2 top-2 flex items-center gap-1 rounded-full border border-white/10 bg-black/70 px-2.5 py-0.5 font-mono text-xs font-bold text-[#FACC15] backdrop-blur-md">
-              <svg className="h-3.5 w-3.5 fill-[#FACC15] text-[#FACC15]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> 8.6
+            <span className="absolute left-2 top-2 flex items-center gap-1 rounded-full border border-white/10 bg-black/70 px-2.5 py-0.5 font-mono text-xs font-bold text-[var(--brand-accent)] backdrop-blur-md">
+              <svg className="h-3.5 w-3.5 fill-[var(--brand-accent)] text-[var(--brand-accent)]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> 8.6
             </span>
           </div>
 

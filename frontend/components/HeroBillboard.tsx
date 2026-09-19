@@ -101,7 +101,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
                 <svg
                   key={s}
                   className={`h-4 w-4 ${
-                    s <= starsCount ? "fill-[#FACC15] text-[#FACC15]" : "fill-white/20 text-white/20"
+                    s <= starsCount ? "fill-[var(--brand-accent)] text-[var(--brand-accent)]" : "fill-white/20 text-white/20"
                   }`}
                   viewBox="0 0 24 24"
                 >
@@ -209,7 +209,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
                   aria-label={`Go to ${titleName(s)}`}
                   aria-current={i === index}
                   className={`group relative flex-1 overflow-hidden rounded-xl border transition ${
-                    i === index ? "border-[#FACC15]" : "border-white/10 opacity-50 hover:opacity-100"
+                    i === index ? "border-[var(--brand-accent)]" : "border-white/10 opacity-50 hover:opacity-100"
                   }`}
                 >
                   <div className="relative aspect-[21/9] w-full sm:aspect-video">
@@ -225,7 +225,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
                       {String(i + 1).padStart(2, "0")} · {titleName(s)}
                     </span>
                     {i === index && (
-                      <span className="hero-progress absolute bottom-0 left-0 h-0.5 bg-[#FACC15]" aria-hidden="true" />
+                      <span className="hero-progress absolute bottom-0 left-0 h-0.5 bg-[var(--brand-accent)]" aria-hidden="true" />
                     )}
                   </div>
                 </button>

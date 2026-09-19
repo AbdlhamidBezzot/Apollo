@@ -981,7 +981,7 @@ export function Player({
                 onClick={fullscreen}
                 aria-label="Toggle fullscreen"
                 title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
-                className="absolute bottom-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md transition hover:bg-[#FACC15] hover:text-black"
+                className="absolute bottom-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md transition hover:bg-[var(--brand-accent)] hover:text-[var(--brand-accent-text)]"
               >
                 {isFullscreen ? (
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -1066,7 +1066,7 @@ export function Player({
                 <button
                   onClick={togglePlay}
                   aria-label="Play"
-                  className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#FACC15] text-xl text-black font-bold shadow-brand-glow transition hover:scale-105"
+                  className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--brand-accent)] text-xl text-[var(--brand-accent-text)] font-bold shadow-brand-glow transition hover:scale-105"
                 >
                   ▶
                 </button>
@@ -1075,7 +1075,7 @@ export function Player({
               {showSkipIntro && (
                 <button
                   onClick={() => skipCue("intro")}
-                  className="absolute bottom-24 right-4 rounded-full bg-[#FACC15] px-4 py-2 text-xs font-bold text-black shadow-brand-glow transition hover:bg-[#FDE68B]"
+                  className="absolute bottom-24 right-4 rounded-full bg-[var(--brand-accent)] px-4 py-2 text-xs font-bold text-[var(--brand-accent-text)] shadow-brand-glow transition hover:bg-[var(--brand-accent-hover)]"
                 >
                   Skip Intro ⏭
                 </button>
@@ -1083,7 +1083,7 @@ export function Player({
               {showSkipOutro && (
                 <button
                   onClick={() => skipCue("outro")}
-                  className="absolute bottom-24 right-4 rounded-full bg-[#FACC15] px-4 py-2 text-xs font-bold text-black shadow-brand-glow transition hover:bg-[#FDE68B]"
+                  className="absolute bottom-24 right-4 rounded-full bg-[var(--brand-accent)] px-4 py-2 text-xs font-bold text-[var(--brand-accent-text)] shadow-brand-glow transition hover:bg-[var(--brand-accent-hover)]"
                 >
                   Skip Outro ⏭
                 </button>
@@ -1104,7 +1104,7 @@ export function Player({
                   <div className="p-3.5 space-y-2">
                     {mediaType === "tv" ? (
                       <>
-                        <p className="font-mono text-xs text-[#FACC15] font-semibold tracking-wider">
+                        <p className="font-mono text-xs text-[var(--brand-accent)] font-semibold tracking-wider">
                           S{String(seasonNum).padStart(2, "0")} E{String(episodeNum + 1).padStart(2, "0")}
                         </p>
                         <p className="text-xs text-white line-clamp-1 font-medium">
@@ -1113,7 +1113,7 @@ export function Player({
                       </>
                     ) : (
                       <>
-                        <p className="font-mono text-xs text-[#FACC15] font-semibold tracking-wider">Recommended Movie</p>
+                        <p className="font-mono text-xs text-[var(--brand-accent)] font-semibold tracking-wider">Recommended Movie</p>
                         <p className="text-xs text-white line-clamp-1 font-medium">
                           {similar[0]?.title || similar[0]?.name || "Next Movie"}
                         </p>
@@ -1122,7 +1122,7 @@ export function Player({
                     <button
                       onClick={playNextItem}
                       disabled={busyResolve}
-                      className="mt-2 w-full rounded-full bg-[#FACC15] px-4 py-2 text-xs font-bold text-black shadow-brand-glow transition hover:bg-[#FDE68B] disabled:opacity-50"
+                      className="mt-2 w-full rounded-full bg-[var(--brand-accent)] px-4 py-2 text-xs font-bold text-[var(--brand-accent-text)] shadow-brand-glow transition hover:bg-[var(--brand-accent-hover)] disabled:opacity-50"
                     >
                       {busyResolve ? "Loading..." : mediaType === "tv" ? "▶ Play next episode" : "▶ Play next movie"}
                     </button>
@@ -1151,25 +1151,25 @@ export function Player({
                       if (videoRef.current) videoRef.current.currentTime = v;
                       syncState({ time: v });
                     }}
-                    className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-[#FACC15] hover:h-2 transition-all"
+                    className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-[var(--brand-accent)] hover:h-2 transition-all"
                   />
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
                   <div className="flex items-center gap-3">
-                    <button onClick={togglePlay} aria-label={playing ? "Pause" : "Play"} className="text-white hover:text-[#FACC15] text-lg">
+                    <button onClick={togglePlay} aria-label={playing ? "Pause" : "Play"} className="text-white hover:text-[var(--brand-accent)] text-lg">
                       {playing ? "❚❚" : "▶"}
                     </button>
                     <button
                       onClick={playNextItem}
                       aria-label="Next"
                       title={mediaType === "tv" ? "Next episode" : "Next movie"}
-                      className="text-white hover:text-[#FACC15] text-sm p-1 disabled:opacity-40"
+                      className="text-white hover:text-[var(--brand-accent)] text-sm p-1 disabled:opacity-40"
                       disabled={busyResolve || (mediaType === "movie" && similar.length === 0)}
                     >
                       ⏭
                     </button>
-                    <button onClick={toggleMute} aria-label="Mute" className="text-white hover:text-[#FACC15]">
+                    <button onClick={toggleMute} aria-label="Mute" className="text-white hover:text-[var(--brand-accent)]">
                       {muted || volume === 0 ? "🔇" : volume < 0.5 ? "🔉" : "🔊"}
                     </button>
                     <span className="font-mono text-xs tabular-nums text-[#A1A1AA]">
@@ -1201,7 +1201,7 @@ export function Player({
                             <button
                               onClick={() => setQuality(-1)}
                               className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/10 ${
-                                curLevel === -1 ? "font-semibold text-[#FACC15]" : "text-white"
+                                curLevel === -1 ? "font-semibold text-[var(--brand-accent)]" : "text-white"
                               }`}
                             >
                               Auto
@@ -1211,7 +1211,7 @@ export function Player({
                                 key={l.index}
                                 onClick={() => setQuality(l.index)}
                                 className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-white/10 ${
-                                  curLevel === l.index ? "font-semibold text-[#FACC15]" : "text-white"
+                                  curLevel === l.index ? "font-semibold text-[var(--brand-accent)]" : "text-white"
                                 }`}
                               >
                                 {l.label}
@@ -1222,7 +1222,7 @@ export function Player({
                       </div>
                     )}
 
-                    <button onClick={fullscreen} aria-label="Toggle fullscreen" className="text-white hover:text-[#FACC15]">
+                    <button onClick={fullscreen} aria-label="Toggle fullscreen" className="text-white hover:text-[var(--brand-accent)]">
                       ⛶
                     </button>
                   </div>
@@ -1235,7 +1235,7 @@ export function Player({
           <div>
             <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">{displayTitle}</h1>
             {mediaType === "tv" && (
-              <p className="text-xs font-mono tracking-[0.14em] uppercase text-[#FACC15] mt-1 font-semibold">
+              <p className="text-xs font-mono tracking-[0.14em] uppercase text-[var(--brand-accent)] mt-1 font-semibold">
                 Season {seasonNum} • Episode {episodeNum} {currentEpisodeObj?.name ? `• ${currentEpisodeObj.name}` : ""}
               </p>
             )}
@@ -1245,13 +1245,13 @@ export function Player({
           <div className="flex flex-wrap items-center justify-between gap-4 py-2 border-b border-white/10 pb-4">
             {/* Channel Info */}
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#FACC15] text-black font-extrabold text-sm shadow-sm">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--brand-accent)] text-[var(--brand-accent-text)] font-extrabold text-sm shadow-sm">
                 A
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold text-xs text-white">Apollo Cinema</span>
-                  <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#FACC15] text-[8px] font-bold text-black" title="Verified Streamer">
+                  <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[var(--brand-accent)] text-[8px] font-bold text-[var(--brand-accent-text)]" title="Verified Streamer">
                     ✓
                   </span>
                 </div>
@@ -1259,7 +1259,7 @@ export function Player({
               </div>
               <button
                 onClick={() => announce("Subscribed to Apollo Cinema")}
-                className="ml-2 rounded-full bg-[#FACC15] px-4 py-1.5 text-xs font-extrabold text-black shadow-brand-glow transition hover:bg-[#FDE68B]"
+                className="ml-2 rounded-full bg-[var(--brand-accent)] px-4 py-1.5 text-xs font-extrabold text-[var(--brand-accent-text)] shadow-brand-glow transition hover:bg-[var(--brand-accent-hover)]"
               >
                 Subscribe
               </button>
@@ -1272,7 +1272,7 @@ export function Player({
                 <button
                   onClick={() => handleMediaReaction("like")}
                   className={`flex items-center gap-1.5 px-3 py-1.5 transition hover:bg-white/10 ${
-                    userReaction === "like" ? "text-[#FACC15] font-bold bg-white/10" : "text-[#A1A1AA] hover:text-white"
+                    userReaction === "like" ? "text-[var(--brand-accent)] font-bold bg-white/10" : "text-[#A1A1AA] hover:text-white"
                   }`}
                   title={user ? "I like this" : "Sign in to like"}
                 >
@@ -1282,7 +1282,7 @@ export function Player({
                 <button
                   onClick={() => handleMediaReaction("dislike")}
                   className={`px-3 py-1.5 flex items-center gap-1 transition hover:bg-white/10 ${
-                    userReaction === "dislike" ? "text-[#FACC15] font-bold bg-white/10" : "text-[#A1A1AA] hover:text-white"
+                    userReaction === "dislike" ? "text-[var(--brand-accent)] font-bold bg-white/10" : "text-[#A1A1AA] hover:text-white"
                   }`}
                   title={user ? "I dislike this" : "Sign in to dislike"}
                 >
@@ -1307,7 +1307,7 @@ export function Player({
                 disabled={watchlistLoading}
                 className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 border backdrop-blur-md transition ${
                   inWatchlist
-                    ? "bg-[#FACC15]/15 text-[#FACC15] border-[#FACC15]/40 font-bold"
+                    ? "bg-[var(--brand-accent)]/15 text-[var(--brand-accent)] border-[var(--brand-accent)]/40 font-bold"
                     : "border-white/10 bg-white/[0.04] text-[#A1A1AA] hover:border-white/20 hover:text-white"
                 }`}
                 title="Save to watchlist"
@@ -1326,7 +1326,7 @@ export function Player({
                       disabled={busyResolve || (p === provider && !selectedAddonStream)}
                       className={`rounded-full px-3 py-1 text-xs font-semibold transition disabled:cursor-default ${
                         p === provider && !selectedAddonStream
-                          ? "bg-[#FACC15] text-black font-bold shadow-brand-glow"
+                          ? "bg-[var(--brand-accent)] text-[var(--brand-accent-text)] font-bold shadow-brand-glow"
                           : "text-[#A1A1AA] hover:text-white"
                       }`}
                     >
@@ -1343,7 +1343,7 @@ export function Player({
                     onClick={() => setAddonStreamMenuOpen((v) => !v)}
                     className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold border backdrop-blur-md transition ${
                       selectedAddonStream
-                        ? "bg-[#FACC15] text-black border-[#FACC15] shadow-brand-glow font-bold"
+                        ? "bg-[var(--brand-accent)] text-[var(--brand-accent-text)] border-[var(--brand-accent)] shadow-brand-glow font-bold"
                         : "border-white/10 bg-white/[0.04] text-[#A1A1AA] hover:border-white/20 hover:text-white"
                     }`}
                   >
@@ -1361,7 +1361,7 @@ export function Player({
                         <p className="text-[11px] font-bold uppercase tracking-wider text-[#A1A1AA]">
                           Direct Addon Streams
                         </p>
-                        <span className="text-[10px] text-[#FACC15] font-mono font-semibold">
+                        <span className="text-[10px] text-[var(--brand-accent)] font-mono font-semibold">
                           {addonStreams.length} found
                         </span>
                       </div>
@@ -1380,13 +1380,13 @@ export function Player({
                               announce(`Playing ${st.title || st.addon_name}`);
                             }}
                             className={`block w-full rounded-xl px-3 py-2 text-left text-xs transition hover:bg-white/10 ${
-                              selectedAddonStream?.id === st.id ? "bg-[#FACC15]/20 font-bold text-[#FACC15] border border-[#FACC15]/30" : "text-white"
+                              selectedAddonStream?.id === st.id ? "bg-[var(--brand-accent)]/20 font-bold text-[var(--brand-accent)] border border-[var(--brand-accent)]/30" : "text-white"
                             }`}
                           >
                             <div className="flex items-center justify-between gap-2">
                               <span className="truncate font-semibold">{st.title || st.addon_name}</span>
                               {st.quality && (
-                                <span className="shrink-0 rounded bg-[#FACC15]/20 px-1.5 py-0.5 text-[10px] font-bold text-[#FACC15]">
+                                <span className="shrink-0 rounded bg-[var(--brand-accent)]/20 px-1.5 py-0.5 text-[10px] font-bold text-[var(--brand-accent)]">
                                   {st.quality}
                                 </span>
                               )}
@@ -1409,7 +1409,7 @@ export function Player({
                 <button
                   onClick={() => setChatOpen((v) => !v)}
                   className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 border backdrop-blur-md transition ${
-                    chatOpen ? "bg-[#FACC15]/15 border-[#FACC15]/40 text-[#FACC15] font-bold" : "border-white/10 bg-white/[0.04] text-[#A1A1AA] hover:border-white/20 hover:text-white"
+                    chatOpen ? "bg-[var(--brand-accent)]/15 border-[var(--brand-accent)]/40 text-[var(--brand-accent)] font-bold" : "border-white/10 bg-white/[0.04] text-[#A1A1AA] hover:border-white/20 hover:text-white"
                   }`}
                 >
                   <span>👥</span>
@@ -1438,8 +1438,8 @@ export function Player({
                 {detail?.release_date?.slice(0, 4) || detail?.first_air_date?.slice(0, 4) || "2024"}
               </span>
               {detail?.vote_average ? (
-                <span className="flex items-center gap-1 rounded-full border border-[#FACC15]/30 bg-black/60 px-2.5 py-0.5 font-mono text-[11px] font-bold text-[#FACC15] backdrop-blur-md">
-                  <svg className="h-3 w-3 fill-[#FACC15] text-[#FACC15]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <span className="flex items-center gap-1 rounded-full border border-[var(--brand-accent)]/30 bg-black/60 px-2.5 py-0.5 font-mono text-[11px] font-bold text-[var(--brand-accent)] backdrop-blur-md">
+                  <svg className="h-3 w-3 fill-[var(--brand-accent)] text-[var(--brand-accent)]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                   {detail.vote_average.toFixed(1)}
                 </span>
               ) : null}
@@ -1472,7 +1472,7 @@ export function Player({
               </div>
             )}
 
-            <button className="mt-3 font-mono text-xs font-semibold text-[#FACC15] hover:underline block">
+            <button className="mt-3 font-mono text-xs font-semibold text-[var(--brand-accent)] hover:underline block">
               {showFullDescription ? "Show less" : "...Show more"}
             </button>
           </div>
@@ -1489,7 +1489,7 @@ export function Player({
             {/* Comment Submission Form (Auth Gated) */}
             {user ? (
               <form onSubmit={handleAddComment} className="flex gap-3 items-start">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FACC15] text-black font-bold text-xs shadow-sm overflow-hidden">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--brand-accent)] text-[var(--brand-accent-text)] font-bold text-xs shadow-sm overflow-hidden">
                   {user.name?.[0]?.toUpperCase() || "U"}
                 </div>
                 <div className="flex-1 space-y-2">
@@ -1499,7 +1499,7 @@ export function Player({
                     onChange={(e) => setNewCommentText(e.target.value)}
                     placeholder="Add a public comment..."
                     disabled={commentSubmitting}
-                    className="w-full border-b border-white/10 bg-transparent px-1 py-1.5 text-sm text-white placeholder-[#A1A1AA] outline-none focus:border-[#FACC15]/60 transition disabled:opacity-50"
+                    className="w-full border-b border-white/10 bg-transparent px-1 py-1.5 text-sm text-white placeholder-[#A1A1AA] outline-none focus:border-[var(--brand-accent)]/60 transition disabled:opacity-50"
                   />
                   {newCommentText.trim() && (
                     <div className="flex justify-end gap-2 pt-1">
@@ -1513,7 +1513,7 @@ export function Player({
                       <button
                         type="submit"
                         disabled={commentSubmitting}
-                        className="rounded-full bg-[#FACC15] px-5 py-1.5 text-xs font-bold text-black shadow-brand-glow transition hover:bg-[#FDE68B] disabled:opacity-50"
+                        className="cinema-btn-accent px-5 py-1.5 text-xs font-bold shadow-brand-glow disabled:opacity-50"
                       >
                         {commentSubmitting ? "Posting..." : "Comment"}
                       </button>
@@ -1526,7 +1526,7 @@ export function Player({
                 <p className="text-xs text-[#A1A1AA] mb-2">Sign in to leave a comment and share your thoughts.</p>
                 <Link
                   href="/login"
-                  className="inline-block rounded-full bg-[#FACC15] px-5 py-1.5 text-xs font-bold text-black shadow-brand-glow transition hover:bg-[#FDE68B]"
+                  className="inline-block cinema-btn-accent px-5 py-1.5 text-xs font-bold shadow-brand-glow"
                 >
                   Sign In to Comment
                 </Link>
@@ -1552,7 +1552,7 @@ export function Player({
                         className="h-8 w-8 rounded-full object-cover shrink-0 border border-white/10"
                       />
                     ) : (
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FACC15] text-black font-bold text-xs shadow-sm">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--brand-accent)] text-[var(--brand-accent-text)] font-bold text-xs shadow-sm">
                         {comment.author_name?.[0]?.toUpperCase() || "A"}
                       </div>
                     )}
@@ -1568,7 +1568,7 @@ export function Player({
                         <button
                           onClick={() => toggleCommentLike(comment.id)}
                           className={`flex items-center gap-1 transition ${
-                            comment.is_liked ? "text-[#FACC15] font-bold" : "hover:text-white"
+                            comment.is_liked ? "text-[var(--brand-accent)] font-bold" : "hover:text-white"
                           }`}
                           title={user ? "Like comment" : "Sign in to like"}
                         >
@@ -1635,7 +1635,7 @@ export function Player({
                         disabled={busyResolve || isCurrent}
                         className={`w-full group flex gap-3 p-2 rounded-xl text-left transition ${
                           isCurrent
-                            ? "bg-[#FACC15]/15 border border-[#FACC15]/40 font-semibold"
+                            ? "bg-[var(--brand-accent)]/15 border border-[var(--brand-accent)]/40 font-semibold"
                             : "hover:bg-white/[0.04] border border-transparent"
                         }`}
                       >
@@ -1656,13 +1656,13 @@ export function Player({
                             E{String(ep.episode_number).padStart(2, "0")}
                           </span>
                           {isCurrent && (
-                            <div className="absolute inset-0 bg-[#FACC15]/40 flex items-center justify-center text-black text-xs font-bold">
+                            <div className="absolute inset-0 bg-[var(--brand-accent)]/40 flex items-center justify-center text-[var(--brand-accent-text)] text-xs font-bold">
                               ▶
                             </div>
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className={`text-xs truncate font-semibold ${isCurrent ? "text-[#FACC15]" : "text-white group-hover:text-[#FACC15]"}`}>
+                          <p className={`text-xs truncate font-semibold ${isCurrent ? "text-[var(--brand-accent)]" : "text-white group-hover:text-[var(--brand-accent)]"}`}>
                             {ep.episode_number}. {ep.name || `Episode ${ep.episode_number}`}
                           </p>
                           <p className="text-[11px] text-[#A1A1AA] line-clamp-1 mt-0.5">{ep.overview || "No overview"}</p>
@@ -1678,7 +1678,7 @@ export function Player({
           {/* Up Next / Recommended Sidebar */}
           <div className="space-y-3">
             <div className="flex items-center justify-between pb-1 border-b border-white/10">
-              <h3 className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#FACC15]">Up next</h3>
+              <h3 className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-[var(--brand-accent)]">Up next</h3>
             </div>
 
             {/* Recommended Video Cards */}
@@ -1711,17 +1711,17 @@ export function Player({
                               alt={ep.name || `Episode ${ep.episode_number}`}
                               className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                             />
-                            <span className="absolute bottom-1 right-1 rounded bg-black/80 px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#FACC15] uppercase tracking-wider">
+                            <span className="absolute bottom-1 right-1 rounded bg-black/80 px-1.5 py-0.5 font-mono text-[9px] font-bold text-[var(--brand-accent)] uppercase tracking-wider">
                               S{seasonNum} E{ep.episode_number}
                             </span>
                             {isNextEp && (
-                              <span className="absolute top-1 left-1 rounded bg-[#FACC15] px-1.5 py-0.5 font-mono text-[9px] font-extrabold text-black shadow uppercase tracking-wider">
+                              <span className="absolute top-1 left-1 rounded bg-[var(--brand-accent)] px-1.5 py-0.5 font-mono text-[9px] font-extrabold text-[var(--brand-accent-text)] shadow uppercase tracking-wider">
                                 UP NEXT
                               </span>
                             )}
                           </div>
                           <div className="min-w-0 flex-1 py-0.5">
-                            <h4 className="font-semibold text-xs text-white line-clamp-2 leading-snug group-hover:text-[#FACC15] transition">
+                            <h4 className="font-semibold text-xs text-white line-clamp-2 leading-snug group-hover:text-[var(--brand-accent)] transition">
                               {ep.episode_number}. {ep.name || `Episode ${ep.episode_number}`}
                             </h4>
                             <p className="text-[11px] text-[#A1A1AA] mt-1 line-clamp-1">
@@ -1775,14 +1775,14 @@ export function Player({
                         </span>
                       </div>
                       <div className="min-w-0 flex-1 py-0.5">
-                        <h4 className="font-semibold text-xs text-white line-clamp-2 leading-snug group-hover:text-[#FACC15] transition">
+                        <h4 className="font-semibold text-xs text-white line-clamp-2 leading-snug group-hover:text-[var(--brand-accent)] transition">
                           {itemTitle}
                         </h4>
                         <p className="text-[11px] text-[#A1A1AA] mt-0.5 font-mono">Apollo Streams</p>
                         <div className="flex items-center gap-2 text-[10px] text-[#A1A1AA] mt-1">
                           <span className="font-mono">{item.release_date?.slice(0, 4) || item.first_air_date?.slice(0, 4) || "2024"}</span>
                           {item.vote_average ? (
-                            <span className="text-[#FACC15] font-mono font-bold flex items-center gap-0.5">
+                            <span className="text-[var(--brand-accent)] font-mono font-bold flex items-center gap-0.5">
                               ★ {item.vote_average.toFixed(1)}
                             </span>
                           ) : null}
@@ -1801,7 +1801,7 @@ export function Player({
       {roomCode && chatOpen && (
         <div className="fixed bottom-4 right-4 z-40 flex h-96 w-80 flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#09090B]/90 backdrop-blur-xl shadow-2xl">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5 bg-white/[0.03]">
-            <p className="text-xs font-extrabold text-white">Movie Night Chat · <span className="font-mono text-[#FACC15]">{room.code}</span></p>
+            <p className="text-xs font-extrabold text-white">Movie Night Chat · <span className="font-mono text-[var(--brand-accent)]">{room.code}</span></p>
             <button onClick={() => setChatOpen(false)} className="text-[#A1A1AA] hover:text-white" aria-label="Close chat">
               ✕
             </button>
@@ -1809,7 +1809,7 @@ export function Player({
           <div className="thin-scroll flex-1 space-y-2 overflow-y-auto px-3 py-2">
             {room.messages.map((msg, i) => (
               <div key={i} className="text-xs">
-                <span className="font-bold text-[#FACC15]">{msg.sender}: </span>
+                <span className="font-bold text-[var(--brand-accent)]">{msg.sender}: </span>
                 <span className="text-white">{msg.text}</span>
               </div>
             ))}
@@ -1827,9 +1827,9 @@ export function Player({
               onChange={(e) => setChatInput(e.target.value)}
               placeholder="Message..."
               aria-label="Chat message"
-              className="flex-1 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs text-white outline-none focus:border-[#FACC15]/60"
+              className="flex-1 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs text-white outline-none focus:border-[var(--brand-accent)]/60"
             />
-            <button type="submit" className="rounded-full bg-[#FACC15] px-4 py-1.5 text-xs font-bold text-black shadow-brand-glow transition hover:bg-[#FDE68B] disabled:opacity-50" disabled={!chatInput.trim()}>
+            <button type="submit" className="cinema-btn-accent px-4 py-1.5 text-xs font-bold shadow-brand-glow disabled:opacity-50" disabled={!chatInput.trim()}>
               Send
             </button>
           </form>
