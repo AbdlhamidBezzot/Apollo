@@ -98,13 +98,20 @@ export function HomeClient() {
   const hasAnyItems = trending.length > 0 || popularMovies.length > 0 || popularTv.length > 0 || topRated.length > 0;
 
   return (
-    <div className="space-y-10 pb-4">
+    <div className="space-y-[88px] pb-12">
       {/* Hero Billboard */}
 
       {trending.length > 0 ? (
         <HeroBillboard slides={trending} />
       ) : loading ? (
-        <section className="relative mx-auto mt-6 flex h-[400px] w-full max-w-7xl items-end overflow-hidden rounded-3xl border border-white/10 bg-bg-surface px-5 pb-14 sm:h-[520px] sm:px-8"><div className="max-w-2xl"><p className="mb-2 text-sm font-semibold text-white/90">Discover what to watch next</p><h1 className="text-4xl font-extrabold leading-[1.1] text-text-vivid sm:text-6xl">Find your next great watch.</h1><p className="mt-4 max-w-lg text-base leading-relaxed text-white/85">Browse movies and series across the streaming services you already use.</p><div className="mt-6 h-11 w-36 animate-pulse rounded-full bg-white/15" aria-label="Loading featured title" /></div></section>
+        <section className="relative mx-auto mt-4 flex h-[400px] w-full max-w-7xl items-end overflow-hidden rounded-3xl border border-white/[0.08] bg-[#1B1E27] px-6 pb-14 sm:h-[520px] sm:px-10">
+          <div className="max-w-2xl">
+            <div className="h-4 w-28 animate-pulse rounded-full bg-white/10" />
+            <h1 className="mt-4 text-4xl font-extrabold tracking-[-0.03em] leading-none text-text-vivid sm:text-6xl">Find your next great watch.</h1>
+            <p className="mt-4 max-w-lg text-sm leading-relaxed text-text-muted sm:text-base">Browse movies and series across the streaming services you already use.</p>
+            <div className="mt-6 h-11 w-36 animate-pulse rounded-full bg-white/15" aria-label="Loading featured title" />
+          </div>
+        </section>
       ) : null}
 
       <ContinueWatchingRow />
@@ -119,7 +126,7 @@ export function HomeClient() {
       <ProviderMarquee />
       <SignInNotice />
 
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 my-6">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 my-4">
         <PokePingsAd />
       </div>
 
@@ -128,35 +135,36 @@ export function HomeClient() {
       <Ad300x250 />
 
       {/* Catalog Rows or Inline Retry Widget */}
-      {rows.map((row, idx) => (
+      {rows.map((row) => (
         <div key={row.title} className="space-y-12">
           {row.items.length > 0 ? (
             <MovieRow title={row.title} items={row.items} seeAllHref={row.seeAllHref} />
           ) : loading || retrying ? (
-            <div className="space-y-3">
+            <div className="mx-auto max-w-7xl px-4 space-y-3">
               <div className="h-5 w-40 rounded bg-white/10" />
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="aspect-[2/3] rounded-xl bg-surface-dark animate-pulse" />
+                  <div key={i} className="aspect-[2/3] rounded-2xl bg-[#1B1E27] animate-pulse" />
                 ))}
               </div>
             </div>
           ) : (
-            <div className="rounded-2xl border border-white/10 bg-surface-dark/60 p-6 text-center backdrop-blur">
-              <p className="text-sm font-semibold text-text-vivid">{row.title}</p>
-              <p className="mt-1 text-xs text-text-muted">
-                {error || "Stream servers are starting up or temporarily offline."}
-              </p>
-              <button
-                onClick={() => loadData(true)}
-                disabled={retrying}
-                className="mt-3 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2 text-xs font-bold text-white shadow-brand-glow hover:bg-brand-soft disabled:opacity-50"
-              >
-                {retrying ? "Connecting…" : "Retry Loading Catalog ▶"}
-              </button>
+            <div className="mx-auto max-w-7xl px-4">
+              <div className="rounded-3xl border border-white/[0.08] bg-[#1B1E27]/60 p-6 text-center backdrop-blur-xl">
+                <p className="text-sm font-semibold text-text-vivid">{row.title}</p>
+                <p className="mt-1 text-xs text-text-muted">
+                  {error || "Stream servers are starting up or temporarily offline."}
+                </p>
+                <button
+                  onClick={() => loadData(true)}
+                  disabled={retrying}
+                  className="mt-3 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2 text-xs font-bold text-white shadow-brand-glow hover:bg-brand-soft disabled:opacity-50"
+                >
+                  {retrying ? "Connecting…" : "Retry Loading Catalog ▶"}
+                </button>
+              </div>
             </div>
           )}
-
         </div>
       ))}
 

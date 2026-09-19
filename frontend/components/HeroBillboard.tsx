@@ -63,7 +63,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
 
   return (
     <section
-      className="relative mx-auto mt-6 h-[520px] w-full max-w-7xl overflow-hidden rounded-3xl border border-white/10 shadow-card-hover"
+      className="relative mx-auto mt-4 h-[540px] w-full max-w-7xl overflow-hidden rounded-3xl border border-white/[0.08]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -76,51 +76,50 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
         sizes="100vw"
         className="hero-fade object-cover"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-bg-void via-bg-void/40 to-transparent" />
-      <div
-        className="absolute inset-0"
-        style={{ background: "radial-gradient(ellipse at 30% 100%, rgba(255,10,71,0.18), transparent 60%)" }}
-        aria-hidden="true"
-      />
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg-void to-transparent" />
+      {/* Dark gradient overlays for legibility */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#08090C] via-[#08090C]/40 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#08090C]/85 via-[#08090C]/30 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#08090C] to-transparent" />
 
-      <div className="relative mx-auto flex h-full max-w-7xl items-end px-4 pb-16 lg:px-8">
+      <div className="relative mx-auto flex h-full max-w-7xl items-end px-6 pb-20 lg:px-10">
         <div className="max-w-2xl">
-          <p className="mb-2 text-sm font-semibold text-white/90">Discover what to watch next</p>
-          <h1 className="mb-3 text-4xl font-extrabold leading-[1.1] text-text-vivid sm:text-6xl">Find your next great watch.</h1>
+          {/* Metadata pill row */}
           <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
-            <span className="rounded-md bg-accent-emerald/90 px-2 py-0.5 font-bold text-black">{match}% Match</span>
+            <span className="rounded-full bg-accent-emerald/15 px-2.5 py-0.5 font-bold text-accent-emerald border border-accent-emerald/30">
+              {match}% Match
+            </span>
             {item.vote_average ? (
-              <span className="glass flex items-center gap-1 rounded-md px-2 py-0.5 font-bold text-badge-rating">
-                <svg className="h-3 w-3 fill-yellow-400 text-yellow-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <span className="flex items-center gap-1 rounded-full bg-white/[0.08] px-2.5 py-0.5 font-bold text-[#FFD166] backdrop-blur-md">
+                <svg className="h-3 w-3 fill-[#FFD166] text-[#FFD166]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                 {item.vote_average.toFixed(1)}
               </span>
             ) : null}
             {releaseYear(item) && <span className="font-mono text-text-muted">{releaseYear(item)}</span>}
-            <span className="glass rounded-md px-2 py-0.5 font-mono text-[11px] uppercase text-text-muted">
+            <span className="rounded-full bg-white/[0.08] px-2.5 py-0.5 font-mono text-[11px] uppercase text-text-muted backdrop-blur-md">
               {isSeries ? "Series" : "4K HDR"}
             </span>
-          </div>
-
-          <h2 className="mb-3 text-xl font-bold leading-tight text-text-vivid sm:text-2xl">
-            {shownTitle}
-          </h2>
-
-
-          <div className="mb-4 flex flex-wrap items-center gap-2">
             {genreNames.map((g) => (
-              <span key={g} className="rounded-full border border-white/15 px-2.5 py-0.5 text-xs text-text-muted">
+              <span key={g} className="rounded-full border border-white/10 px-2.5 py-0.5 text-xs text-text-muted">
                 {g}
               </span>
             ))}
           </div>
 
-          <p className="mb-6 max-w-xl text-base leading-relaxed text-white/85 line-clamp-2">{item.overview}</p>
+          {/* Headline Display XL */}
+          <h1 className="mb-4 text-4xl font-extrabold tracking-[-0.03em] leading-[1.05] text-text-vivid sm:text-5xl lg:text-6xl">
+            {shownTitle}
+          </h1>
 
+          {/* Brief Overview */}
+          <p className="mb-6 max-w-xl text-sm leading-relaxed text-text-muted line-clamp-2 sm:text-base">
+            {item.overview}
+          </p>
+
+          {/* Actions */}
           <div className="flex flex-wrap items-center gap-3">
             <Link
               href={watchHref}
-              className="flex min-h-11 items-center gap-2 rounded-full bg-brand px-7 py-2.5 text-sm font-bold text-white shadow-brand-glow-lg transition hover:bg-brand-soft"
+              className="flex min-h-11 items-center gap-2 rounded-full bg-brand px-7 py-2.5 text-sm font-bold text-white shadow-brand-glow transition hover:bg-brand-soft"
             >
               <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden="true">
                 <path d="M7 5l12 7-12 7V5z" />
@@ -129,7 +128,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
             </Link>
             <Link
               href={href}
-              className="glass flex min-h-11 items-center rounded-full px-7 py-2.5 text-sm font-semibold text-text-vivid transition hover:bg-white/10"
+              className="flex min-h-11 items-center rounded-full border border-white/15 bg-white/[0.06] px-7 py-2.5 text-sm font-semibold text-text-vivid backdrop-blur-md transition hover:bg-white/15"
             >
               Details
             </Link>
@@ -139,13 +138,13 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
 
       {/* Slide selector dock */}
       {count > 1 && (
-        <div className="absolute inset-x-0 bottom-0 z-20">
-          <div className="mx-auto max-w-7xl px-4 pb-2 lg:px-8">
+        <div className="absolute inset-x-0 bottom-3 z-20">
+          <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <div className="flex items-end gap-2">
               <button
                 onClick={() => go(index - 1)}
                 aria-label="Previous slide"
-                className="glass flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-text-muted transition hover:text-text-vivid"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-text-muted backdrop-blur-md transition hover:text-text-vivid"
               >
                 ‹
               </button>
@@ -156,10 +155,10 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
                   aria-label={`Go to ${titleName(s)}`}
                   aria-current={i === index}
                   className={`group relative flex-1 overflow-hidden rounded-lg border transition ${
-                    i === index ? "border-brand/60" : "border-white/10 opacity-60 hover:opacity-100"
+                    i === index ? "border-brand/70" : "border-white/10 opacity-50 hover:opacity-100"
                   }`}
                 >
-                  <div className="relative aspect-video w-full">
+                  <div className="relative aspect-[21/9] w-full sm:aspect-video">
                     <Image
                       src={backdropUrl(s.backdrop_path, "w500")}
                       alt=""
@@ -167,7 +166,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
                       sizes="200px"
                       className="object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-bg-void/90 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#08090C]/90 to-transparent" />
                     <span className="absolute bottom-1 left-2 truncate pr-2 font-mono text-[10px] text-text-vivid">
                       {String(i + 1).padStart(2, "0")} · {titleName(s)}
                     </span>
@@ -180,7 +179,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
               <button
                 onClick={() => go(index + 1)}
                 aria-label="Next slide"
-                className="glass flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-text-muted transition hover:text-text-vivid"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-text-muted backdrop-blur-md transition hover:text-text-vivid"
               >
                 ›
               </button>

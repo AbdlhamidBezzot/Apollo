@@ -6,13 +6,12 @@ export function MovieRow({ title, items, seeAllHref }: { title: string; items: T
   if (!items.length) return null;
   return (
     <section className="mx-auto max-w-7xl px-4">
-      <div className="mb-3 flex items-center gap-3">
-        <h2 className="text-xl font-extrabold tracking-tight text-text-vivid">{title}</h2>
-        <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-xl font-bold tracking-tight text-text-vivid sm:text-2xl">{title}</h2>
         {seeAllHref && (
           <Link
             href={seeAllHref}
-            className="group inline-flex items-center gap-1 text-sm font-semibold text-brand-soft transition hover:text-brand"
+            className="group inline-flex items-center gap-1 text-xs font-semibold text-brand-soft transition hover:text-brand"
           >
             See all
             <span className="transition-transform group-hover:translate-x-0.5" aria-hidden="true">

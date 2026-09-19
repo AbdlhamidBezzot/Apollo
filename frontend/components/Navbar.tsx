@@ -441,8 +441,9 @@ export function Navbar() {
         onMouseLeave={() => setHover(false)}
       >
         <div
-          className={`glass flex h-full flex-col overflow-hidden rounded-3xl shadow-glass transition-all duration-500 ease-out ${hover ? "w-60" : "w-[72px]"
-            }`}
+          className={`flex h-full flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-[#08090C]/75 backdrop-blur-xl shadow-glass transition-all duration-500 ease-out ${
+            hover ? "w-60" : "w-[72px]"
+          }`}
         >
           <div className={`flex h-16 shrink-0 items-center ${hover ? "px-3" : "justify-center px-0"}`}>
             <ApolloLogo compact={!hover} />
@@ -453,11 +454,13 @@ export function Navbar() {
               <Link
                 key={link.label}
                 href={link.href}
-                className={`card-lift relative flex h-11 shrink-0 items-center gap-3 rounded-xl transition ${hover ? "px-3" : "justify-center px-0"
-                  } ${isActive(link)
+                className={`card-lift relative flex h-11 shrink-0 items-center gap-3 rounded-xl transition ${
+                  hover ? "px-3" : "justify-center px-0"
+                } ${
+                  isActive(link)
                     ? "bg-brand/15 text-text-vivid"
-                    : "text-text-muted hover:bg-white/5 hover:text-text-vivid"
-                  }`}
+                    : "text-text-muted hover:bg-white/[0.04] hover:text-text-vivid"
+                }`}
               >
                 {isActive(link) && (
                   <span className="absolute left-0 h-5 w-1 rounded-r-full bg-brand" aria-hidden="true" />
@@ -472,12 +475,13 @@ export function Navbar() {
             ))}
           </nav>
 
-          <div className="shrink-0 border-t border-white/10 p-2">
+          <div className="shrink-0 border-t border-white/[0.08] p-2">
 
             <Link
               href="/movie-night"
-              className={`card-lift flex h-11 w-full items-center gap-3 rounded-xl text-left transition hover:bg-brand/15 ${hover ? "px-3" : "justify-center px-0"
-                } text-text-muted hover:text-text-vivid`}
+              className={`card-lift flex h-11 w-full items-center gap-3 rounded-xl text-left transition hover:bg-brand/15 ${
+                hover ? "px-3" : "justify-center px-0"
+              } text-text-muted hover:text-text-vivid`}
             >
               <span className="flex w-6 shrink-0 items-center justify-center text-brand-soft">
                 <Icon name="people" className="h-5 w-5" />
@@ -490,7 +494,7 @@ export function Navbar() {
 
       {/* Top glass command strip */}
       <header className="sticky top-0 z-40 flex justify-center px-4 pt-4 lg:pl-[calc(72px+1rem)]">
-        <div className="glass flex w-full max-w-7xl items-center gap-3 rounded-full px-3 py-2">
+        <div className="flex w-full max-w-7xl items-center gap-3 rounded-full border border-white/[0.08] bg-[#08090C]/65 px-3 py-2 backdrop-blur-xl">
 
 
           <CommandSearch open={searchOpen} setOpen={setSearchOpen} />

@@ -26,14 +26,13 @@ body {
     box-shadow: 0 20px 50px -10px rgba(255, 10, 71, 0.25);
   }
 
-  /* Card hover lift */
+  /* Card hover lift - quiet, confident movement */
   .card-lift {
-    transition: transform cubic-bezier(0.16, 1, 0.3, 1) 0.4s, box-shadow cubic-bezier(0.16, 1, 0.3, 1) 0.4s;
+    transition: transform cubic-bezier(0.16, 1, 0.3, 1) 0.35s, box-shadow cubic-bezier(0.16, 1, 0.3, 1) 0.35s, background-color cubic-bezier(0.16, 1, 0.3, 1) 0.35s;
     will-change: transform;
   }
   .card-lift:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 20px 50px -10px rgba(255, 10, 71, 0.25);
+    transform: translateY(-4px) scale(1.015);
   }
 }
 
