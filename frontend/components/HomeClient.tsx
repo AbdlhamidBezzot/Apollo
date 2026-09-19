@@ -104,7 +104,7 @@ export function HomeClient() {
       {trending.length > 0 ? (
         <HeroBillboard slides={trending} />
       ) : loading ? (
-        <section className="relative w-full min-h-[80vh] -mt-20 pt-28 pb-16 flex items-end overflow-hidden bg-[#121215] px-6 lg:px-12">
+        <section className="relative w-full min-h-[80vh] -mt-16 pt-20 pb-16 flex items-end overflow-hidden bg-[#121215] px-6 lg:px-12">
           <div className="max-w-2xl space-y-4">
             <div className="h-4 w-28 animate-pulse rounded-full bg-white/10" />
             <h1 className="text-4xl font-black tracking-tight text-white sm:text-6xl">Find your next great watch.</h1>

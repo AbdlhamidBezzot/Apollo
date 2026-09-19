@@ -29,6 +29,13 @@ const ICONS: Record<string, ReactElement> = {
       <path d="M4 5h16M4 5v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V5M4 10h16" />
     </>
   ),
+  music: (
+    <>
+      <path d="M9 18V5l12-2v13" />
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="18" cy="16" r="3" />
+    </>
+  ),
   browse: (
     <>
       <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -78,16 +85,11 @@ const ICONS: Record<string, ReactElement> = {
       <path d="M12 3a9 9 0 0 0 0 18M12 3a9 9 0 0 1 0 18M3 12h18" />
     </>
   ),
-  addons: (
-    <>
-      <path d="M12 2v4M12 18v4M4 12H2M22 12h-2M19.07 4.93l-2.83 2.83M7.76 16.24l-2.83 2.83M19.07 19.07l-2.83-2.83M7.76 7.76L4.93 4.93" />
-      <circle cx="12" cy="12" r="4" />
-    </>
-  ),
   close: <path d="M6 6l12 12M18 6L6 18" />,
+  chevronDown: <path d="M6 9l6 6 6-6" />,
 };
 
-function Icon({ name, className = "h-6 w-6" }: { name: string; className?: string }) {
+function Icon({ name, className = "h-5 w-5" }: { name: string; className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -104,38 +106,38 @@ function Icon({ name, className = "h-6 w-6" }: { name: string; className?: strin
   );
 }
 
-/* ---------- Dock data ---------- */
-const DOCK_TOP = [
-  { href: "/", label: "Home", icon: "home", base: "/", media: null as string | null },
-  { href: "/sports", label: "Live Sports", icon: "sports", base: "/sports", media: null },
-  { href: "/movies", label: "Movies", icon: "movies", base: "/movies", media: null },
-  { href: "/tv", label: "TV Shows", icon: "series", base: "/tv", media: null },
-  { href: "/browse", label: "Browse", icon: "browse", base: "/browse", media: "all" },
-  { href: "/anime", label: "Anime Hub", icon: "anime", base: "/anime", media: null },
-  { href: "/editorial", label: "Editorial", icon: "editorial", base: "/editorial", media: null },
-  { href: "/my-list", label: "Watchlist", icon: "watchlist", base: "/my-list", media: null },
+/* ---------- Nav link data ---------- */
+const NAV_LINKS = [
+  { href: "/", label: "Home", icon: "home" },
+  { href: "/movies", label: "Movies", icon: "movies" },
+  { href: "/tv", label: "TV Shows", icon: "series" },
+  { href: "/anime", label: "Anime", icon: "anime" },
+  { href: "/browse", label: "Browse", icon: "browse" },
 ];
 
-
-
+/* ---- Browse dropdown items ---- */
+const BROWSE_ITEMS = [
+  { href: "/sports", label: "Live Sports", icon: "sports" },
+  { href: "/editorial", label: "Editorial", icon: "editorial" },
+  { href: "/my-list", label: "Watchlist", icon: "watchlist" },
+  { href: "/movie-night", label: "Movie Night Room", icon: "people" },
+];
 
 /* ---------- Logo ---------- */
-function ApolloLogo({ compact }: { compact: boolean }) {
+function ApolloLogo() {
   return (
-    <Link href="/" className="flex items-center gap-3" aria-label="Apollo home">
-      <span className="relative flex h-9 w-9 shrink-0 items-center justify-center">
-        <span className="absolute inset-0 rounded-full bg-[var(--brand-accent)]/25 blur-md" aria-hidden="true" />
-        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true" className="relative">
+    <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="Apollo home">
+      <span className="relative flex h-8 w-8 shrink-0 items-center justify-center">
+        <span className="absolute inset-0 rounded-full bg-[var(--brand-accent)]/20 blur-md" aria-hidden="true" />
+        <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true" className="relative">
           <circle cx="16" cy="16" r="14" stroke="var(--brand-accent)" strokeWidth="2.5" />
           <circle cx="16" cy="16" r="6" fill="var(--brand-accent)" />
           <path d="M16 2v6M16 24v6M2 16h6M24 16h6" stroke="var(--brand-accent)" strokeWidth="2" strokeLinecap="round" />
         </svg>
       </span>
-      {!compact && (
-        <span className="text-lg font-black tracking-tight text-text-vivid">
-          Apollo<span className="text-[var(--brand-accent)]">.</span>
-        </span>
-      )}
+      <span className="text-base font-black tracking-tight text-white">
+        Apollo<span style={{ color: "var(--brand-accent)" }}>.</span>
+      </span>
     </Link>
   );
 }
@@ -176,7 +178,7 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
     };
     document.addEventListener("mousedown", onDown);
     return () => document.removeEventListener("mousedown", onDown);
-  }, [open]);
+  }, [open, setOpen]);
 
   useEffect(() => {
     const query = q.trim();
@@ -212,33 +214,43 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
   };
 
   return (
-    <div ref={boxRef} className="relative flex-1">
-      <form
-        role="search"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (q.trim().length >= 2) go(`/search?q=${encodeURIComponent(q.trim())}`);
-        }}
-        className="flex h-10 items-center gap-2.5 rounded-full px-4 bg-[#09090B]/80 border border-white/10 focus-within:bg-[#09090B] focus-within:border-[var(--brand-accent)]/60 transition"
+    <div ref={boxRef} className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Search"
+        id="navbar-search-btn"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/70 transition hover:bg-white/10 hover:text-white hover:border-[var(--brand-accent)]/50"
       >
-        <Icon name="searchIcon" className="h-4 w-4 text-text-muted" />
-        <input
-          ref={inputRef}
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          onFocus={() => setOpen(true)}
-          placeholder="Search titles, actors..."
-          aria-label="Search"
-          className="w-full bg-transparent text-sm font-medium text-text-vivid outline-none placeholder:text-text-muted"
-        />
-        <kbd className="hidden rounded-full border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[10px] text-text-muted sm:block">
-          ⌘K
-        </kbd>
-      </form>
+        <Icon name="searchIcon" className="h-4 w-4" />
+      </button>
 
-      {open && q.trim().length >= 2 && (
-        <div className="animate-rise absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl bg-[#09090B]/95 border border-white/15 backdrop-blur-2xl shadow-2xl">
-          <div className="flex items-center gap-1 border-b border-white/10 p-2">
+      {open && (
+        <div className="animate-rise absolute right-0 top-full mt-3 z-50 w-[360px] overflow-hidden rounded-2xl bg-[#09090B]/98 border border-white/15 backdrop-blur-2xl shadow-2xl">
+          {/* Search input inside dropdown */}
+          <form
+            role="search"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (q.trim().length >= 2) go(`/search?q=${encodeURIComponent(q.trim())}`);
+            }}
+            className="flex items-center gap-2.5 border-b border-white/10 px-4 py-3"
+          >
+            <Icon name="searchIcon" className="h-4 w-4 shrink-0 text-text-muted" />
+            <input
+              ref={inputRef}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search titles, actors..."
+              aria-label="Search"
+              className="w-full bg-transparent text-sm font-medium text-white outline-none placeholder:text-text-muted"
+            />
+            <kbd className="hidden rounded-full border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[10px] text-text-muted sm:block">
+              ⌘K
+            </kbd>
+          </form>
+
+          {/* Category filter */}
+          <div className="flex items-center gap-1 border-b border-white/10 px-3 py-2">
             {(
               [
                 { value: "multi", label: "All" },
@@ -250,60 +262,68 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
                 key={c.value}
                 onClick={() => setCat(c.value)}
                 aria-pressed={cat === c.value}
-                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${cat === c.value ? "bg-[var(--brand-accent)] text-[var(--brand-accent-text)]" : "text-text-muted hover:text-text-vivid"
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${cat === c.value ? "bg-[var(--brand-accent)] text-[var(--brand-accent-text)]" : "text-text-muted hover:text-white"
                   }`}
               >
                 {c.label}
               </button>
             ))}
           </div>
-          {busy ? (
-            <div className="flex items-center gap-2 px-4 py-3 text-sm text-text-muted">
-              <span className="h-3 w-3 animate-spin rounded-full border-2 border-[var(--brand-accent)] border-t-transparent" />
-              Searching...
-            </div>
-          ) : res.length === 0 ? (
-            <p className="px-4 py-4 text-sm text-text-muted">No results for "{q}".</p>
-          ) : (
-            res.map((item) => {
-              const mt = item.media_type === "tv" ? "tv" : "movie";
-              const href = mt === "tv" ? `/tv/${item.id}` : `/movie/${item.id}`;
-              return (
+
+          {q.trim().length >= 2 ? (
+            busy ? (
+              <div className="flex items-center gap-2 px-4 py-3 text-sm text-text-muted">
+                <span className="h-3 w-3 animate-spin rounded-full border-2 border-[var(--brand-accent)] border-t-transparent" />
+                Searching...
+              </div>
+            ) : res.length === 0 ? (
+              <p className="px-4 py-4 text-sm text-text-muted">No results for &quot;{q}&quot;.</p>
+            ) : (
+              <>
+                {res.map((item) => {
+                  const mt = item.media_type === "tv" ? "tv" : "movie";
+                  const href = mt === "tv" ? `/tv/${item.id}` : `/movie/${item.id}`;
+                  return (
+                    <button
+                      key={`${mt}-${item.id}`}
+                      onClick={() => go(href)}
+                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-white/5"
+                    >
+                      <Image
+                        src={posterUrl(item.poster_path, "w92")}
+                        alt=""
+                        width={40}
+                        height={60}
+                        className="h-[60px] w-10 shrink-0 rounded-lg object-cover border border-white/10"
+                      />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-white">{titleName(item)}</p>
+                        <p className="flex items-center gap-2 text-xs text-text-muted">
+                          <span
+                            className={`rounded-full px-2 py-0.5 font-mono text-[10px] uppercase ${mt === "tv" ? "bg-[var(--brand-accent)]/15 text-[var(--brand-accent)] border border-[var(--brand-accent)]/30" : "bg-white/10 text-text-muted"
+                              }`}
+                          >
+                            {mt}
+                          </span>
+                          {releaseYear(item)}
+                          {item.vote_average ? <span style={{ color: "var(--brand-accent)" }}>★ {item.vote_average.toFixed(1)}</span> : null}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
                 <button
-                  key={`${mt}-${item.id}`}
-                  onClick={() => go(href)}
-                  className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-white/5"
+                  onClick={() => go(`/search?q=${encodeURIComponent(q.trim())}`)}
+                  className="block w-full border-t border-white/10 px-4 py-2.5 text-left text-sm font-medium transition hover:bg-white/5"
+                  style={{ color: "var(--brand-accent)" }}
                 >
-                  <Image
-                    src={posterUrl(item.poster_path, "w92")}
-                    alt=""
-                    width={40}
-                    height={60}
-                    className="h-[60px] w-10 shrink-0 rounded-lg object-cover border border-white/10"
-                  />
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-text-vivid">{titleName(item)}</p>
-                    <p className="flex items-center gap-2 text-xs text-text-muted">
-                      <span
-                        className={`rounded-full px-2 py-0.5 font-mono text-[10px] uppercase ${mt === "tv" ? "bg-[var(--brand-accent)]/15 text-[var(--brand-accent)] border border-[var(--brand-accent)]/30" : "bg-white/10 text-text-muted"
-                          }`}
-                      >
-                        {mt}
-                      </span>
-                      {releaseYear(item)}
-                      {item.vote_average ? <span className="text-[var(--brand-accent)]">★ {item.vote_average.toFixed(1)}</span> : null}
-                    </p>
-                  </div>
+                  See all results for &quot;{q}&quot; →
                 </button>
-              );
-            })
+              </>
+            )
+          ) : (
+            <p className="px-4 py-4 text-sm text-text-muted">Type to search movies, series, actors…</p>
           )}
-          <button
-            onClick={() => go(`/search?q=${encodeURIComponent(q.trim())}`)}
-            className="block w-full border-t border-white/10 px-4 py-2.5 text-left text-sm font-medium text-[var(--brand-accent)] transition hover:bg-white/5"
-          >
-            See all results for "{q}" →
-          </button>
         </div>
       )}
     </div>
@@ -324,7 +344,7 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
       <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={onClose} />
       <div className="glass animate-rise absolute left-4 right-4 top-4 overflow-hidden rounded-3xl border border-white/15 bg-[#09090B]/95 p-2 shadow-2xl backdrop-blur-2xl">
         <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-          <ApolloLogo compact={false} />
+          <ApolloLogo />
           <button
             onClick={onClose}
             aria-label="Close menu"
@@ -334,11 +354,11 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
           </button>
         </div>
         <div className="space-y-1 p-2">
-          {DOCK_TOP.map((l) => (
+          {[...NAV_LINKS, ...BROWSE_ITEMS].map((l) => (
             <button
               key={l.label}
               onClick={() => go(l.href)}
-              className="flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-left text-sm font-semibold text-text-vivid transition hover:bg-white/5"
+              className="flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-left text-sm font-semibold text-white/80 transition hover:bg-white/5 hover:text-white"
             >
               <span className="w-5 text-text-muted">
                 <Icon name={l.icon} className="h-5 w-5" />
@@ -348,20 +368,12 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
           ))}
         </div>
         <div className="space-y-2 border-t border-white/10 p-3">
-
-          <Link
-            href="/movie-night"
-            onClick={onClose}
-            className="cinema-btn-gold flex w-full items-center justify-center gap-2 text-sm font-bold"
-          >
-            Movie Night Room
-          </Link>
           {user ? (
             <button
               onClick={() => go("/profile")}
               className="flex w-full items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-left text-sm text-text-muted transition hover:bg-white/10 hover:text-white"
             >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--brand-accent)] font-bold text-[var(--brand-accent-text)]">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full font-bold" style={{ backgroundColor: "var(--brand-accent)", color: "var(--brand-accent-text)" }}>
                 {(user.name || user.email).charAt(0).toUpperCase()}
               </span>
               {user.name || user.email}
@@ -369,7 +381,7 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
           ) : loading ? null : (
             <button
               onClick={() => go("/login")}
-              className="cinema-btn-pill w-full text-center text-sm font-semibold"
+              className="cinema-btn-accent w-full text-center text-sm font-semibold"
             >
               Sign in
             </button>
@@ -401,7 +413,8 @@ function ThemePickerDropdown() {
         onClick={() => setOpen((v) => !v)}
         title="Change Theme Accent Color"
         aria-label="Change Theme Accent Color"
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 transition hover:bg-white/10 hover:border-white/30"
+        id="navbar-theme-btn"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 transition hover:bg-white/10 hover:border-white/30"
       >
         <span
           className="h-4 w-4 rounded-full border border-white/40 shadow-sm"
@@ -432,12 +445,65 @@ function ThemePickerDropdown() {
                   className="h-5 w-5 rounded-full border border-white/30 shadow-md"
                   style={{ backgroundColor: p.primary }}
                 />
-                <span className="text-[10px] font-semibold text-text-vivid truncate w-full text-center">
+                <span className="text-[10px] font-semibold text-white/80 truncate w-full text-center">
                   {p.name.split(" ")[1] || p.name}
                 </span>
               </button>
             ))}
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------- Browse Dropdown ---------- */
+function BrowseDropdown() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+
+  const isActive = BROWSE_ITEMS.some((item) => pathname.startsWith(item.href));
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition ${
+          isActive
+            ? "text-white"
+            : "text-white/60 hover:text-white"
+        }`}
+        style={isActive ? { color: "var(--brand-accent)" } : {}}
+      >
+        More
+        <Icon name="chevronDown" className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="animate-rise absolute left-0 top-full mt-2 z-50 w-52 rounded-2xl border border-white/15 bg-[#09090B]/98 p-1.5 backdrop-blur-2xl shadow-2xl">
+          {BROWSE_ITEMS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/70 transition hover:bg-white/8 hover:text-white"
+            >
+              <span className="text-text-muted">
+                <Icon name={item.icon} className="h-4 w-4" />
+              </span>
+              {item.label}
+            </Link>
+          ))}
         </div>
       )}
     </div>
@@ -450,16 +516,21 @@ export function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const media = searchParams.get("media_type");
   const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [hover, setHover] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
@@ -471,112 +542,89 @@ export function Navbar() {
     return () => document.removeEventListener("mousedown", onDoc);
   }, [menuOpen]);
 
-  const openCinebot = () => window.dispatchEvent(new CustomEvent("apollo:cinebot"));
-
   const doSignOut = async () => {
     setMenuOpen(false);
     await signOut();
     router.push("/");
   };
 
-  const isActive = (link: (typeof DOCK_TOP)[number]) => {
-    if (link.base === "/") return pathname === "/";
-    if (link.base === "/movies") return pathname === "/movies";
-    if (link.base === "/tv") return pathname === "/tv";
-    if (link.base === "/anime") return pathname.startsWith("/anime");
-    if (link.base === "/my-list") return pathname.startsWith("/my-list");
-    if (link.base === "/browse") {
-      if (pathname !== "/browse") return false;
-      if (link.media === "all") return !media || (media !== "movie" && media !== "tv");
-      return media === link.media;
-    }
-    return pathname.startsWith(link.base);
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    return pathname.startsWith(href);
   };
-
 
   const initials = (user?.name || user?.email || "A").charAt(0).toUpperCase();
 
   return (
     <>
-      {/* Left floating glass dock (desktop) */}
-      <aside
-        className="fixed bottom-4 left-4 top-4 z-40 hidden lg:block"
-        aria-label="Primary navigation"
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
+      {/* Top horizontal navbar */}
+      <header
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+          scrolled
+            ? "bg-[#09090B]/95 border-b border-white/[0.08] backdrop-blur-xl shadow-lg"
+            : "bg-gradient-to-b from-[#09090B]/80 to-transparent backdrop-blur-sm"
+        }`}
       >
-        <div
-          className={`flex h-full flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-[#09090B]/80 backdrop-blur-xl shadow-glass transition-all duration-500 ease-out ${
-            hover ? "w-60" : "w-[72px]"
-          }`}
-        >
-          <div className={`flex h-16 shrink-0 items-center ${hover ? "px-4" : "justify-center px-0"}`}>
-            <ApolloLogo compact={!hover} />
-          </div>
+        <div className="mx-auto flex h-16 max-w-screen-2xl items-center gap-4 px-4 sm:px-6 lg:px-8">
 
-          <nav className="flex flex-1 flex-col gap-1 overflow-hidden p-2">
-            {DOCK_TOP.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className={`card-lift relative flex h-11 shrink-0 items-center gap-3 rounded-full transition ${
-                  hover ? "px-4" : "justify-center px-0"
-                } ${
-                  isActive(link)
-                    ? "bg-white/10 text-text-vivid border border-white/20"
-                    : "text-text-muted hover:bg-white/[0.05] hover:text-text-vivid"
-                }`}
-              >
-                {isActive(link) && (
-                  <span className="absolute left-0 h-5 w-1 rounded-r-full bg-[var(--brand-accent)]" aria-hidden="true" />
-                )}
-                <span className="flex w-6 shrink-0 items-center justify-center">
-                  <Icon name={link.icon} className={`h-5 w-5 ${isActive(link) ? "text-[var(--brand-accent)]" : ""}`} />
-                </span>
-                {hover && (
-                  <span className="whitespace-pre text-sm font-semibold">{link.label}</span>
-                )}
-              </Link>
-            ))}
+          {/* Left: Logo */}
+          <ApolloLogo />
+
+          {/* Center: Nav links (desktop) */}
+          <nav className="hidden lg:flex items-center gap-1 mx-auto" aria-label="Main navigation">
+            {NAV_LINKS.map((link) => {
+              const active = isActive(link.href);
+              return (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className={`relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all ${
+                    active
+                      ? "text-white"
+                      : "text-white/60 hover:text-white hover:bg-white/5"
+                  }`}
+                  style={active ? { color: "var(--brand-accent)" } : {}}
+                >
+                  {active && (
+                    <span
+                      className="absolute inset-0 rounded-full opacity-15"
+                      style={{ backgroundColor: "var(--brand-accent)" }}
+                      aria-hidden="true"
+                    />
+                  )}
+                  <Icon name={link.icon} className="h-4 w-4 relative" />
+                  <span className="relative">{link.label}</span>
+                </Link>
+              );
+            })}
+            <BrowseDropdown />
           </nav>
 
-          <div className="shrink-0 border-t border-white/[0.08] p-2">
+          {/* Right: Actions */}
+          <div className="ml-auto flex items-center gap-2">
 
-            <Link
-              href="/movie-night"
-              className={`card-lift flex h-11 w-full items-center gap-3 rounded-full text-left transition ${
-                hover ? "px-4" : "justify-center px-0"
-              } text-text-muted hover:bg-white/[0.05] hover:text-text-vivid`}
-            >
-              <span className="flex w-6 shrink-0 items-center justify-center text-[var(--brand-accent)]">
-                <Icon name="people" className="h-5 w-5" />
-              </span>
-              {hover && <span className="text-sm font-semibold">Movie Night Room</span>}
-            </Link>
-          </div>
-        </div>
-      </aside>
+            {/* Search */}
+            <CommandSearch open={searchOpen} setOpen={setSearchOpen} />
 
-      {/* Top glass command strip */}
-      <header className="sticky top-0 z-40 flex justify-center px-4 pt-4 lg:pl-[calc(72px+1rem)]">
-        <div className="flex w-full max-w-7xl items-center gap-3 rounded-full border border-white/[0.08] bg-[#09090B]/75 px-3 py-2 backdrop-blur-xl">
-
-
-          <CommandSearch open={searchOpen} setOpen={setSearchOpen} />
-
-          <div className="flex shrink-0 items-center gap-2">
+            {/* Theme Picker */}
             <ThemePickerDropdown />
+
+            {/* User menu (desktop) */}
             {!mounted || loading ? (
-              <div className="h-10 w-24 animate-pulse rounded-full border border-white/10 bg-white/5" aria-hidden="true" />
+              <div className="h-9 w-20 animate-pulse rounded-full border border-white/10 bg-white/5" aria-hidden="true" />
             ) : user ? (
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setMenuOpen((v) => !v)}
                   aria-haspopup="menu"
                   aria-expanded={menuOpen}
-                  className="flex h-10 items-center gap-2 rounded-full border border-white/20 bg-white/10 hover:bg-white/15 pl-1 pr-3 transition"
+                  id="navbar-user-btn"
+                  className="flex h-9 items-center gap-2 rounded-full border border-white/20 bg-white/10 hover:bg-white/15 pl-1 pr-3 transition"
                 >
-                  <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[var(--brand-accent)] font-bold text-[var(--brand-accent-text)]">
+                  <span
+                    className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full font-bold"
+                    style={{ backgroundColor: "var(--brand-accent)", color: "var(--brand-accent-text)" }}
+                  >
                     {user.avatar ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
@@ -584,14 +632,14 @@ export function Navbar() {
                       initials
                     )}
                   </span>
-                  <span className="hidden max-w-[7rem] truncate text-sm font-medium text-text-vivid sm:block">
+                  <span className="hidden max-w-[7rem] truncate text-sm font-medium text-white sm:block">
                     {user.name || user.email}
                   </span>
                 </button>
                 {menuOpen && (
                   <div
                     role="menu"
-                    className="animate-rise absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-2xl bg-[#09090B]/95 border border-white/15 shadow-2xl backdrop-blur-2xl"
+                    className="animate-rise absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-2xl bg-[#09090B]/98 border border-white/15 shadow-2xl backdrop-blur-2xl"
                   >
                     {[
                       { href: "/my-list", label: "My List" },
@@ -604,7 +652,7 @@ export function Navbar() {
                         href={l.href}
                         onClick={() => setMenuOpen(false)}
                         role="menuitem"
-                        className="block px-4 py-2.5 text-sm text-text-muted transition hover:bg-white/10 hover:text-text-vivid"
+                        className="block px-4 py-2.5 text-sm text-white/60 transition hover:bg-white/10 hover:text-white"
                       >
                         {l.label}
                       </Link>
@@ -613,7 +661,8 @@ export function Navbar() {
                       <button
                         onClick={doSignOut}
                         role="menuitem"
-                        className="block w-full px-4 py-2.5 text-left text-sm text-[var(--brand-accent)] transition hover:bg-white/10"
+                        className="block w-full px-4 py-2.5 text-left text-sm transition hover:bg-white/10"
+                        style={{ color: "var(--brand-accent)" }}
                       >
                         Sign out
                       </button>
@@ -624,20 +673,20 @@ export function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="cinema-btn-gold h-10 px-5 text-sm font-semibold"
+                className="cinema-btn-accent h-9 px-5 text-sm font-semibold"
               >
                 Sign in
               </Link>
             )}
 
-
+            {/* Mobile hamburger */}
             <button
               onClick={() => setMobileOpen((v) => !v)}
               aria-label="Toggle menu"
               aria-expanded={mobileOpen}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/85 hover:text-text-vivid lg:hidden"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/80 hover:text-white lg:hidden"
             >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 {mobileOpen ? (
                   <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
                 ) : (

@@ -98,10 +98,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Suspense fallback={null}>
               <Navbar />
             </Suspense>
-            <main className="min-h-screen pb-8 lg:pl-24">
+            <main className="min-h-screen pb-8 pt-16">
               {children}
             </main>
-            <div className="lg:pl-24"><Footer /></div>
+            <Footer />
             <ChatBot />
             <MovieNightModal />
           </AuthProvider>

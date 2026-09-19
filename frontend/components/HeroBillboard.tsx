@@ -66,11 +66,11 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
 
   return (
     <section
-      className="relative w-full min-h-[85vh] lg:min-h-[90vh] -mt-20 pt-28 pb-16 flex flex-col justify-end overflow-hidden bg-[#09090B]"
+      className="relative w-full min-h-[85vh] lg:min-h-[90vh] -mt-16 pt-20 pb-16 flex flex-col justify-end overflow-hidden bg-[#09090B]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Background Image */}
+      {/* Background Image — no blur, sharp and clear */}
       <Image
         key={index}
         src={backdropUrl(item.backdrop_path)}
@@ -79,12 +79,13 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
         priority
         sizes="100vw"
         className="hero-fade object-cover object-center w-full h-full"
+        style={{ imageRendering: "auto" }}
       />
 
-      {/* CinemaOS Vignette Gradients for Maximum Contrast */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#09090B] via-[#09090B]/85 via-45% to-transparent z-10" />
-      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#09090B] via-[#09090B]/60 to-transparent z-10" />
-      <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-[#09090B]/80 via-[#09090B]/30 to-transparent z-10" />
+      {/* Minimal vignette — keeps image clear while providing text contrast */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#09090B]/90 via-[#09090B]/50 via-50% to-transparent z-10" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#09090B]/80 via-[#09090B]/30 to-transparent z-10" />
+      <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#09090B]/60 to-transparent z-10" />
 
       {/* Main Hero Content */}
       <div className="relative z-20 mx-auto w-full max-w-7xl px-6 lg:px-12 pt-16 pb-8">
@@ -126,17 +127,17 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
             )}
           </div>
 
-          {/* Overview / Description in PURE BRIGHT WHITE */}
-          <p className="max-w-xl sm:max-w-2xl text-sm sm:text-base font-normal leading-relaxed text-white/95 line-clamp-3 sm:line-clamp-4 drop-shadow-lg">
+          {/* Overview / Description — pure solid white, fully visible */}
+          <p className="max-w-xl sm:max-w-2xl text-sm sm:text-base font-medium leading-relaxed text-white line-clamp-3 sm:line-clamp-4" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.9), 0 2px 16px rgba(0,0,0,0.7)" }}>
             {item.overview || "A hapless medical courier fights for his life amid an outbreak of a deadly mutagenic virus in an isolated mountain town."}
           </p>
 
           {/* CinemaOS Control Buttons */}
           <div className="flex items-center gap-3 pt-2">
-            {/* White Solid Pill Play Button */}
+            {/* Brand Accent Play Button */}
             <Link
               href={watchHref}
-              className="group flex h-12 items-center gap-2.5 rounded-full bg-white px-8 font-extrabold text-black transition-all hover:bg-white/90 hover:scale-[1.03] active:scale-95 shadow-2xl"
+              className="group flex h-12 items-center gap-2.5 rounded-full px-8 font-extrabold transition-all hover:scale-[1.03] active:scale-95 shadow-2xl cinema-btn-accent"
             >
               <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden="true">
                 <path d="M7 5l12 7-12 7V5z" />
@@ -151,7 +152,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
                 setCastOpen(true);
               }}
               aria-label="Add to Bookmark"
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md transition-all hover:bg-white/20 hover:border-white/40 hover:scale-105 active:scale-95 shadow-lg"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md transition-all hover:border-[var(--brand-accent)]/60 hover:bg-[var(--brand-accent)]/10 hover:scale-105 active:scale-95 shadow-lg"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
@@ -162,7 +163,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
             <Link
               href={href}
               aria-label="View Details"
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md transition-all hover:bg-white/20 hover:border-white/40 hover:scale-105 active:scale-95 shadow-lg"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md transition-all hover:border-[var(--brand-accent)]/60 hover:bg-[var(--brand-accent)]/10 hover:scale-105 active:scale-95 shadow-lg"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
