@@ -216,7 +216,7 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
   return (
     <div ref={boxRef} className="relative">
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(!open)}
         aria-label="Search"
         id="navbar-search-btn"
         className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/70 transition hover:bg-white/10 hover:text-white hover:border-[var(--brand-accent)]/50"
