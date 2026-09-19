@@ -241,53 +241,54 @@ export function MovieNightRoomClient() {
   if (!joined) {
     return (
       <div className="mx-auto max-w-md px-4 py-16">
-        <div className="glass rounded-3xl p-7 shadow-glass">
-          <h1 className="mb-1 text-2xl font-extrabold tracking-tightest text-text-vivid">Movie Night Room</h1>
-          <p className="mb-6 text-sm text-text-muted">
+        <div className="rounded-3xl border border-white/10 bg-[#09090B]/60 p-7 shadow-glass backdrop-blur-xl">
+          <span className="cinema-label text-[10px]">Watch Together</span>
+          <h1 className="mb-2 mt-3 text-2xl font-extrabold tracking-tight text-[#FAFAFA]">Movie Night Room</h1>
+          <p className="mb-6 text-sm text-[#A1A1AA]">
             Pick a movie together, then it plays on the host&apos;s screen.
           </p>
           <button
             onClick={createRoom}
             disabled={busy || loading || !user}
-            className="mb-4 w-full rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-white shadow-brand-glow transition hover:bg-brand-soft disabled:opacity-40"
+            className="cinema-btn-gold mb-4 w-full font-bold shadow-brand-glow disabled:opacity-40"
           >
             {busy ? "Creating…" : !user ? "Sign in to host a room" : "Start a Movie Night Room"}
           </button>
           {!user && (
             <button
               onClick={() => router.push("/login")}
-              className="mb-6 w-full rounded-full border border-white/10 px-5 py-2.5 text-sm font-semibold text-text-vivid"
+              className="cinema-btn-pill mb-6 w-full text-sm font-semibold"
             >
               Sign in
             </button>
           )}
 
-          <form onSubmit={joinRoom} className="space-y-2">
-            <p className="text-xs uppercase tracking-wide text-text-muted">Or join with a code</p>
+          <form onSubmit={joinRoom} className="space-y-3">
+            <p className="text-xs uppercase tracking-wider text-[#A1A1AA] font-semibold">Or join with a code</p>
             <input
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="APLO-K3F9"
               aria-label="Room code"
-              className="w-full rounded-full border border-white/10 bg-black/20 px-4 py-2 font-mono text-sm uppercase text-text-vivid outline-none placeholder:text-text-muted focus:border-brand/50"
+              className="w-full rounded-full border border-white/15 bg-[#09090B] px-4 py-2 font-mono text-sm uppercase text-[#FAFAFA] outline-none placeholder:text-[#A1A1AA] focus:border-[#FACC15]"
             />
             <input
               value={guestName}
               onChange={(e) => setGuestName(e.target.value)}
               placeholder="Your name (optional)"
               aria-label="Guest name"
-              className="w-full rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm text-text-vivid outline-none placeholder:text-text-muted focus:border-brand/50"
+              className="w-full rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] outline-none placeholder:text-[#A1A1AA] focus:border-[#FACC15]"
             />
             <button
               type="submit"
               disabled={busy || code.trim().length < 6}
-              className="w-full rounded-full border border-white/10 px-5 py-2 text-sm font-semibold text-text-vivid transition hover:border-brand/50 disabled:opacity-40"
+              className="cinema-btn-pill w-full text-sm font-semibold disabled:opacity-40"
             >
               Join room
             </button>
           </form>
 
-          {error && <p className="mt-3 text-xs text-brand-soft">{error}</p>}
+          {error && <p className="mt-3 text-xs text-[#FACC15]">{error}</p>}
         </div>
       </div>
     );
@@ -299,18 +300,18 @@ export function MovieNightRoomClient() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <div className="mb-6">
-        <p className="text-xs uppercase tracking-wide text-brand-soft">Movie Night Room</p>
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-extrabold tracking-tightest text-text-vivid">Room {room?.code}</h1>
-          {isHost && <span className="rounded-full bg-brand/15 px-2 py-0.5 text-[11px] font-bold text-brand-soft">host</span>}
+        <p className="cinema-label text-[10px]">Movie Night Room</p>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <h1 className="text-2xl font-black tracking-tight text-[#FAFAFA]">Room {room?.code}</h1>
+          {isHost && <span className="rounded-full border border-[#FACC15]/40 bg-[#FACC15]/15 px-3 py-0.5 text-[11px] font-bold text-[#FACC15]">host</span>}
         </div>
-        <p className="mt-1 text-sm text-text-muted">
+        <p className="mt-1 text-sm text-[#A1A1AA]">
           {isHost ? `Waiting on the group… ${readyCount}/${total} preferences in.` : `Host: ${room?.host_name}`}
         </p>
         {shareLink && (
           <button
             onClick={() => navigator.clipboard.writeText(shareLink)}
-            className="mt-2 rounded-full border border-white/10 px-3 py-1 text-xs text-text-muted transition hover:border-brand/50"
+            className="cinema-btn-pill mt-3 px-4 py-1 text-xs text-[#A1A1AA] hover:text-white"
           >
             Copy invite link
           </button>
@@ -319,25 +320,25 @@ export function MovieNightRoomClient() {
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Participants */}
-        <section className="glass rounded-3xl p-5 shadow-glass">
-          <h2 className="mb-3 text-sm font-bold text-text-vivid">
+        <section className="rounded-3xl border border-white/10 bg-[#09090B]/60 p-6 shadow-glass backdrop-blur-xl">
+          <h2 className="mb-3 text-sm font-bold text-[#FAFAFA]">
             Who&apos;s in · {readyCount}/{total} ready
           </h2>
           <div className="mb-4 flex h-2 w-full overflow-hidden rounded-full bg-white/10">
             <div
-              className="bg-brand transition-all duration-500"
+              className="bg-[#FACC15] transition-all duration-500"
               style={{ width: total ? `${(readyCount / total) * 100}%` : "0%" }}
             />
           </div>
-          <ul className="space-y-2">
+          <ul className="space-y-2.5">
             {(room?.participants || []).map((p, i) => (
               <li key={i} className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-2 text-text-vivid">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand text-[10px] font-bold text-white">
+                <span className="flex items-center gap-2 text-[#FAFAFA]">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#FACC15] text-[10px] font-bold text-[#0B0B0C]">
                     {p.name.charAt(0).toUpperCase()}
                   </span>
                   {p.name}
-                  {p.is_host && <span className="text-[10px] uppercase text-text-muted">host</span>}
+                  {p.is_host && <span className="text-[10px] uppercase text-[#A1A1AA]">host</span>}
                 </span>
                 <StatusPill ready={p.has_preferences} />
               </li>
@@ -345,7 +346,7 @@ export function MovieNightRoomClient() {
           </ul>
           <button
             onClick={doLeaveRoom}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-xs font-bold text-red-400 transition hover:bg-red-500/20 hover:border-red-500/50"
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-xs font-bold text-red-400 transition hover:bg-red-500/20 hover:border-red-500/50"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -357,19 +358,19 @@ export function MovieNightRoomClient() {
         </section>
 
         {/* Preferences */}
-        <section className="glass rounded-3xl p-5 shadow-glass">
-          <h2 className="mb-3 text-sm font-bold text-text-vivid">Your preferences</h2>
-          <p className="mb-3 text-xs text-text-muted">Quick answers the group merge uses:</p>
+        <section className="rounded-3xl border border-white/10 bg-[#09090B]/60 p-6 shadow-glass backdrop-blur-xl">
+          <h2 className="mb-1 text-sm font-bold text-[#FAFAFA]">Your preferences</h2>
+          <p className="mb-4 text-xs text-[#A1A1AA]">Quick answers the group merge uses:</p>
 
-          <label className="mb-1 block text-xs uppercase tracking-wide text-text-muted">What are you into?</label>
-          <div className="mb-3 flex flex-wrap gap-1.5">
+          <label className="mb-1 block text-xs uppercase tracking-wider text-[#A1A1AA] font-semibold">What are you into?</label>
+          <div className="mb-4 flex flex-wrap gap-1.5">
             {genres.map((g) => (
               <button
                 key={g.id}
                 type="button"
                 onClick={() => toggle(fav, setFav, g.id)}
-                className={`rounded-full px-2.5 py-1 text-xs transition ${
-                  fav.includes(g.id) ? "bg-brand text-white" : "border border-white/10 text-text-muted hover:border-brand/50"
+                className={`rounded-full px-3 py-1 text-xs transition ${
+                  fav.includes(g.id) ? "bg-[#FACC15] text-[#0B0B0C] font-semibold" : "border border-white/10 bg-white/5 text-[#A1A1AA] hover:border-[#FACC15]/40"
                 }`}
               >
                 {g.name}
@@ -377,15 +378,15 @@ export function MovieNightRoomClient() {
             ))}
           </div>
 
-          <label className="mb-1 block text-xs uppercase tracking-wide text-text-muted">Definitely not</label>
-          <div className="mb-3 flex flex-wrap gap-1.5">
+          <label className="mb-1 block text-xs uppercase tracking-wider text-[#A1A1AA] font-semibold">Definitely not</label>
+          <div className="mb-4 flex flex-wrap gap-1.5">
             {genres.map((g) => (
               <button
                 key={g.id}
                 type="button"
                 onClick={() => toggle(excl, setExcl, g.id)}
-                className={`rounded-full px-2.5 py-1 text-xs transition ${
-                  excl.includes(g.id) ? "bg-brand text-white line-through" : "border border-white/10 text-text-muted hover:border-brand/50"
+                className={`rounded-full px-3 py-1 text-xs transition ${
+                  excl.includes(g.id) ? "bg-red-500/20 text-red-400 border border-red-500/40 line-through" : "border border-white/10 bg-white/5 text-[#A1A1AA] hover:border-white/20"
                 }`}
               >
                 {g.name}
@@ -393,15 +394,15 @@ export function MovieNightRoomClient() {
             ))}
           </div>
 
-          <label className="mb-1 block text-xs uppercase tracking-wide text-text-muted">Mood</label>
-          <div className="mb-3 flex flex-wrap gap-1.5">
+          <label className="mb-1 block text-xs uppercase tracking-wider text-[#A1A1AA] font-semibold">Mood</label>
+          <div className="mb-4 flex flex-wrap gap-1.5">
             {MOODS.map((m) => (
               <button
                 key={m.value}
                 type="button"
                 onClick={() => setMood(m.value)}
-                className={`rounded-full px-2.5 py-1 text-xs transition ${
-                  mood === m.value ? "bg-brand text-white" : "border border-white/10 text-text-muted hover:border-brand/50"
+                className={`rounded-full px-3 py-1 text-xs transition ${
+                  mood === m.value ? "bg-[#FACC15] text-[#0B0B0C] font-semibold" : "border border-white/10 bg-white/5 text-[#A1A1AA] hover:border-[#FACC15]/40"
                 }`}
               >
                 {m.label}
@@ -409,19 +410,19 @@ export function MovieNightRoomClient() {
             ))}
           </div>
 
-          <div className="mb-4 grid grid-cols-2 gap-3">
+          <div className="mb-5 grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs uppercase tracking-wide text-text-muted">Max runtime (min)</label>
+              <label className="mb-1 block text-xs uppercase tracking-wider text-[#A1A1AA] font-semibold">Max runtime (min)</label>
               <input
                 type="number"
                 value={runtime}
                 onChange={(e) => setRuntime(e.target.value === "" ? "" : Number(e.target.value))}
                 placeholder="120"
-                className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-text-vivid outline-none focus:border-brand/50"
+                className="w-full rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] outline-none focus:border-[#FACC15]"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs uppercase tracking-wide text-text-muted">Intensity (1–5)</label>
+              <label className="mb-1 block text-xs uppercase tracking-wider text-[#A1A1AA] font-semibold">Intensity (1–5)</label>
               <input
                 type="number"
                 min={1}
@@ -429,7 +430,7 @@ export function MovieNightRoomClient() {
                 value={intensity}
                 onChange={(e) => setIntensity(e.target.value === "" ? "" : Number(e.target.value))}
                 placeholder="3"
-                className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-text-vivid outline-none focus:border-brand/50"
+                className="w-full rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] outline-none focus:border-[#FACC15]"
               />
             </div>
           </div>
@@ -437,7 +438,7 @@ export function MovieNightRoomClient() {
           <button
             onClick={savePrefs}
             disabled={busy}
-            className="w-full rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-white shadow-brand-glow transition hover:bg-brand-soft disabled:opacity-40"
+            className="cinema-btn-gold w-full font-bold shadow-brand-glow disabled:opacity-40"
           >
             {busy ? "Saving…" : "Save preferences"}
           </button>
@@ -446,7 +447,7 @@ export function MovieNightRoomClient() {
             <button
               onClick={suggest}
               disabled={busySuggest || readyCount < 1}
-              className="mt-2 w-full rounded-full border border-brand/40 px-5 py-2.5 text-sm font-bold text-brand-soft transition hover:bg-brand/10 disabled:opacity-40"
+              className="mt-3 w-full rounded-full border border-[#FACC15]/40 bg-[#FACC15]/10 px-5 py-2.5 text-sm font-bold text-[#FACC15] transition hover:bg-[#FACC15]/20 disabled:opacity-40"
             >
               {busySuggest ? "Finding a pick…" : "Propose a pick for the group"}
             </button>
@@ -454,47 +455,47 @@ export function MovieNightRoomClient() {
         </section>
       </div>
 
-      {error && <p className="mt-4 text-center text-xs text-brand-soft">{error}</p>}
+      {error && <p className="mt-4 text-center text-xs text-[#FACC15]">{error}</p>}
 
       {suggestion && (
-        <section className="glass mt-6 rounded-3xl p-5 shadow-glass">
-          <h2 className="mb-2 text-sm font-bold text-text-vivid">Group pick</h2>
-          <p className="mb-4 whitespace-pre-line text-sm text-text-vivid">{suggestion.reply}</p>
-          <div className="space-y-2">
+        <section className="rounded-3xl border border-white/10 bg-[#09090B]/60 p-6 shadow-glass backdrop-blur-xl mt-6">
+          <h2 className="mb-2 text-sm font-bold text-[#FAFAFA]">Group pick</h2>
+          <p className="mb-4 whitespace-pre-line text-sm text-[#FAFAFA]">{suggestion.reply}</p>
+          <div className="space-y-3">
             {titles.map((s) => (
-              <div key={s.tmdb_id} className="overflow-hidden rounded-xl border border-white/10 bg-white/5">
-                <div className="flex gap-2.5 p-2">
-                  <div className="relative h-24 w-16 shrink-0 overflow-hidden rounded-md bg-bg-card">
+              <div key={s.tmdb_id} className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                <div className="flex gap-3 p-3">
+                  <div className="relative h-24 w-16 shrink-0 overflow-hidden rounded-lg bg-[#09090B]">
                     <Image src={posterUrl(s.poster_path ?? null, "w185")} alt={s.title} fill sizes="64px" className="object-cover" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-text-vivid">{s.title}</p>
-                    <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-text-muted">
+                    <p className="truncate text-sm font-semibold text-[#FAFAFA]">{s.title}</p>
+                    <div className="mt-1 flex items-center gap-1.5 text-[11px] text-[#A1A1AA]">
                       {typeof s.vote_average === "number" && s.vote_average > 0 ? (
-                        <span className="flex items-center gap-1 rounded bg-badge-rating/15 px-1.5 font-bold text-badge-rating">
-                          <svg className="h-3 w-3 fill-yellow-400 text-yellow-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <span className="flex items-center gap-1 rounded-full border border-white/10 bg-black/70 px-2 py-0.5 font-mono text-[10px] font-bold text-[#FACC15]">
+                          <svg className="h-3 w-3 fill-[#FACC15] text-[#FACC15]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                           {s.vote_average.toFixed(1)}
                         </span>
                       ) : null}
-                      <span className="uppercase">{s.media_type}</span>
+                      <span className="uppercase font-mono">{s.media_type}</span>
                     </div>
-                    <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-text-muted">{s.pitch}</p>
+                    <p className="mt-1.5 line-clamp-2 text-[11px] leading-relaxed text-[#A1A1AA]">{s.pitch}</p>
                   </div>
                 </div>
                 {isHost && (
                   <button
                     onClick={() => playPick(s)}
                     disabled={busy}
-                    className="flex w-full items-center gap-1.5 border-t border-white/10 px-3 py-2 text-left text-xs font-bold text-brand-soft transition hover:bg-white/5 disabled:opacity-40"
+                    className="flex w-full items-center gap-2 border-t border-white/10 px-4 py-2.5 text-left text-xs font-bold text-[#FACC15] transition hover:bg-white/5 disabled:opacity-40"
                   >
-                    <svg className="h-3.5 w-3.5 fill-current text-brand-soft" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg className="h-3.5 w-3.5 fill-current text-[#FACC15]" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                     Confirm & launch for the room
                   </button>
                 )}
               </div>
             ))}
           </div>
-          {!isHost && <p className="mt-3 text-xs text-text-muted">The host confirms the final pick and launches playback.</p>}
+          {!isHost && <p className="mt-3 text-xs text-[#A1A1AA]">The host confirms the final pick and launches playback.</p>}
         </section>
       )}
     </div>

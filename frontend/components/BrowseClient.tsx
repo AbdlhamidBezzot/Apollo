@@ -266,21 +266,21 @@ export function BrowseClient({
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <div className="mb-6">
-        <p className="font-mono text-xs uppercase tracking-wide text-brand-soft">
+        <p className="cinema-label text-[10px]">
           {isTrending ? "Trending · updated weekly" : "Browse the catalog"}
         </p>
-        <h1 className="mt-1 text-3xl font-extrabold tracking-tightest text-text-vivid">
+        <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-[#FAFAFA] sm:text-4xl">
           {isTrending ? "Trending now" : activeMedia === "tv" ? "TV Series" : "Movies"}
         </h1>
         {!loading && totalResults > 0 && (
-          <p className="mt-1 text-sm text-text-muted">
+          <p className="mt-1 text-sm text-[#A1A1AA]">
             Showing {items.length.toLocaleString()} of {totalResults.toLocaleString()} titles
           </p>
         )}
       </div>
 
       {!isTrending && (
-        <div className="mb-6 flex items-center gap-4 border-b border-white/10">
+        <div className="mb-6 flex items-center gap-2 border-b border-white/10 pb-3">
           {(
             [
               { label: "Movies", media: "movie" },
@@ -290,30 +290,26 @@ export function BrowseClient({
             <button
               key={tab.media}
               onClick={() => update({ media_type: tab.media })}
-              className={`relative pb-3 text-sm transition ${
-                activeMedia === tab.media ? "font-bold text-text-vivid" : "text-text-muted hover:text-text-vivid"
+              className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
+                activeMedia === tab.media
+                  ? "bg-[#FACC15] text-[#0B0B0C] shadow-brand-glow"
+                  : "border border-white/10 bg-white/5 text-[#A1A1AA] hover:border-white/25 hover:text-white"
               }`}
             >
               {tab.label}
-              <span
-                aria-hidden="true"
-                className={`absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-brand transition-opacity ${
-                  activeMedia === tab.media ? "opacity-100" : "opacity-0"
-                }`}
-              />
             </button>
           ))}
         </div>
       )}
 
       {!isTrending && (
-        <div className="glass mb-8 flex flex-wrap items-end gap-3 rounded-2xl p-3 text-sm">
-          <label className="text-xs uppercase tracking-wide text-text-muted">
+        <div className="glass mb-8 flex flex-wrap items-end gap-3 rounded-2xl p-4 text-sm bg-[#09090B]/60 border border-white/10">
+          <label className="text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
             Genre
             <select
               value={f.genre}
               onChange={(e) => update({ genre: e.target.value })}
-              className="mt-1 block rounded-lg border border-white/10 bg-bg-card px-3 py-2 text-sm text-text-vivid focus:border-brand/50"
+              className="mt-1 block rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[#FACC15] outline-none"
             >
               <option value="">All genres</option>
               {genres.map((g) => (
@@ -323,7 +319,7 @@ export function BrowseClient({
               ))}
             </select>
           </label>
-          <label className="text-xs uppercase tracking-wide text-text-muted">
+          <label className="text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
             Year
             <input
               type="number"
@@ -332,10 +328,10 @@ export function BrowseClient({
               value={f.year}
               onChange={(e) => update({ year: e.target.value })}
               placeholder="Any"
-              className="mt-1 block w-24 rounded-lg border border-white/10 bg-bg-card px-3 py-2 text-sm text-text-vivid focus:border-brand/50"
+              className="mt-1 block w-28 rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[#FACC15] outline-none"
             />
           </label>
-          <label className="text-xs uppercase tracking-wide text-text-muted">
+          <label className="text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
             Min rating
             <input
               type="number"
@@ -345,15 +341,15 @@ export function BrowseClient({
               value={f.min_rating}
               onChange={(e) => update({ min_rating: e.target.value })}
               placeholder="Any"
-              className="mt-1 block w-24 rounded-lg border border-white/10 bg-bg-card px-3 py-2 text-sm text-text-vivid focus:border-brand/50"
+              className="mt-1 block w-28 rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[#FACC15] outline-none"
             />
           </label>
-          <label className="text-xs uppercase tracking-wide text-text-muted">
+          <label className="text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
             Language
             <select
               value={f.language}
               onChange={(e) => update({ language: e.target.value })}
-              className="mt-1 block rounded-lg border border-white/10 bg-bg-card px-3 py-2 text-sm text-text-vivid focus:border-brand/50"
+              className="mt-1 block rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[#FACC15] outline-none"
             >
               <option value="">All languages</option>
               {LANGUAGES.map((l) => (
@@ -363,12 +359,12 @@ export function BrowseClient({
               ))}
             </select>
           </label>
-          <label className="text-xs uppercase tracking-wide text-text-muted">
+          <label className="text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
             Country
             <select
               value={f.country}
               onChange={(e) => update({ country: e.target.value })}
-              className="mt-1 block rounded-lg border border-white/10 bg-bg-card px-3 py-2 text-sm text-text-vivid focus:border-brand/50"
+              className="mt-1 block rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[#FACC15] outline-none"
             >
               <option value="">All countries</option>
               {COUNTRIES.map((c) => (
@@ -378,12 +374,12 @@ export function BrowseClient({
               ))}
             </select>
           </label>
-          <label className="text-xs uppercase tracking-wide text-text-muted">
+          <label className="text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
             Sort
             <select
               value={f.sort_by}
               onChange={(e) => update({ sort_by: e.target.value })}
-              className="mt-1 block rounded-lg border border-white/10 bg-bg-card px-3 py-2 text-sm text-text-vivid focus:border-brand/50"
+              className="mt-1 block rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] focus:border-[#FACC15] outline-none"
             >
               {SORTS.map((s) => (
                 <option key={s.value} value={s.value}>
@@ -396,7 +392,7 @@ export function BrowseClient({
             onClick={() =>
               update({ genre: "", year: "", min_rating: "", sort_by: "popularity.desc", language: "", country: "" })
             }
-            className="rounded-lg border border-white/10 px-4 py-2 text-sm font-semibold text-text-muted transition hover:border-brand/50 hover:text-text-vivid"
+            className="cinema-btn-pill px-5 py-2 text-sm font-semibold"
           >
             Reset
           </button>
@@ -449,7 +445,7 @@ export function BrowseClient({
               ) : (
                 <button
                   onClick={loadMore}
-                  className="rounded-full bg-brand px-8 py-2.5 text-sm font-bold text-white shadow-brand-glow transition hover:bg-brand-soft"
+                  className="cinema-btn-gold px-8 py-2.5 font-bold"
                 >
                   Load more
                 </button>

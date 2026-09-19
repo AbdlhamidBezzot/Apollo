@@ -123,16 +123,16 @@ function ApolloLogo({ compact }: { compact: boolean }) {
   return (
     <Link href="/" className="flex items-center gap-3" aria-label="Apollo home">
       <span className="relative flex h-9 w-9 shrink-0 items-center justify-center">
-        <span className="absolute inset-0 rounded-full bg-brand/30 blur-md" aria-hidden="true" />
+        <span className="absolute inset-0 rounded-full bg-[#FACC15]/25 blur-md" aria-hidden="true" />
         <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true" className="relative">
-          <circle cx="16" cy="16" r="14" stroke="#FF0A47" strokeWidth="2.5" />
-          <circle cx="16" cy="16" r="6" fill="#FF0A47" />
-          <path d="M16 2v6M16 24v6M2 16h6M24 16h6" stroke="#FF0A47" strokeWidth="2" strokeLinecap="round" />
+          <circle cx="16" cy="16" r="14" stroke="#FACC15" strokeWidth="2.5" />
+          <circle cx="16" cy="16" r="6" fill="#FACC15" />
+          <path d="M16 2v6M16 24v6M2 16h6M24 16h6" stroke="#FACC15" strokeWidth="2" strokeLinecap="round" />
         </svg>
       </span>
       {!compact && (
-        <span className="text-lg font-extrabold tracking-tightest text-text-vivid">
-          Apollo<span className="text-brand">.</span>
+        <span className="text-lg font-black tracking-tight text-text-vivid">
+          Apollo<span className="text-[#FACC15]">.</span>
         </span>
       )}
     </Link>
@@ -218,7 +218,7 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
           e.preventDefault();
           if (q.trim().length >= 2) go(`/search?q=${encodeURIComponent(q.trim())}`);
         }}
-        className="flex h-10 items-center gap-2.5 rounded-full px-3.5 bg-[#141722] border border-white/15 focus-within:bg-[#1a1d2b] focus-within:border-brand/60 shadow-md transition"
+        className="flex h-10 items-center gap-2.5 rounded-full px-4 bg-[#09090B]/80 border border-white/10 focus-within:bg-[#09090B] focus-within:border-[#FACC15]/60 transition"
       >
         <Icon name="searchIcon" className="h-4 w-4 text-text-muted" />
         <input
@@ -226,17 +226,17 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onFocus={() => setOpen(true)}
-          placeholder="Search titles, actors.."
+          placeholder="Search titles, actors..."
           aria-label="Search"
-          className="w-full bg-transparent text-sm text-text-vivid outline-none placeholder:text-text-muted"
+          className="w-full bg-transparent text-sm font-medium text-text-vivid outline-none placeholder:text-text-muted"
         />
-        <kbd className="hidden rounded-md border border-white/10 bg-white/10 px-1.5 py-0.5 font-mono text-[10px] text-text-muted sm:block">
+        <kbd className="hidden rounded-full border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[10px] text-text-muted sm:block">
           ⌘K
         </kbd>
       </form>
 
       {open && q.trim().length >= 2 && (
-        <div className="animate-rise absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl bg-[#12141d] border border-white/20 shadow-2xl">
+        <div className="animate-rise absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl bg-[#09090B]/95 border border-white/15 backdrop-blur-2xl shadow-2xl">
           <div className="flex items-center gap-1 border-b border-white/10 p-2">
             {(
               [
@@ -249,7 +249,7 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
                 key={c.value}
                 onClick={() => setCat(c.value)}
                 aria-pressed={cat === c.value}
-                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${cat === c.value ? "bg-brand text-white" : "text-text-muted hover:text-text-vivid"
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${cat === c.value ? "bg-[#FACC15] text-[#0B0B0C]" : "text-text-muted hover:text-text-vivid"
                   }`}
               >
                 {c.label}
@@ -258,7 +258,7 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
           </div>
           {busy ? (
             <div className="flex items-center gap-2 px-4 py-3 text-sm text-text-muted">
-              <span className="h-3 w-3 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+              <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#FACC15] border-t-transparent" />
               Searching...
             </div>
           ) : res.length === 0 ? (
@@ -278,19 +278,19 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
                     alt=""
                     width={40}
                     height={60}
-                    className="h-[60px] w-10 shrink-0 rounded-md object-cover"
+                    className="h-[60px] w-10 shrink-0 rounded-lg object-cover border border-white/10"
                   />
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-text-vivid">{titleName(item)}</p>
                     <p className="flex items-center gap-2 text-xs text-text-muted">
                       <span
-                        className={`rounded px-1.5 py-0.5 font-mono text-[10px] uppercase ${mt === "tv" ? "bg-brand/15 text-brand-soft" : "bg-white/10 text-text-muted"
+                        className={`rounded-full px-2 py-0.5 font-mono text-[10px] uppercase ${mt === "tv" ? "bg-[#FACC15]/15 text-[#FACC15] border border-[#FACC15]/30" : "bg-white/10 text-text-muted"
                           }`}
                       >
                         {mt}
                       </span>
                       {releaseYear(item)}
-                      {item.vote_average ? <span className="text-badge-rating">★ {item.vote_average.toFixed(1)}</span> : null}
+                      {item.vote_average ? <span className="text-[#FACC15]">★ {item.vote_average.toFixed(1)}</span> : null}
                     </p>
                   </div>
                 </button>
@@ -299,7 +299,7 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
           )}
           <button
             onClick={() => go(`/search?q=${encodeURIComponent(q.trim())}`)}
-            className="block w-full border-t border-white/10 px-4 py-2.5 text-left text-sm font-medium text-brand-soft transition hover:bg-white/5"
+            className="block w-full border-t border-white/10 px-4 py-2.5 text-left text-sm font-medium text-[#FACC15] transition hover:bg-white/5"
           >
             See all results for "{q}" →
           </button>
@@ -320,26 +320,26 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="glass animate-rise absolute left-4 right-4 top-4 overflow-hidden rounded-3xl shadow-glass">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={onClose} />
+      <div className="glass animate-rise absolute left-4 right-4 top-4 overflow-hidden rounded-3xl border border-white/15 bg-[#09090B]/95 p-2 shadow-2xl backdrop-blur-2xl">
         <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
           <ApolloLogo compact={false} />
           <button
             onClick={onClose}
             aria-label="Close menu"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-text-muted"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-text-muted hover:text-white"
           >
             <Icon name="close" className="h-5 w-5" />
           </button>
         </div>
-        <div className="space-y-1 p-3">
+        <div className="space-y-1 p-2">
           {DOCK_TOP.map((l) => (
             <button
               key={l.label}
               onClick={() => go(l.href)}
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-text-vivid transition hover:bg-white/5"
+              className="flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-left text-sm font-semibold text-text-vivid transition hover:bg-white/5"
             >
-              <span className="w-6 text-text-muted">
+              <span className="w-5 text-text-muted">
                 <Icon name={l.icon} className="h-5 w-5" />
               </span>
               {l.label}
@@ -351,16 +351,16 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
           <Link
             href="/movie-night"
             onClick={onClose}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-brand px-4 py-2.5 text-sm font-bold text-white shadow-brand-glow"
+            className="cinema-btn-gold flex w-full items-center justify-center gap-2 text-sm font-bold"
           >
             Movie Night Room
           </Link>
           {user ? (
             <button
               onClick={() => go("/profile")}
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-text-muted transition hover:bg-white/5"
+              className="flex w-full items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-left text-sm text-text-muted transition hover:bg-white/10 hover:text-white"
             >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand font-bold text-white">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FACC15] font-bold text-[#0B0B0C]">
                 {(user.name || user.email).charAt(0).toUpperCase()}
               </span>
               {user.name || user.email}
@@ -368,7 +368,7 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
           ) : loading ? null : (
             <button
               onClick={() => go("/login")}
-              className="w-full rounded-xl border border-white/10 px-3 py-2.5 text-left text-sm font-medium text-text-vivid"
+              className="cinema-btn-pill w-full text-center text-sm font-semibold"
             >
               Sign in
             </button>
@@ -441,11 +441,11 @@ export function Navbar() {
         onMouseLeave={() => setHover(false)}
       >
         <div
-          className={`flex h-full flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-[#08090C]/75 backdrop-blur-xl shadow-glass transition-all duration-500 ease-out ${
+          className={`flex h-full flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-[#09090B]/80 backdrop-blur-xl shadow-glass transition-all duration-500 ease-out ${
             hover ? "w-60" : "w-[72px]"
           }`}
         >
-          <div className={`flex h-16 shrink-0 items-center ${hover ? "px-3" : "justify-center px-0"}`}>
+          <div className={`flex h-16 shrink-0 items-center ${hover ? "px-4" : "justify-center px-0"}`}>
             <ApolloLogo compact={!hover} />
           </div>
 
@@ -454,19 +454,19 @@ export function Navbar() {
               <Link
                 key={link.label}
                 href={link.href}
-                className={`card-lift relative flex h-11 shrink-0 items-center gap-3 rounded-xl transition ${
-                  hover ? "px-3" : "justify-center px-0"
+                className={`card-lift relative flex h-11 shrink-0 items-center gap-3 rounded-full transition ${
+                  hover ? "px-4" : "justify-center px-0"
                 } ${
                   isActive(link)
-                    ? "bg-brand/15 text-text-vivid"
-                    : "text-text-muted hover:bg-white/[0.04] hover:text-text-vivid"
+                    ? "bg-white/10 text-text-vivid border border-white/20"
+                    : "text-text-muted hover:bg-white/[0.05] hover:text-text-vivid"
                 }`}
               >
                 {isActive(link) && (
-                  <span className="absolute left-0 h-5 w-1 rounded-r-full bg-brand" aria-hidden="true" />
+                  <span className="absolute left-0 h-5 w-1 rounded-r-full bg-[#FACC15]" aria-hidden="true" />
                 )}
                 <span className="flex w-6 shrink-0 items-center justify-center">
-                  <Icon name={link.icon} className="h-5 w-5" />
+                  <Icon name={link.icon} className={`h-5 w-5 ${isActive(link) ? "text-[#FACC15]" : ""}`} />
                 </span>
                 {hover && (
                   <span className="whitespace-pre text-sm font-semibold">{link.label}</span>
@@ -479,11 +479,11 @@ export function Navbar() {
 
             <Link
               href="/movie-night"
-              className={`card-lift flex h-11 w-full items-center gap-3 rounded-xl text-left transition hover:bg-brand/15 ${
-                hover ? "px-3" : "justify-center px-0"
-              } text-text-muted hover:text-text-vivid`}
+              className={`card-lift flex h-11 w-full items-center gap-3 rounded-full text-left transition ${
+                hover ? "px-4" : "justify-center px-0"
+              } text-text-muted hover:bg-white/[0.05] hover:text-text-vivid`}
             >
-              <span className="flex w-6 shrink-0 items-center justify-center text-brand-soft">
+              <span className="flex w-6 shrink-0 items-center justify-center text-[#FACC15]">
                 <Icon name="people" className="h-5 w-5" />
               </span>
               {hover && <span className="text-sm font-semibold">Movie Night Room</span>}
@@ -494,23 +494,23 @@ export function Navbar() {
 
       {/* Top glass command strip */}
       <header className="sticky top-0 z-40 flex justify-center px-4 pt-4 lg:pl-[calc(72px+1rem)]">
-        <div className="flex w-full max-w-7xl items-center gap-3 rounded-full border border-white/[0.08] bg-[#08090C]/65 px-3 py-2 backdrop-blur-xl">
+        <div className="flex w-full max-w-7xl items-center gap-3 rounded-full border border-white/[0.08] bg-[#09090B]/75 px-3 py-2 backdrop-blur-xl">
 
 
           <CommandSearch open={searchOpen} setOpen={setSearchOpen} />
 
           <div className="flex shrink-0 items-center gap-2">
             {!mounted || loading ? (
-              <div className="h-10 w-20 animate-pulse rounded-full border border-white/10 bg-white/5" aria-hidden="true" />
+              <div className="h-10 w-24 animate-pulse rounded-full border border-white/10 bg-white/5" aria-hidden="true" />
             ) : user ? (
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setMenuOpen((v) => !v)}
                   aria-haspopup="menu"
                   aria-expanded={menuOpen}
-                  className="flex h-10 items-center gap-2 rounded-full border border-white/15 bg-[#161824] hover:bg-[#1f2233] pl-1 pr-3 transition shadow-sm"
+                  className="flex h-10 items-center gap-2 rounded-full border border-white/20 bg-white/10 hover:bg-white/15 pl-1 pr-3 transition"
                 >
-                  <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-brand font-bold text-white shadow">
+                  <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#FACC15] font-bold text-[#0B0B0C]">
                     {user.avatar ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
@@ -525,7 +525,7 @@ export function Navbar() {
                 {menuOpen && (
                   <div
                     role="menu"
-                    className="animate-rise absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-2xl bg-[#12141d] border border-white/20 shadow-2xl"
+                    className="animate-rise absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-2xl bg-[#09090B]/95 border border-white/15 shadow-2xl backdrop-blur-2xl"
                   >
                     {[
                       { href: "/my-list", label: "My List" },
@@ -547,7 +547,7 @@ export function Navbar() {
                       <button
                         onClick={doSignOut}
                         role="menuitem"
-                        className="block w-full px-4 py-2.5 text-left text-sm text-brand-soft transition hover:bg-white/10"
+                        className="block w-full px-4 py-2.5 text-left text-sm text-[#FACC15] transition hover:bg-white/10"
                       >
                         Sign out
                       </button>
@@ -558,7 +558,7 @@ export function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="flex h-10 items-center rounded-full border border-white/15 bg-[#161824] hover:bg-brand hover:border-brand px-4 text-sm font-semibold text-white transition shadow-sm"
+                className="cinema-btn-gold h-10 px-5 text-sm font-semibold"
               >
                 Sign in
               </Link>
@@ -569,7 +569,7 @@ export function Navbar() {
               onClick={() => setMobileOpen((v) => !v)}
               aria-label="Toggle menu"
               aria-expanded={mobileOpen}
-              className="flex h-11 w-11 items-center justify-center rounded-lg text-white/85 hover:text-text-vivid lg:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/85 hover:text-text-vivid lg:hidden"
             >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 {mobileOpen ? (

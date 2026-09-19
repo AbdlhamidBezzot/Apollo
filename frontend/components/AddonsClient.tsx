@@ -221,9 +221,9 @@ function CatalogCard({
         isBroken
           ? "border-red-500/20 bg-red-500/5 opacity-60"
           : addon.user_enabled
-          ? "border-brand/40 bg-brand/5 shadow-brand-glow/10"
-          : "border-white/10 opacity-80 hover:border-white/20 hover:opacity-100"
-      }`}
+          ? "border-[#FACC15]/30 bg-[#FACC15]/5 shadow-brand-glow/10"
+          : "border-white/10 bg-[#121215]/60 opacity-80 hover:border-white/20 hover:opacity-100"
+      } backdrop-blur-xl`}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
@@ -293,7 +293,7 @@ function CatalogCard({
               isBroken
                 ? "bg-white/5 cursor-not-allowed"
                 : addon.user_enabled
-                ? "bg-brand"
+                ? "bg-[#FACC15]"
                 : "bg-white/15 hover:bg-white/25"
             } ${busy ? "opacity-50" : ""}`}
           >
@@ -373,8 +373,8 @@ export function AddonsClient() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-12 lg:pl-[calc(72px+2rem)]">
       <div className="mb-8">
-        <h1 className="text-3xl font-extrabold text-text-vivid">Add-ons</h1>
-        <p className="mt-2 text-sm text-text-muted leading-relaxed max-w-2xl">
+        <h1 className="text-3xl font-black text-white">Add-ons</h1>
+        <p className="mt-2 text-sm text-[#A1A1AA] leading-relaxed max-w-2xl">
           Active et personnalise tes addons (Torrentio Lite, Debrid API, etc.). Apollo les interroge automatiquement quand tu lances un film ou une série.
         </p>
       </div>
@@ -391,18 +391,18 @@ export function AddonsClient() {
       {/* Catalog Grid */}
       <section>
         {fetching ? (
-          <div className="flex items-center gap-3 text-sm text-text-muted py-12">
-            <span className="h-5 w-5 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+          <div className="flex items-center gap-3 text-sm text-[#A1A1AA] py-12">
+            <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#FACC15] border-t-transparent" />
             Chargement du catalogue d'add-ons…
           </div>
         ) : addons.length === 0 ? (
-          <div className="glass rounded-2xl border border-white/5 px-6 py-12 text-center">
+          <div className="rounded-2xl border border-white/10 bg-[#121215]/60 px-6 py-12 text-center backdrop-blur-xl">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
-              <svg className="h-8 w-8 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg className="h-8 w-8 text-[#A1A1AA]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
               </svg>
             </div>
-            <p className="text-sm font-medium text-text-muted">Aucun addon disponible pour le moment</p>
+            <p className="text-sm font-medium text-[#A1A1AA]">Aucun addon disponible pour le moment</p>
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
@@ -427,9 +427,9 @@ export function AddonsClient() {
       )}
 
       {/* Security notice */}
-      <div className="mt-10 rounded-2xl border border-white/5 bg-white/2 px-5 py-4">
-        <p className="text-xs text-text-muted/70 leading-relaxed">
-          <span className="font-semibold text-text-muted">🔒 Sécurité & Confidentialité :</span>{" "}
+      <div className="mt-10 rounded-2xl border border-white/10 bg-[#121215]/40 px-5 py-4 backdrop-blur-xl">
+        <p className="text-xs text-[#A1A1AA]/70 leading-relaxed">
+          <span className="font-semibold text-[#A1A1AA]">🔒 Sécurité &amp; Confidentialité :</span>{" "}
           Tous les add-ons du catalogue sont validés par Apollo et sécurisés contre les attaques SSRF.
           Les requêtes d'addons sont exécutées directement par le serveur backend Apollo de manière isolée.
         </p>

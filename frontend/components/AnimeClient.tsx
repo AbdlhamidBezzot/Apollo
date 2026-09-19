@@ -68,8 +68,8 @@ export function AnimeClient() {
   return (
     <div className="mx-auto max-w-7xl space-y-12 px-4 py-8">
       <div>
-        <p className="font-mono text-xs uppercase tracking-wide text-brand-soft">Discover</p>
-        <h1 className="mt-1 text-3xl font-extrabold tracking-tightest text-text-vivid">Anime</h1>
+        <p className="cinema-label text-[10px]">Discover</p>
+        <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-[#FAFAFA] sm:text-4xl">Anime Hub</h1>
       </div>
       <AnimeHubPrefs />
 
@@ -78,23 +78,23 @@ export function AnimeClient() {
         <MovieRow title="Anime movies" items={movies} seeAllHref="/browse?media_type=movie&genre=16" />
       ) : loading || retrying ? (
         <div className="space-y-3">
-          <div className="h-5 w-40 rounded bg-white/10" />
+          <div className="h-5 w-40 rounded-full bg-white/10" />
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="aspect-[2/3] rounded-xl bg-surface-dark animate-pulse" />
+              <div key={i} className="aspect-[2/3] rounded-2xl bg-[#09090B]/60 border border-white/10 animate-pulse" />
             ))}
           </div>
         </div>
       ) : (
-        <div className="rounded-2xl border border-white/10 bg-surface-dark/60 p-6 text-center backdrop-blur">
-          <p className="text-sm font-semibold text-text-vivid">Anime movies</p>
-          <p className="mt-1 text-xs text-text-muted">
+        <div className="rounded-3xl border border-white/10 bg-[#09090B]/60 p-6 text-center backdrop-blur-xl">
+          <p className="text-sm font-semibold text-[#FAFAFA]">Anime movies</p>
+          <p className="mt-1 text-xs text-[#A1A1AA]">
             {error || "Anime stream server is starting up or temporarily offline."}
           </p>
           <button
             onClick={() => loadAnimeData(true)}
             disabled={retrying}
-            className="mt-3 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2 text-xs font-bold text-white shadow-brand-glow hover:bg-brand-soft disabled:opacity-50"
+            className="cinema-btn-gold mt-3 text-xs font-bold shadow-brand-glow disabled:opacity-50"
           >
             {retrying ? "Connecting…" : "Retry Loading Anime ▶"}
           </button>
@@ -106,23 +106,23 @@ export function AnimeClient() {
         <MovieRow title="Anime series" items={series} seeAllHref="/browse?media_type=tv&genre=16" />
       ) : loading || retrying ? (
         <div className="space-y-3">
-          <div className="h-5 w-40 rounded bg-white/10" />
+          <div className="h-5 w-40 rounded-full bg-white/10" />
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="aspect-[2/3] rounded-xl bg-surface-dark animate-pulse" />
+              <div key={i} className="aspect-[2/3] rounded-2xl bg-[#09090B]/60 border border-white/10 animate-pulse" />
             ))}
           </div>
         </div>
       ) : (
-        <div className="rounded-2xl border border-white/10 bg-surface-dark/60 p-6 text-center backdrop-blur">
-          <p className="text-sm font-semibold text-text-vivid">Anime series</p>
-          <p className="mt-1 text-xs text-text-muted">
+        <div className="rounded-3xl border border-white/10 bg-[#09090B]/60 p-6 text-center backdrop-blur-xl">
+          <p className="text-sm font-semibold text-[#FAFAFA]">Anime series</p>
+          <p className="mt-1 text-xs text-[#A1A1AA]">
             {error || "Anime stream server is starting up or temporarily offline."}
           </p>
           <button
             onClick={() => loadAnimeData(true)}
             disabled={retrying}
-            className="mt-3 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2 text-xs font-bold text-white shadow-brand-glow hover:bg-brand-soft disabled:opacity-50"
+            className="cinema-btn-gold mt-3 text-xs font-bold shadow-brand-glow disabled:opacity-50"
           >
             {retrying ? "Connecting…" : "Retry Loading Anime ▶"}
           </button>

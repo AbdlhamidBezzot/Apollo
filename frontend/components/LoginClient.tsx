@@ -65,60 +65,76 @@ export function LoginClient() {
   }
 
   return (
-    <div className="mx-auto max-w-sm px-4 py-16">
-      <div className="glass rounded-3xl p-7 shadow-glass">
-        <h1 className="mb-6 text-center text-3xl font-extrabold tracking-tightest text-text-vivid">
-          {mode === "login" ? "Welcome back" : "Create your account"}
-        </h1>
+    <div className="flex min-h-[80vh] items-center justify-center px-4 py-16">
+      <div className="w-full max-w-sm">
+        {/* Logo mark */}
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#FACC15] text-black font-black text-xl shadow-brand-glow">
+            A
+          </div>
+          <h1 className="text-3xl font-black tracking-tight text-white">
+            {mode === "login" ? "Welcome back" : "Create account"}
+          </h1>
+          <p className="mt-1 text-sm text-[#A1A1AA]">
+            {mode === "login" ? "Sign in to continue streaming" : "Start watching in seconds"}
+          </p>
+        </div>
 
-        <form onSubmit={submit} className="space-y-3">
-          {mode === "register" && (
+        <div className="rounded-2xl border border-white/10 bg-[#121215]/60 p-6 backdrop-blur-xl shadow-2xl">
+          <form onSubmit={submit} className="space-y-3">
+            {mode === "register" && (
+              <input
+                name="name"
+                required
+                placeholder="Display name"
+                className="w-full rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white outline-none placeholder:text-[#A1A1AA] focus:border-[#FACC15]/50 transition"
+              />
+            )}
             <input
-              name="name"
+              name="email"
+              type="email"
               required
-              placeholder="Display name"
-              className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-text-vivid outline-none placeholder:text-text-muted focus:border-brand/50"
+              placeholder="Email address"
+              className="w-full rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white outline-none placeholder:text-[#A1A1AA] focus:border-[#FACC15]/50 transition"
             />
-          )}
-          <input
-            name="email"
-            type="email"
-            required
-            placeholder="Email"
-            className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-text-vivid outline-none placeholder:text-text-muted focus:border-brand/50"
-          />
-          <input
-            name="password"
-            type="password"
-            required
-            minLength={mode === "register" ? 8 : 1}
-            placeholder={mode === "register" ? "Password (min 8 chars)" : "Password"}
-            className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-text-vivid outline-none placeholder:text-text-muted focus:border-brand/50"
-          />
-          {error && (
-            <p className="text-xs text-brand-soft" role="alert">
-              {error}
-              {accountAction && (
-                <button type="button" onClick={() => switchMode(accountAction)} className="ml-1 font-bold underline hover:text-white">
-                  {accountAction === "login" ? "Sign in instead" : "Create an account"}
-                </button>
-              )}
-            </p>
-          )}
-          <button
-            type="submit"
-            disabled={busy}
-            className="w-full rounded-xl bg-brand py-2.5 text-sm font-bold text-white shadow-brand-glow transition hover:bg-brand-soft disabled:opacity-40"
-          >
-            {busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}
-          </button>
-        </form>
-        <p className="mt-4 text-center text-sm text-text-muted">
-          {mode === "login" ? "New here? " : "Already have an account? "}
-          <button type="button" onClick={() => switchMode(mode === "login" ? "register" : "login")} className="text-brand-soft hover:underline">
-            {mode === "login" ? "Create an account" : "Sign in"}
-          </button>
-        </p>
+            <input
+              name="password"
+              type="password"
+              required
+              minLength={mode === "register" ? 8 : 1}
+              placeholder={mode === "register" ? "Password (min 8 chars)" : "Password"}
+              className="w-full rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white outline-none placeholder:text-[#A1A1AA] focus:border-[#FACC15]/50 transition"
+            />
+            {error && (
+              <p className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400" role="alert">
+                {error}
+                {accountAction && (
+                  <button type="button" onClick={() => switchMode(accountAction)} className="ml-1 font-bold underline hover:text-red-300">
+                    {accountAction === "login" ? "Sign in instead" : "Create an account"}
+                  </button>
+                )}
+              </p>
+            )}
+            <button
+              type="submit"
+              disabled={busy}
+              className="w-full rounded-full bg-[#FACC15] py-2.5 text-sm font-extrabold text-black shadow-brand-glow transition hover:bg-[#FDE68B] disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}
+            </button>
+          </form>
+
+          <p className="mt-5 text-center text-sm text-[#A1A1AA]">
+            {mode === "login" ? "New here? " : "Already have an account? "}
+            <button
+              type="button"
+              onClick={() => switchMode(mode === "login" ? "register" : "login")}
+              className="font-semibold text-[#FACC15] hover:underline"
+            >
+              {mode === "login" ? "Create an account" : "Sign in"}
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );

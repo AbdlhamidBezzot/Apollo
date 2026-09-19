@@ -67,8 +67,8 @@ export function HistoryClient() {
   if (status === "error") {
     return (
       <div className="mx-auto max-w-xl px-4 py-24 text-center">
-        <p className="mb-4 text-text-muted">Sign in to see your viewing history.</p>
-        <Link href="/login" className="rounded-full bg-brand px-6 py-2 text-sm font-bold text-white shadow-brand-glow">
+        <p className="mb-4 text-[#A1A1AA]">Sign in to see your viewing history.</p>
+        <Link href="/login" className="rounded-full bg-[#FACC15] px-6 py-2 text-sm font-extrabold text-black shadow-brand-glow transition hover:bg-[#FDE68B]">
           Sign in
         </Link>
       </div>
@@ -86,15 +86,15 @@ export function HistoryClient() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <h1 className="mb-6 text-3xl font-extrabold tracking-tight text-text-vivid">Viewing History</h1>
+      <h1 className="mb-6 text-3xl font-black tracking-tight text-white">Viewing History</h1>
       {status === "loading" ? (
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="skeleton h-20 rounded-xl" />
+            <div key={i} className="h-20 rounded-2xl border border-white/10 bg-[#121215]/60 animate-pulse" />
           ))}
         </div>
       ) : items.length === 0 ? (
-        <p className="text-text-muted">Nothing watched yet. Your playback history will appear here.</p>
+        <p className="text-[#A1A1AA]">Nothing watched yet. Your playback history will appear here.</p>
       ) : (
         <div className="space-y-3">
           {items.map((entry) => {
@@ -108,7 +108,7 @@ export function HistoryClient() {
               <Link
                 key={entry.id}
                 href={href}
-                className="group flex items-center gap-4 overflow-hidden rounded-2xl border border-white/10 bg-bg-card p-3 transition duration-300 hover:border-brand/40"
+                className="group flex items-center gap-4 overflow-hidden rounded-2xl border border-white/10 bg-[#121215]/60 p-3 transition duration-300 hover:border-[#FACC15]/30 backdrop-blur-xl"
               >
                 <div className="relative h-20 w-36 shrink-0 overflow-hidden rounded-lg bg-black">
                   <Image
@@ -120,17 +120,17 @@ export function HistoryClient() {
                   />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold text-text-vivid">
+                  <p className="truncate font-semibold text-white">
                     {entry.detail ? titleName(entry.detail) : `${entry.media_type} #${entry.tmdb_id}`}
                   </p>
                   <div className="mt-1.5 h-1.5 w-full max-w-md overflow-hidden rounded-full bg-white/10">
-                    <div className="h-full rounded-full bg-brand" style={{ width: `${pct}%` }} />
+                    <div className="h-full rounded-full bg-[#FACC15]" style={{ width: `${pct}%` }} />
                   </div>
-                  <p className="mt-1 font-mono text-[11px] text-text-muted">
+                  <p className="mt-1 font-mono text-[11px] text-[#A1A1AA]">
                     {entry.completed ? "Completed" : `${Math.round(entry.progress_seconds / 60)} min watched`}
                   </p>
                 </div>
-                <span className="glass hidden rounded-full border border-white/10 px-3 py-1 text-xs text-text-muted transition group-hover:border-brand/50 group-hover:text-brand-soft sm:block">
+                <span className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-[#A1A1AA] transition group-hover:border-[#FACC15]/40 group-hover:text-[#FACC15] sm:block">
                   {entry.completed ? "Watch again" : "Resume"}
                 </span>
                 <button
@@ -141,7 +141,7 @@ export function HistoryClient() {
                     e.stopPropagation();
                     removeItem(entry);
                   }}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 text-sm text-text-muted transition hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-400"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 text-sm text-[#A1A1AA] transition hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-400"
                 >
                   ✕
                 </button>

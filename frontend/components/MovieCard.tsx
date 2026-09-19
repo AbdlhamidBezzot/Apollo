@@ -17,7 +17,7 @@ export function MovieCard({ item, onRemove }: { item: Title; onRemove?: (item: T
       href={href}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="card-lift group relative z-0 w-36 shrink-0 overflow-hidden rounded-2xl bg-bg-card hover:z-10 sm:w-44"
+      className="card-lift group relative z-0 w-36 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-[#09090B]/60 hover:border-white/30 hover:z-10 sm:w-44"
       title={titleName(item)}
     >
       <div className="relative aspect-[2/3]">
@@ -29,7 +29,7 @@ export function MovieCard({ item, onRemove }: { item: Title; onRemove?: (item: T
 
           sizes="(max-width: 640px) 144px, 176px"
           className={`object-cover transition-all duration-500 ease-out ${
-            hovered ? "scale-110 opacity-0" : "scale-100 opacity-100"
+            hovered ? "scale-105 opacity-0" : "scale-100 opacity-100"
           }`}
         />
 
@@ -44,15 +44,15 @@ export function MovieCard({ item, onRemove }: { item: Title; onRemove?: (item: T
           />
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-bg-void/95 via-bg-void/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#09090B]/95 via-[#09090B]/30 to-transparent" />
 
-        {/* Play overlay */}
+        {/* Gold Play overlay */}
         <div
           className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${
             hovered ? "opacity-100" : "opacity-0"
           }`}
         >
-          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand text-white shadow-brand-glow-lg transition-transform duration-300 group-hover:scale-110">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FACC15] text-[#0B0B0C] shadow-brand-glow transition-transform duration-300 group-hover:scale-110">
             <svg viewBox="0 0 24 24" fill="currentColor" className="ml-0.5 h-5 w-5" aria-hidden="true">
               <path d="M7 5l12 7-12 7V5z" />
             </svg>
@@ -60,10 +60,10 @@ export function MovieCard({ item, onRemove }: { item: Title; onRemove?: (item: T
         </div>
 
         {/* Rating badge */}
-        <div className="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-black/60 px-2 py-0.5 font-mono text-[11px] font-bold text-[#FFD166] backdrop-blur-md">
+        <div className="absolute left-2 top-2 flex items-center gap-1 rounded-full border border-white/10 bg-black/70 px-2.5 py-0.5 font-mono text-[11px] font-bold text-[#FACC15] backdrop-blur-md">
           {rating ? (
             <>
-              <svg className="h-3 w-3 fill-[#FFD166] text-[#FFD166]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg className="h-3 w-3 fill-[#FACC15] text-[#FACC15]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
               {rating}
             </>
           ) : mediaType === "tv" ? "TV" : "MOVIE"}
@@ -79,7 +79,7 @@ export function MovieCard({ item, onRemove }: { item: Title; onRemove?: (item: T
               e.stopPropagation();
               onRemove(item);
             }}
-            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-xs text-white backdrop-blur transition hover:bg-brand hover:text-white"
+            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/70 text-xs text-white backdrop-blur transition hover:bg-[#FACC15] hover:text-[#0B0B0C]"
           >
             ✕
           </button>
@@ -87,17 +87,17 @@ export function MovieCard({ item, onRemove }: { item: Title; onRemove?: (item: T
       </div>
 
       {/* Bottom info */}
-      <div className="absolute inset-x-0 bottom-0 p-2">
+      <div className="absolute inset-x-0 bottom-0 p-2.5">
         <p
           className={`truncate text-sm font-semibold text-text-vivid transition-all duration-300 ${
-            hovered ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
+            hovered ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
           }`}
         >
           {titleName(item)}
         </p>
         <p
           className={`text-xs text-text-muted transition-all duration-300 ${
-            hovered ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
+            hovered ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
           }`}
         >
           {releaseYear(item)}

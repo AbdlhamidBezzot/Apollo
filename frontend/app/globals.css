@@ -8,49 +8,59 @@
 
 html,
 body {
-  background-color: #08090c;
-  color: #e9ebee;
-  font-family: "Plus Jakarta Sans", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #09090b;
+  color: #fafafa;
+  font-family: "Space Grotesk", "Plus Jakarta Sans", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 @layer components {
-  /* Frosted liquid glass surface used by the floating dock, command bar & modals */
+  /* Frosted semi-transparent canvas surface */
   .glass {
-    @apply border border-white/10 bg-glass backdrop-blur-glass;
+    @apply border border-[#262628] bg-[#09090b]/80 backdrop-blur-xl;
   }
 
-  /* Ambient brand backlight ring (radial radial) */
+  /* Ambient gold backlight ring */
   .glow-ring {
-    box-shadow: 0 20px 50px -10px rgba(255, 10, 71, 0.25);
+    box-shadow: 0 0 35px 0px rgba(250, 204, 21, 0.25);
   }
 
-  /* Card hover lift - quiet, confident movement */
+  /* Card hover lift - subtle, refined movement */
   .card-lift {
-    transition: transform cubic-bezier(0.16, 1, 0.3, 1) 0.35s, box-shadow cubic-bezier(0.16, 1, 0.3, 1) 0.35s, background-color cubic-bezier(0.16, 1, 0.3, 1) 0.35s;
+    transition: transform cubic-bezier(0.16, 1, 0.3, 1) 0.35s, border-color cubic-bezier(0.16, 1, 0.3, 1) 0.35s, background-color cubic-bezier(0.16, 1, 0.3, 1) 0.35s;
     will-change: transform;
   }
   .card-lift:hover {
-    transform: translateY(-4px) scale(1.015);
+    transform: translateY(-3px);
   }
 
-  /* Cinemaos small uppercase tracking label */
+  /* Cinemaos uppercase tracked label */
   .cinema-label {
-    @apply font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-text-muted border border-white/10 bg-white/[0.04] rounded-full px-2.5 py-0.5 backdrop-blur-md;
+    @apply text-[11px] font-semibold uppercase tracking-[1.96px] text-text-muted border border-white/10 bg-white/[0.04] rounded-full px-2.5 py-0.5 backdrop-blur-md;
   }
 
   /* Cinemaos layered semi-transparent surface */
   .cinema-surface {
-    @apply border border-white/[0.08] bg-[#1B1E27]/60 backdrop-blur-xl rounded-2xl;
+    @apply border border-white/[0.08] bg-[#09090b]/60 backdrop-blur-xl rounded-2xl;
+  }
+
+  /* Cinemaos pill button standard */
+  .cinema-btn-pill {
+    @apply inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-medium text-[#fafafa] backdrop-blur-md transition hover:border-white/40 hover:bg-white/15 active:scale-[0.98];
+  }
+
+  /* Cinemaos gold pill button standard */
+  .cinema-btn-gold {
+    @apply inline-flex items-center justify-center rounded-full bg-[#FACC15] px-6 py-2.5 text-sm font-semibold text-[#0B0B0C] shadow-brand-glow transition hover:bg-[#FDE68B] active:scale-[0.98];
   }
 }
 
-/* Accessible focus ring (WCAG 2.2 AA â€” cyan) */
+/* Accessible focus ring (WCAG 2.2 AA — Gold focus ring) */
 :focus-visible {
-  outline: 2px solid #00e5ff;
+  outline: 2px solid #FACC15;
   outline-offset: 2px;
-  border-radius: 2px;
+  border-radius: 9999px;
 }
 
 /* Hide scrollbars on horizontal poster rows */
@@ -64,7 +74,7 @@ body {
 
 /* Skeleton shimmer */
 .skeleton {
-  @apply animate-pulse bg-base-card;
+  @apply animate-pulse bg-white/5;
 }
 
 /* Thin themed scrollbar for chat/drawer panels */
@@ -89,7 +99,7 @@ body {
 @keyframes heroFade {
   from {
     opacity: 0;
-    transform: scale(1.04);
+    transform: scale(1.03);
   }
   to {
     opacity: 1;
@@ -120,7 +130,8 @@ body {
   }
 }
 .provider-marquee::before, .provider-marquee::after { content: ''; position: absolute; z-index: 1; top: 0; bottom: 0; width: 12%; pointer-events: none; }
-.provider-marquee::before { left: 0; background: linear-gradient(90deg, #08090c, transparent); }
-.provider-marquee::after { right: 0; background: linear-gradient(270deg, #08090c, transparent); }
+.provider-marquee::before { left: 0; background: linear-gradient(90deg, #09090b, transparent); }
+.provider-marquee::after { right: 0; background: linear-gradient(270deg, #09090b, transparent); }
 .provider-track { animation: provider-scroll 30s linear infinite; will-change: transform; }
 @keyframes provider-scroll { to { transform: translateX(-50%); } }
+

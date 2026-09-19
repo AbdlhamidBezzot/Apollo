@@ -45,8 +45,8 @@ export function MyListClient() {
   if (status === "error") {
     return (
       <div className="mx-auto max-w-xl px-4 py-24 text-center">
-        <p className="mb-4 text-text-muted">Sign in to see your list.</p>
-        <Link href="/login" className="rounded-full bg-brand px-6 py-2 text-sm font-bold text-white shadow-brand-glow">
+        <p className="mb-4 text-[#A1A1AA]">Sign in to see your list.</p>
+        <Link href="/login" className="rounded-full bg-[#FACC15] px-6 py-2 text-sm font-extrabold text-black shadow-brand-glow transition hover:bg-[#FDE68B]">
           Sign in
         </Link>
       </div>
@@ -66,13 +66,13 @@ export function MyListClient() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-extrabold tracking-tight text-text-vivid">My List</h1>
+      <h1 className="mb-6 text-2xl font-black tracking-tight text-white">My List</h1>
       {status === "empty" ? (
-        <p className="text-text-muted">Your list is empty. Add titles from their detail pages.</p>
+        <p className="text-[#A1A1AA]">Your list is empty. Add titles from their detail pages.</p>
       ) : status !== "loaded" ? (
         <div className="flex flex-wrap gap-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="skeleton aspect-[2/3] w-32 rounded-lg sm:w-40" />
+            <div key={i} className="aspect-[2/3] w-32 rounded-2xl border border-white/10 bg-[#121215]/60 animate-pulse sm:w-40" />
           ))}
         </div>
       ) : (

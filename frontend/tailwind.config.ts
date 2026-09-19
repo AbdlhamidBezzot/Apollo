@@ -9,55 +9,67 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // OLED-dark Apollo palette
-        "bg-void": "#08090C",
-        "bg-surface": "#11131A",
-        "bg-card": "#1B1E27",
-        glass: "rgba(18, 20, 28, 0.65)",
-        brand: {
-          DEFAULT: "#FF0A47",
-          crimson: "#FF0A47",
-          soft: "#FF5C7A",
-          glow: "rgba(255, 10, 71, 0.35)",
+        // Cinemaos Dark Canvas Palette
+        canvas: "#09090B",
+        "bg-void": "#09090B",
+        "bg-surface": "#09090B",
+        "bg-card": "rgba(9, 9, 11, 0.6)",
+        glass: "rgba(9, 9, 11, 0.75)",
+        
+        // Cinemaos Gold & Monochromatic Primary Tokens
+        primary: "#FAFAFA",
+        "on-primary": "#222222",
+        body: "#A1A1AA",
+        "accent-1": "#FACC15",
+        "accent-2": "#FDE68B",
+        gold: {
+          DEFAULT: "#FACC15",
+          soft: "#FDE68B",
+          glow: "rgba(250, 204, 21, 0.3)",
         },
-        "text-vivid": "#FFFFFF",
-        "text-muted": "#B6C2D2",
+        brand: {
+          DEFAULT: "#FACC15",
+          crimson: "#FACC15",
+          soft: "#FDE68B",
+          glow: "rgba(250, 204, 21, 0.3)",
+        },
+        "text-vivid": "#FAFAFA",
+        "text-muted": "#A1A1AA",
         "accent-emerald": "#10B981",
         "accent-amber": "#F59E0B",
 
-        // Backwards-compatible aliases (existing components keep working)
+        // Backwards-compatible aliases
         base: {
-          DEFAULT: "#08090C",
-          soft: "#11131A",
-          card: "#1B1E27",
-          line: "#262A37",
+          DEFAULT: "#09090B",
+          soft: "rgba(9, 9, 11, 0.8)",
+          card: "rgba(9, 9, 11, 0.6)",
+          line: "rgba(39, 39, 42, 0.5)",
         },
         accent: {
-          DEFAULT: "#FF0A47",
-          soft: "#FF5C7A",
-          glow: "rgba(255, 10, 71, 0.35)",
+          DEFAULT: "#FACC15",
+          soft: "#FDE68B",
+          glow: "rgba(250, 204, 21, 0.3)",
         },
         text: {
-          primary: "#FFFFFF",
-          secondary: "#B3B9C5",
-          muted: "#62706F",
+          primary: "#FAFAFA",
+          secondary: "#A1A1AA",
+          muted: "#71717A",
         },
         badge: {
-          rating: "#FFD166",
+          rating: "#FACC15",
           filler: "#F59E0B",
           canon: "#10B981",
         },
       },
       fontFamily: {
         sans: [
+          "Space Grotesk",
           "Plus Jakarta Sans",
           "Inter",
           "-apple-system",
           "BlinkMacSystemFont",
           "Segoe UI",
           "Roboto",
-          "Helvetica",
-          "Arial",
           "sans-serif",
         ],
         mono: [
@@ -73,18 +85,21 @@ const config: Config = {
         tightest: "-0.03em",
         tight: "-0.02em",
         wide: "0.02em",
+        tracked: "1.96px",
       },
       boxShadow: {
-        "card-hover": "0px 12px 32px rgba(0,0,0,0.8)",
-        "brand-glow": "0 0 24px rgba(255, 10, 71, 0.35)",
-        "brand-glow-lg": "0 20px 50px -10px rgba(255, 10, 71, 0.25)",
-        "glass": "0 8px 32px rgba(0,0,0,0.35)",
+        "card-hover": "rgba(0, 0, 0, 0.4) 0px 10px 30px -5px",
+        "brand-glow": "0 0 20px rgba(250, 204, 21, 0.35)",
+        "brand-glow-lg": "0 20px 40px -10px rgba(250, 204, 21, 0.3)",
+        "glass": "rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px",
+        "cinema-micro": "rgba(255, 255, 255, 0.45) 0px 0px 10px 0px",
       },
       backdropBlur: {
         "glass": "20px",
       },
       borderRadius: {
         "glass": "20px",
+        full: "9999px",
       },
       keyframes: {
         pulse: {
@@ -104,9 +119,9 @@ const config: Config = {
           to: { opacity: "1", transform: "translateX(0)" },
         },
         "radial-pulse": {
-          "0%": { boxShadow: "0 0 0 0 rgba(255, 10, 71, 0.4)" },
-          "70%": { boxShadow: "0 0 0 12px rgba(255, 10, 71, 0)" },
-          "100%": { boxShadow: "0 0 0 0 rgba(255, 10, 71, 0)" },
+          "0%": { boxShadow: "0 0 0 0 rgba(250, 204, 21, 0.4)" },
+          "70%": { boxShadow: "0 0 0 12px rgba(250, 204, 21, 0)" },
+          "100%": { boxShadow: "0 0 0 0 rgba(250, 204, 21, 0)" },
         },
       },
       animation: {

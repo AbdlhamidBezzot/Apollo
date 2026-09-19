@@ -63,7 +63,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
 
   return (
     <section
-      className="relative mx-auto mt-4 h-[540px] w-full max-w-7xl overflow-hidden rounded-3xl border border-white/[0.08]"
+      className="relative mx-auto mt-4 h-[560px] w-full max-w-7xl overflow-hidden rounded-3xl border border-white/[0.08] bg-[#09090B]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -76,50 +76,50 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
         sizes="100vw"
         className="hero-fade object-cover"
       />
-      {/* Dark gradient overlays for legibility */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#08090C] via-[#08090C]/40 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#08090C]/85 via-[#08090C]/30 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#08090C] to-transparent" />
+      {/* Dark atmospheric Cinemaos gradient overlays */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#09090B] via-[#09090B]/40 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#09090B]/90 via-[#09090B]/40 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-[#09090B] to-transparent" />
 
       <div className="relative mx-auto flex h-full max-w-7xl items-end px-6 pb-20 lg:px-10">
         <div className="max-w-2xl">
           {/* Metadata pill row */}
-          <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
-            <span className="rounded-full bg-accent-emerald/15 px-2.5 py-0.5 font-bold text-accent-emerald border border-accent-emerald/30">
+          <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
+            <span className="rounded-full bg-[#10B981]/15 px-3 py-0.5 font-bold text-[#10B981] border border-[#10B981]/30">
               {match}% Match
             </span>
             {item.vote_average ? (
-              <span className="flex items-center gap-1 rounded-full bg-white/[0.08] px-2.5 py-0.5 font-bold text-[#FFD166] backdrop-blur-md">
-                <svg className="h-3 w-3 fill-[#FFD166] text-[#FFD166]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <span className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-0.5 font-bold text-[#FACC15] border border-white/10 backdrop-blur-md">
+                <svg className="h-3 w-3 fill-[#FACC15] text-[#FACC15]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                 {item.vote_average.toFixed(1)}
               </span>
             ) : null}
             {releaseYear(item) && <span className="font-mono text-text-muted">{releaseYear(item)}</span>}
-            <span className="rounded-full bg-white/[0.08] px-2.5 py-0.5 font-mono text-[11px] uppercase text-text-muted backdrop-blur-md">
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-0.5 font-mono text-[11px] uppercase tracking-wider text-text-muted backdrop-blur-md">
               {isSeries ? "Series" : "4K HDR"}
             </span>
             {genreNames.map((g) => (
-              <span key={g} className="rounded-full border border-white/10 px-2.5 py-0.5 text-xs text-text-muted">
+              <span key={g} className="rounded-full border border-white/10 px-3 py-0.5 text-xs text-text-muted">
                 {g}
               </span>
             ))}
           </div>
 
-          {/* Headline Display XL */}
-          <h1 className="mb-4 text-4xl font-extrabold tracking-[-0.03em] leading-[1.05] text-text-vivid sm:text-5xl lg:text-6xl">
+          {/* Cinemaos Headline Display 80px / Weight 900 */}
+          <h1 className="mb-4 text-4xl font-black tracking-tight leading-none text-[#FAFAFA] sm:text-5xl lg:text-7xl">
             {shownTitle}
           </h1>
 
           {/* Brief Overview */}
-          <p className="mb-6 max-w-xl text-sm leading-relaxed text-text-muted line-clamp-2 sm:text-base">
+          <p className="mb-6 max-w-xl text-sm leading-relaxed text-[#A1A1AA] line-clamp-2 sm:text-base">
             {item.overview}
           </p>
 
-          {/* Actions */}
+          {/* Cinemaos Pill Actions */}
           <div className="flex flex-wrap items-center gap-3">
             <Link
               href={watchHref}
-              className="flex min-h-11 items-center gap-2 rounded-full bg-brand px-7 py-2.5 text-sm font-bold text-white shadow-brand-glow transition hover:bg-brand-soft"
+              className="cinema-btn-gold min-h-[44px] gap-2 font-bold shadow-brand-glow"
             >
               <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden="true">
                 <path d="M7 5l12 7-12 7V5z" />
@@ -128,7 +128,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
             </Link>
             <Link
               href={href}
-              className="flex min-h-11 items-center rounded-full border border-white/15 bg-white/[0.06] px-7 py-2.5 text-sm font-semibold text-text-vivid backdrop-blur-md transition hover:bg-white/15"
+              className="cinema-btn-pill min-h-[44px] font-semibold"
             >
               Details
             </Link>
@@ -138,13 +138,13 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
 
       {/* Slide selector dock */}
       {count > 1 && (
-        <div className="absolute inset-x-0 bottom-3 z-20">
+        <div className="absolute inset-x-0 bottom-4 z-20">
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
             <div className="flex items-end gap-2">
               <button
                 onClick={() => go(index - 1)}
                 aria-label="Previous slide"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-text-muted backdrop-blur-md transition hover:text-text-vivid"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-text-muted backdrop-blur-md transition hover:text-white hover:border-white/40"
               >
                 ‹
               </button>
@@ -154,8 +154,8 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
                   onClick={() => go(i)}
                   aria-label={`Go to ${titleName(s)}`}
                   aria-current={i === index}
-                  className={`group relative flex-1 overflow-hidden rounded-lg border transition ${
-                    i === index ? "border-brand/70" : "border-white/10 opacity-50 hover:opacity-100"
+                  className={`group relative flex-1 overflow-hidden rounded-xl border transition ${
+                    i === index ? "border-[#FACC15]" : "border-white/10 opacity-50 hover:opacity-100"
                   }`}
                 >
                   <div className="relative aspect-[21/9] w-full sm:aspect-video">
@@ -166,12 +166,12 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
                       sizes="200px"
                       className="object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#08090C]/90 to-transparent" />
-                    <span className="absolute bottom-1 left-2 truncate pr-2 font-mono text-[10px] text-text-vivid">
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#09090B]/90 to-transparent" />
+                    <span className="absolute bottom-1 left-2 truncate pr-2 font-mono text-[10px] font-bold text-white">
                       {String(i + 1).padStart(2, "0")} · {titleName(s)}
                     </span>
                     {i === index && (
-                      <span className="hero-progress absolute bottom-0 left-0 h-0.5 bg-brand" aria-hidden="true" />
+                      <span className="hero-progress absolute bottom-0 left-0 h-0.5 bg-[#FACC15]" aria-hidden="true" />
                     )}
                   </div>
                 </button>

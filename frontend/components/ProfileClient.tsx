@@ -155,25 +155,28 @@ export function ProfileClient() {
 
   return (
     <div className="mx-auto max-w-xl px-4 py-12 space-y-8">
-      <h1 className="text-3xl font-extrabold tracking-tight text-text-vivid">Account Settings</h1>
+      <div>
+        <p className="cinema-label text-[10px]">Account</p>
+        <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-[#FAFAFA]">Account Settings</h1>
+      </div>
 
       {/* Profile Picture Section */}
-      <div className="glass space-y-4 rounded-3xl p-6 shadow-glass border border-white/10">
-        <h2 className="text-lg font-bold text-text-vivid">Profile Picture</h2>
+      <div className="rounded-3xl border border-white/10 bg-[#09090B]/60 p-6 shadow-glass backdrop-blur-xl space-y-4">
+        <h2 className="text-lg font-bold text-[#FAFAFA]">Profile Picture</h2>
         <div className="flex items-center gap-4">
-          <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-brand/50 bg-gradient-to-tr from-brand to-purple-600 shadow-md">
+          <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[#FACC15] bg-[#09090B] shadow-md">
             {avatarUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img src={avatarUrl} alt={user.name} className="h-full w-full object-cover" />
             ) : (
-              <span className="text-3xl font-bold text-white">{user.name?.[0]?.toUpperCase() || "U"}</span>
+              <span className="text-3xl font-bold text-[#FACC15]">{user.name?.[0]?.toUpperCase() || "U"}</span>
             )}
           </div>
           <div className="flex-1 min-w-0 space-y-2">
-            <p className="text-xs text-text-muted">
+            <p className="text-xs text-[#A1A1AA]">
               Add your image URL or upload a photo to display alongside your comments and reviews.
             </p>
-            <label className="inline-block cursor-pointer rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-white/20">
+            <label className="cinema-btn-pill cursor-pointer px-4 py-1.5 text-xs font-semibold">
               <span>Choose Image File...</span>
               <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
             </label>
@@ -182,22 +185,22 @@ export function ProfileClient() {
 
         <form onSubmit={handleSaveAvatar} className="space-y-3 pt-2">
           <div>
-            <label className="block text-xs uppercase tracking-wide text-text-muted mb-1">Or paste Avatar Image URL</label>
+            <label className="block text-xs uppercase tracking-wider font-semibold text-[#A1A1AA] mb-1">Or paste Avatar Image URL</label>
             <input
               type="text"
               value={avatarUrl}
               onChange={(e) => setAvatarUrl(e.target.value)}
               placeholder="https://example.com/my-photo.jpg"
-              className="w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2 text-sm text-text-vivid outline-none focus:border-brand"
+              className="w-full rounded-full border border-white/15 bg-[#09090B] px-4 py-2 text-sm text-[#FAFAFA] outline-none focus:border-[#FACC15]"
             />
           </div>
           {avatarMessage && (
-            <p className="text-xs font-semibold text-brand-soft">{avatarMessage}</p>
+            <p className="text-xs font-semibold text-[#FACC15]">{avatarMessage}</p>
           )}
           <button
             type="submit"
             disabled={savingAvatar || !avatarUrl.trim()}
-            className="rounded-full bg-brand px-6 py-2 text-xs font-bold text-white shadow-brand-glow transition hover:bg-brand-soft disabled:opacity-50"
+            className="cinema-btn-gold py-2 px-6 text-xs font-bold shadow-brand-glow disabled:opacity-50"
           >
             {savingAvatar ? "Saving..." : "Save Profile Picture"}
           </button>
@@ -205,23 +208,23 @@ export function ProfileClient() {
       </div>
 
       {/* Account Info Section */}
-      <div className="glass space-y-4 rounded-3xl p-6 shadow-glass border border-white/10">
+      <div className="rounded-3xl border border-white/10 bg-[#09090B]/60 p-6 shadow-glass backdrop-blur-xl space-y-4">
         <div>
-          <p className="text-xs uppercase tracking-wide text-text-muted">Display name</p>
-          <p className="mt-1 text-lg font-semibold text-text-vivid">{user.name}</p>
+          <p className="text-xs uppercase tracking-wider font-semibold text-[#A1A1AA]">Display name</p>
+          <p className="mt-1 text-lg font-semibold text-[#FAFAFA]">{user.name}</p>
         </div>
         <div>
-          <p className="text-xs uppercase tracking-wide text-text-muted">Email</p>
-          <p className="mt-1 font-mono text-sm text-text-muted">{user.email}</p>
+          <p className="text-xs uppercase tracking-wider font-semibold text-[#A1A1AA]">Email</p>
+          <p className="mt-1 font-mono text-sm text-[#A1A1AA]">{user.email}</p>
         </div>
         <div className="flex gap-2">
           {user.is_admin ? (
-            <span className="rounded-full bg-badge-rating/15 px-2.5 py-0.5 text-[11px] font-bold text-badge-rating">Admin</span>
+            <span className="rounded-full border border-[#FACC15]/30 bg-[#FACC15]/15 px-3 py-0.5 text-[11px] font-bold text-[#FACC15]">Admin</span>
           ) : null}
         </div>
         <button
           onClick={doSignOut}
-          className="mt-2 w-full rounded-full bg-brand px-6 py-2.5 text-sm font-bold text-white shadow-brand-glow transition hover:bg-brand-soft"
+          className="cinema-btn-gold mt-2 w-full py-2.5 font-bold shadow-brand-glow"
         >
           Sign out
         </button>
@@ -232,7 +235,7 @@ export function ProfileClient() {
         {confirmingDelete ? (
           <div className="rounded-3xl border border-red-500/30 bg-red-500/5 p-6">
             <h2 className="mb-1 text-lg font-bold text-red-400">Delete your account?</h2>
-            <p className="mb-4 text-sm text-text-muted">
+            <p className="mb-4 text-sm text-[#A1A1AA]">
               This permanently removes your account, profiles, watchlist, history and chat. This cannot be undone.
             </p>
             <div className="flex gap-2">
@@ -241,24 +244,24 @@ export function ProfileClient() {
                 disabled={deleting}
                 className="rounded-full bg-red-600 px-5 py-2 text-sm font-bold text-white transition hover:bg-red-500 disabled:opacity-50"
               >
-                {deleting ? "DeletingÃ¢â‚¬Â¦" : "Yes, delete permanently"}
+                {deleting ? "Deleting…" : "Yes, delete permanently"}
               </button>
               <button
                 onClick={() => setConfirmingDelete(false)}
                 disabled={deleting}
-                className="rounded-full border border-white/10 px-5 py-2 text-sm font-semibold text-text-muted transition hover:border-white/30 hover:text-text-vivid"
+                className="cinema-btn-pill px-5 py-2 text-sm font-semibold"
               >
                 Cancel
               </button>
             </div>
           </div>
         ) : (
-          <div className="rounded-3xl border border-white/10 p-6">
-            <h2 className="mb-1 text-lg font-bold text-text-vivid">Danger zone</h2>
-            <p className="mb-4 text-sm text-text-muted">Permanently delete this account and all of its data.</p>
+          <div className="rounded-3xl border border-white/10 bg-[#09090B]/60 p-6 backdrop-blur-xl">
+            <h2 className="mb-1 text-lg font-bold text-[#FAFAFA]">Danger zone</h2>
+            <p className="mb-4 text-sm text-[#A1A1AA]">Permanently delete this account and all of its data.</p>
             <button
               onClick={() => setConfirmingDelete(true)}
-              className="rounded-full border border-red-500/40 px-5 py-2 text-sm font-bold text-red-400 transition hover:bg-red-500/10"
+              className="rounded-full border border-red-500/40 bg-red-500/10 px-5 py-2 text-sm font-bold text-red-400 transition hover:bg-red-500/20"
             >
               Delete account
             </button>
