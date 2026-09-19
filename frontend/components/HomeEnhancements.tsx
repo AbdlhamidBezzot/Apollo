@@ -22,14 +22,20 @@ const PROVIDERS = [
 export function Top10Carousel({ items }: { items: Title[] }) {
   if (!items.length) return null;
   return (
-    <section className="mx-auto max-w-7xl px-4">
-      <div className="mb-4 flex items-end justify-between">
-        <div>
-          <p className="cinema-label text-[10px]">Ranked today</p>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight text-[#FAFAFA] sm:text-3xl">Top 10 in Apollo</h2>
+    <section className="mx-auto max-w-7xl px-4 sm:px-6">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <span className="h-4 w-1 rounded-full bg-white/40" aria-hidden="true" />
+          <h2 className="text-xs font-black uppercase tracking-wider text-white sm:text-sm">Top 10 in Apollo</h2>
         </div>
-        <Link href="/browse?kind=trending" className="text-xs font-semibold text-[#FACC15] hover:underline transition">
-          Browse all →
+        <Link
+          href="/browse?kind=trending"
+          className="group inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3.5 py-1 text-xs font-semibold text-white/90 backdrop-blur-md transition hover:bg-white/10 hover:border-white/20"
+        >
+          Browse all
+          <span className="transition-transform group-hover:translate-x-0.5" aria-hidden="true">
+            ›
+          </span>
         </Link>
       </div>
       <div className="no-scrollbar -mx-4 flex gap-1 overflow-x-auto px-4 pb-4">

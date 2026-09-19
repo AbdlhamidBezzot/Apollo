@@ -41,10 +41,13 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
     return (item.genre_ids || []).slice(0, 3).map((id) => map.get(id)).filter(Boolean) as string[];
   }, [genres, item]);
 
-  const match = Math.max(62, Math.min(98, Math.round(((item.vote_average || 7) * 10) * 0.98)));
   const isSeries = item.media_type === "tv";
   const href = isSeries ? `/tv/${item.id}` : `/movie/${item.id}`;
   const watchHref = `/watch/${isSeries ? "tv" : "movie"}/${item.id}`;
+
+  const ratingScore = item.vote_average ? item.vote_average : 7.0;
+  const percentage = (ratingScore * 10).toFixed(1);
+  const starsCount = Math.min(5, Math.max(1, Math.round(ratingScore / 2)));
 
   const loadDetail = async () => {
     if (detail) return;
@@ -63,10 +66,11 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
 
   return (
     <section
-      className="relative mx-auto mt-4 h-[560px] w-full max-w-7xl overflow-hidden rounded-3xl border border-white/[0.08] bg-[#09090B]"
+      className="relative mx-auto mt-4 h-[580px] w-full max-w-7xl overflow-hidden rounded-3xl border border-white/[0.08] bg-[#09090B]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
+      {/* Background Image */}
       <Image
         key={index}
         src={backdropUrl(item.backdrop_path)}
@@ -74,67 +78,117 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
         fill
         priority
         sizes="100vw"
-        className="hero-fade object-cover"
+        className="hero-fade object-cover object-center"
       />
-      {/* Dark atmospheric Cinemaos gradient overlays */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#09090B] via-[#09090B]/40 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#09090B]/90 via-[#09090B]/40 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-[#09090B] to-transparent" />
 
-      <div className="relative mx-auto flex h-full max-w-7xl items-end px-6 pb-20 lg:px-10">
-        <div className="max-w-2xl">
-          {/* Metadata pill row */}
-          <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
-            <span className="rounded-full bg-[#10B981]/15 px-3 py-0.5 font-bold text-[#10B981] border border-[#10B981]/30">
-              {match}% Match
-            </span>
-            {item.vote_average ? (
-              <span className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-0.5 font-bold text-[#FACC15] border border-white/10 backdrop-blur-md">
-                <svg className="h-3 w-3 fill-[#FACC15] text-[#FACC15]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                {item.vote_average.toFixed(1)}
-              </span>
-            ) : null}
-            {releaseYear(item) && <span className="font-mono text-text-muted">{releaseYear(item)}</span>}
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-0.5 font-mono text-[11px] uppercase tracking-wider text-text-muted backdrop-blur-md">
-              {isSeries ? "Series" : "4K HDR"}
-            </span>
-            {genreNames.map((g) => (
-              <span key={g} className="rounded-full border border-white/10 px-3 py-0.5 text-xs text-text-muted">
-                {g}
-              </span>
-            ))}
-          </div>
+      {/* CinemaOS precise gradients for pristine white text contrast on the left */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#09090B] via-[#09090B]/85 via-50% to-transparent z-10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#09090B] via-[#09090B]/30 to-transparent z-10" />
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#09090B] to-transparent z-10" />
 
-          {/* Cinemaos Headline Display 80px / Weight 900 */}
-          <h1 className="mb-4 text-4xl font-black tracking-tight leading-none text-[#FAFAFA] sm:text-5xl lg:text-7xl">
+      {/* Main Hero Content */}
+      <div className="relative z-20 mx-auto flex h-full max-w-7xl items-center px-6 pt-12 pb-16 lg:px-12">
+        <div className="max-w-xl sm:max-w-2xl">
+          {/* CinemaOS Title */}
+          <h1 className="mb-3 text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-7xl drop-shadow-lg leading-[1.05]">
             {shownTitle}
           </h1>
 
-          {/* Brief Overview */}
-          <p className="mb-6 max-w-xl text-sm leading-relaxed text-[#A1A1AA] line-clamp-2 sm:text-base">
-            {item.overview}
+          {/* CinemaOS 5-Star Rating & Percentage Row */}
+          <div className="mb-4 flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <svg
+                  key={s}
+                  className={`h-4 w-4 ${
+                    s <= starsCount ? "fill-[#FACC15] text-[#FACC15]" : "fill-white/20 text-white/20"
+                  }`}
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              ))}
+            </div>
+            <span className="font-semibold text-sm text-white drop-shadow-sm ml-1">
+              {percentage}%
+            </span>
+
+            {releaseYear(item) && (
+              <span className="ml-2 font-mono text-xs text-white/70">
+                · {releaseYear(item)}
+              </span>
+            )}
+
+            {genreNames.length > 0 && (
+              <span className="hidden sm:inline-block ml-2 text-xs text-white/70">
+                · {genreNames.join(", ")}
+              </span>
+            )}
+          </div>
+
+          {/* Overview / Description in CRISP WHITE (Not Black or Dim) */}
+          <p className="mb-6 max-w-xl text-sm font-normal leading-relaxed text-zinc-200 sm:text-base line-clamp-3 sm:line-clamp-4 drop-shadow-sm">
+            {item.overview || "A hapless medical courier fights for his life amid an outbreak of a deadly mutagenic virus in an isolated mountain town."}
           </p>
 
-          {/* Cinemaos Pill Actions */}
-          <div className="flex flex-wrap items-center gap-3">
+          {/* CinemaOS Control Buttons */}
+          <div className="flex items-center gap-3">
+            {/* White Solid Pill Play Button */}
             <Link
               href={watchHref}
-              className="cinema-btn-gold min-h-[44px] gap-2 font-bold shadow-brand-glow"
+              className="group flex h-11 items-center gap-2 rounded-full bg-white px-7 font-bold text-black transition-all hover:bg-white/90 hover:scale-[1.02] active:scale-95 shadow-xl"
             >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden="true">
                 <path d="M7 5l12 7-12 7V5z" />
               </svg>
-              Play Now
+              <span className="text-sm">Play</span>
             </Link>
+
+            {/* Bookmark Circle Button */}
+            <button
+              onClick={() => {
+                loadDetail();
+                setCastOpen(true);
+              }}
+              aria-label="Add to Bookmark"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white backdrop-blur-md transition-all hover:bg-white/20 hover:border-white/30 hover:scale-105 active:scale-95"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+            </button>
+
+            {/* Info Circle Button */}
             <Link
               href={href}
-              className="cinema-btn-pill min-h-[44px] font-semibold"
+              aria-label="View Details"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white backdrop-blur-md transition-all hover:bg-white/20 hover:border-white/30 hover:scale-105 active:scale-95"
             >
-              Details
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </Link>
           </div>
         </div>
       </div>
+
+      {/* CinemaOS Right Vertical Slide Indicator */}
+      {count > 1 && (
+        <div className="absolute right-6 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-2 sm:flex">
+          <div className="flex h-36 w-1.5 flex-col justify-between rounded-full bg-white/10 p-0.5 backdrop-blur-md">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => go(i)}
+                aria-label={`Slide ${i + 1}`}
+                className={`w-full rounded-full transition-all ${
+                  i === index ? "h-8 bg-white" : "h-2 bg-white/30 hover:bg-white/60"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Slide selector dock */}
       {count > 1 && (
