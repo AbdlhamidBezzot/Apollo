@@ -7,7 +7,7 @@ import { backdropUrl, posterUrl, releaseYear, titleName } from "@/lib/api";
 import { get } from "@/lib/http";
 import type { Genre, Title, TitleDetail } from "@/lib/types";
 
-const SLIDE_MS = 6000;
+const SLIDE_MS = 5000;
 
 export function HeroBillboard({ slides }: { slides: Title[] }) {
   const [index, setIndex] = useState(0);
@@ -87,6 +87,36 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
       <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#09090B]/80 via-[#09090B]/30 to-transparent z-10" />
       <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#09090B]/60 to-transparent z-10" />
 
+      {/* Interactive Carousel Prev / Next Buttons */}
+      {count > 1 && (
+        <>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              go(index - 1);
+            }}
+            aria-label="Previous movie"
+            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white backdrop-blur-md transition-all hover:bg-[var(--brand-accent)] hover:border-[var(--brand-accent)] hover:scale-110 active:scale-95 shadow-2xl"
+          >
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              go(index + 1);
+            }}
+            aria-label="Next movie"
+            className="absolute right-3 sm:right-16 top-1/2 -translate-y-1/2 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white backdrop-blur-md transition-all hover:bg-[var(--brand-accent)] hover:border-[var(--brand-accent)] hover:scale-110 active:scale-95 shadow-2xl"
+          >
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </>
+      )}
+
       {/* Main Hero Content */}
       <div className="relative z-20 mx-auto w-full max-w-7xl px-6 lg:px-12 pt-16 pb-8">
         <div className="max-w-xl sm:max-w-2xl lg:max-w-3xl space-y-4">
@@ -128,7 +158,10 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
           </div>
 
           {/* Overview / Description — pure solid white, fully visible */}
-          <p className="max-w-xl sm:max-w-2xl text-sm sm:text-base font-medium leading-relaxed text-white line-clamp-3 sm:line-clamp-4" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.9), 0 2px 16px rgba(0,0,0,0.7)" }}>
+          <p
+            className="max-w-xl sm:max-w-2xl text-sm sm:text-base font-semibold leading-relaxed text-white line-clamp-3 sm:line-clamp-4 drop-shadow-xl"
+            style={{ color: "#FFFFFF", textShadow: "0 2px 10px rgba(0,0,0,0.95), 0 1px 4px rgba(0,0,0,0.8)" }}
+          >
             {item.overview || "A hapless medical courier fights for his life amid an outbreak of a deadly mutagenic virus in an isolated mountain town."}
           </p>
 

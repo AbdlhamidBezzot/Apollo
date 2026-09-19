@@ -159,7 +159,7 @@ function useSummonSearch(onSummon: () => void) {
 function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => void }) {
   const router = useRouter();
   const [q, setQ] = useState("");
-  const [cat, setCat] = useState<"multi" | "movie" | "tv">("multi");
+  const [cat, setCat] = useState<"multi" | "movie" | "tv" | "anime" | "manga" | "recent">("multi");
   const [res, setRes] = useState<Title[]>([]);
   const [busy, setBusy] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -168,16 +168,19 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
   useSummonSearch(useCallback(() => setOpen(true), [setOpen]));
 
   useEffect(() => {
-    if (open) inputRef.current?.focus();
+    if (open) {
+      const t = setTimeout(() => inputRef.current?.focus(), 50);
+      return () => clearTimeout(t);
+    }
   }, [open]);
 
   useEffect(() => {
     if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOpen(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
     };
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [open, setOpen]);
 
   useEffect(() => {
@@ -189,10 +192,11 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
     }
     setBusy(true);
     let cancelled = false;
+    const fetchCat = cat === "anime" ? "tv" : cat === "manga" ? "multi" : cat === "recent" ? "multi" : cat;
     const t = setTimeout(async () => {
       try {
         const data = await get<ContentListResponse>(
-          `/api/v1/content/search?q=${encodeURIComponent(query)}&media_type=${cat}`,
+          `/api/v1/content/search?q=${encodeURIComponent(query)}&media_type=${fetchCat}`,
         );
         if (!cancelled) setRes((data.results || []).slice(0, 6));
       } catch {
@@ -214,7 +218,7 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
   };
 
   return (
-    <div ref={boxRef} className="relative">
+    <>
       <button
         onClick={() => setOpen(!open)}
         aria-label="Search"
@@ -225,108 +229,155 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
       </button>
 
       {open && (
-        <div className="animate-rise absolute right-0 top-full mt-3 z-50 w-[360px] overflow-hidden rounded-2xl bg-[#09090B]/98 border border-white/15 backdrop-blur-2xl shadow-2xl">
-          {/* Search input inside dropdown */}
-          <form
-            role="search"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (q.trim().length >= 2) go(`/search?q=${encodeURIComponent(q.trim())}`);
-            }}
-            className="flex items-center gap-2.5 border-b border-white/10 px-4 py-3"
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 sm:pt-28 px-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          {/* Overlay backdrop click to close */}
+          <div className="absolute inset-0" onClick={() => setOpen(false)} />
+
+          {/* Solid 100% OPAQUE modal search box matching user image */}
+          <div
+            ref={boxRef}
+            className="relative z-10 w-full max-w-xl overflow-hidden rounded-2xl border border-white/15 shadow-2xl opacity-100"
+            style={{ backgroundColor: "#0c0c0e" }}
           >
-            <Icon name="searchIcon" className="h-4 w-4 shrink-0 text-text-muted" />
-            <input
-              ref={inputRef}
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search titles, actors..."
-              aria-label="Search"
-              className="w-full bg-transparent text-sm font-medium text-white outline-none placeholder:text-text-muted"
-            />
-            <kbd className="hidden rounded-full border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[10px] text-text-muted sm:block">
-              ⌘K
-            </kbd>
-          </form>
-
-          {/* Category filter */}
-          <div className="flex items-center gap-1 border-b border-white/10 px-3 py-2">
-            {(
-              [
-                { value: "multi", label: "All" },
-                { value: "movie", label: "Movies" },
-                { value: "tv", label: "Series" },
-              ] as const
-            ).map((c) => (
+            {/* Search Input Field */}
+            <form
+              role="search"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (q.trim().length >= 2) go(`/search?q=${encodeURIComponent(q.trim())}`);
+              }}
+              className="flex items-center gap-3 border-b border-white/10 px-4 py-3.5"
+              style={{ backgroundColor: "#111114" }}
+            >
+              <Icon name="searchIcon" className="h-4 w-4 shrink-0 text-white/60" />
+              <input
+                ref={inputRef}
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search movies & TV shows..."
+                aria-label="Search movies & TV shows..."
+                className="w-full bg-transparent text-sm font-medium text-white outline-none placeholder:text-white/40"
+              />
               <button
-                key={c.value}
-                onClick={() => setCat(c.value)}
-                aria-pressed={cat === c.value}
-                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${cat === c.value ? "bg-[var(--brand-accent)] text-[var(--brand-accent-text)]" : "text-text-muted hover:text-white"
-                  }`}
+                type="button"
+                onClick={() => go(`/search`)}
+                aria-label="Filter"
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-white/50 hover:bg-white/10 hover:text-white transition"
               >
-                {c.label}
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
               </button>
-            ))}
-          </div>
+            </form>
 
-          {q.trim().length >= 2 ? (
-            busy ? (
-              <div className="flex items-center gap-2 px-4 py-3 text-sm text-text-muted">
-                <span className="h-3 w-3 animate-spin rounded-full border-2 border-[var(--brand-accent)] border-t-transparent" />
-                Searching...
-              </div>
-            ) : res.length === 0 ? (
-              <p className="px-4 py-4 text-sm text-text-muted">No results for &quot;{q}&quot;.</p>
-            ) : (
-              <>
-                {res.map((item) => {
-                  const mt = item.media_type === "tv" ? "tv" : "movie";
-                  const href = mt === "tv" ? `/tv/${item.id}` : `/movie/${item.id}`;
-                  return (
-                    <button
-                      key={`${mt}-${item.id}`}
-                      onClick={() => go(href)}
-                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-white/5"
-                    >
-                      <Image
-                        src={posterUrl(item.poster_path, "w92")}
-                        alt=""
-                        width={40}
-                        height={60}
-                        className="h-[60px] w-10 shrink-0 rounded-lg object-cover border border-white/10"
-                      />
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-white">{titleName(item)}</p>
-                        <p className="flex items-center gap-2 text-xs text-text-muted">
-                          <span
-                            className={`rounded-full px-2 py-0.5 font-mono text-[10px] uppercase ${mt === "tv" ? "bg-[var(--brand-accent)]/15 text-[var(--brand-accent)] border border-[var(--brand-accent)]/30" : "bg-white/10 text-text-muted"
+            {/* Category Filter Pills Matching Image */}
+            <div
+              className="flex items-center gap-1.5 border-b border-white/10 px-3 py-2.5 overflow-x-auto no-scrollbar"
+              style={{ backgroundColor: "#0c0c0e" }}
+            >
+              {[
+                { value: "multi", label: "Movies & TV", icon: "🎬" },
+                { value: "movie", label: "Movie", icon: "🍿" },
+                { value: "tv", label: "TV", icon: "📺" },
+                { value: "anime", label: "Anime", icon: "🐰" },
+                { value: "manga", label: "Manga", icon: "📖" },
+                { value: "recent", label: "Recent", icon: "🕒" },
+              ].map((c) => {
+                const active = cat === c.value;
+                return (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => setCat(c.value as any)}
+                    aria-pressed={active}
+                    className={`flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
+                      active
+                        ? "bg-white/15 text-white border border-white/20 shadow-sm"
+                        : "text-white/60 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    <span>{c.icon}</span>
+                    <span>{c.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Search Content / Results */}
+            {q.trim().length >= 2 ? (
+              busy ? (
+                <div className="flex items-center gap-2 px-4 py-6 text-sm text-white/60" style={{ backgroundColor: "#0c0c0e" }}>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--brand-accent)] border-t-transparent" />
+                  Searching content...
+                </div>
+              ) : res.length === 0 ? (
+                <div className="px-4 py-8 text-center text-sm text-white/50" style={{ backgroundColor: "#0c0c0e" }}>
+                  No results found for &quot;{q}&quot;.
+                </div>
+              ) : (
+                <div className="max-h-[50vh] overflow-y-auto divide-y divide-white/5" style={{ backgroundColor: "#0c0c0e" }}>
+                  {res.map((item) => {
+                    const mt = item.media_type === "tv" ? "tv" : "movie";
+                    const href = mt === "tv" ? `/tv/${item.id}` : `/movie/${item.id}`;
+                    return (
+                      <button
+                        key={`${mt}-${item.id}`}
+                        onClick={() => go(href)}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-white/5"
+                      >
+                        <Image
+                          src={posterUrl(item.poster_path, "w92")}
+                          alt=""
+                          width={44}
+                          height={66}
+                          className="h-[66px] w-[44px] shrink-0 rounded-lg object-cover border border-white/10"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-bold text-white">{titleName(item)}</p>
+                          <p className="flex items-center gap-2 text-xs text-white/60 mt-1">
+                            <span
+                              className={`rounded-full px-2 py-0.5 font-mono text-[10px] uppercase font-bold ${
+                                mt === "tv"
+                                  ? "bg-[var(--brand-accent)]/20 text-[var(--brand-accent)] border border-[var(--brand-accent)]/40"
+                                  : "bg-white/10 text-white/80"
                               }`}
-                          >
-                            {mt}
-                          </span>
-                          {releaseYear(item)}
-                          {item.vote_average ? <span style={{ color: "var(--brand-accent)" }}>★ {item.vote_average.toFixed(1)}</span> : null}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
-                <button
-                  onClick={() => go(`/search?q=${encodeURIComponent(q.trim())}`)}
-                  className="block w-full border-t border-white/10 px-4 py-2.5 text-left text-sm font-medium transition hover:bg-white/5"
-                  style={{ color: "var(--brand-accent)" }}
-                >
-                  See all results for &quot;{q}&quot; →
-                </button>
-              </>
-            )
-          ) : (
-            <p className="px-4 py-4 text-sm text-text-muted">Type to search movies, series, actors…</p>
-          )}
+                            >
+                              {mt}
+                            </span>
+                            {releaseYear(item) && <span>· {releaseYear(item)}</span>}
+                            {item.vote_average ? (
+                              <span className="text-[var(--brand-accent)] font-semibold">
+                                ★ {item.vote_average.toFixed(1)}
+                              </span>
+                            ) : null}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                  <button
+                    onClick={() => go(`/search?q=${encodeURIComponent(q.trim())}`)}
+                    className="block w-full px-4 py-3 text-left text-sm font-semibold transition hover:bg-white/5"
+                    style={{ color: "var(--brand-accent)" }}
+                  >
+                    See all results for &quot;{q}&quot; →
+                  </button>
+                </div>
+              )
+            ) : (
+              /* Footer Instruction matching image */
+              <div className="px-4 py-8 text-center text-xs text-white/50" style={{ backgroundColor: "#0c0c0e" }}>
+                Press{" "}
+                <kbd className="rounded border border-white/20 bg-white/10 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-white">
+                  Enter
+                </kbd>{" "}
+                after typing to save to recent searches
+              </div>
+            )}
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
