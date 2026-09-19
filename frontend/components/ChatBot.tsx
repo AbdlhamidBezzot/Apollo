@@ -181,36 +181,35 @@ export function ChatBot() {
   return (
     <>
       {open && (
-        <div className="glass animate-draw-in fixed bottom-24 right-4 z-[9900] flex h-[600px] w-[380px] max-w-[calc(100vw-2rem)] max-h-[80vh] flex-col overflow-hidden rounded-3xl shadow-glass">
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+        <div className="glass animate-draw-in fixed bottom-24 right-4 z-[9900] flex h-[600px] w-[380px] max-w-[calc(100vw-2rem)] max-h-[80vh] flex-col overflow-hidden rounded-3xl border border-white/15 bg-[#09090b] shadow-2xl">
+          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 bg-[#111115]">
             <div className="flex items-center gap-2">
-              <span className="relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-brand text-sm font-bold text-white">
-                <span className="absolute -inset-1 animate-radial-pulse" aria-hidden="true" />
+              <span className="relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-white text-sm font-black text-black">
                 AI
               </span>
               <div>
-                <p className="text-sm font-bold tracking-tight text-text-vivid">CineBot</p>
-                <p className="text-[11px] text-text-muted">AI companion</p>
+                <p className="text-sm font-bold tracking-tight text-white">Apollo AI</p>
+                <p className="text-[11px] text-white/50">AI companion</p>
               </div>
             </div>
-            <button onClick={() => setOpen(false)} className="rounded p-1 text-text-muted hover:text-text-vivid" aria-label="Close chat">
+            <button onClick={() => setOpen(false)} className="rounded p-1 text-white/60 hover:text-white" aria-label="Close chat">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
               </svg>
             </button>
           </div>
 
-          <div className="thin-scroll flex-1 space-y-3 overflow-y-auto px-4 py-3">
+          <div className="thin-scroll flex-1 space-y-3 overflow-y-auto px-4 py-3 bg-[#09090b]">
             {messages.map((m, i) => (
               <div key={i} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
                 {m.role === "bot" && (
-                  <span className="relative mr-2 mt-1 flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand text-[10px] font-bold text-white">
+                  <span className="relative mr-2 mt-1 flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white text-[10px] font-black text-black">
                     AI
                   </span>
                 )}
                 <div
-                  className={`max-w-[85%] whitespace-pre-line rounded-2xl px-3 py-2 text-sm ${
-                    m.role === "user" ? "bg-brand text-white shadow-brand-glow" : "glass text-text-vivid"
+                  className={`max-w-[85%] whitespace-pre-line rounded-2xl px-3.5 py-2.5 text-sm ${
+                    m.role === "user" ? "bg-white text-black font-semibold shadow-md" : "bg-[#141418] border border-white/10 text-white"
                   }`}
                 >
                   {m.content}
@@ -219,10 +218,10 @@ export function ChatBot() {
                       {m.suggestions.map((s) => (
                         <div
                           key={s.tmdb_id}
-                          className="overflow-hidden rounded-xl border border-white/10 bg-white/5 transition hover:border-brand/50"
+                          className="overflow-hidden rounded-xl border border-white/10 bg-white/5 transition hover:border-white/30"
                         >
                           <div className="flex gap-2.5 p-2">
-                            <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded-md bg-bg-card">
+                            <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded-md bg-zinc-800">
                               <Image
                                 src={posterUrl(s.poster_path ?? null, "w185")}
                                 alt={s.title}
@@ -232,24 +231,24 @@ export function ChatBot() {
                               />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-semibold text-text-vivid">{s.title}</p>
-                              <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-text-muted">
+                              <p className="truncate text-sm font-semibold text-white">{s.title}</p>
+                              <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-white/60">
                                 {typeof s.vote_average === "number" && s.vote_average > 0 ? (
-                                  <span className="rounded bg-badge-rating/15 px-1.5 font-bold text-badge-rating">
+                                  <span className="rounded bg-white/10 px-1.5 font-bold text-white">
                                     ★ {s.vote_average.toFixed(1)}
                                   </span>
                                 ) : null}
                                 <span className="uppercase">{s.media_type}</span>
                               </div>
-                              <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-text-muted">{s.pitch}</p>
+                              <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-white/70">{s.pitch}</p>
                             </div>
                           </div>
                           <button
                             disabled={busy}
                             onClick={() => playSuggestion(s)}
-                            className="block w-full border-t border-white/10 px-3 py-2 text-left text-xs font-bold text-brand-soft transition hover:bg-white/5 disabled:opacity-40"
+                            className="block w-full border-t border-white/10 px-3 py-2 text-left text-xs font-bold text-white transition hover:bg-white/10 disabled:opacity-40"
                           >
-                            ▶ Stream now
+                            Stream now →
                           </button>
                         </div>
                       ))}
@@ -265,24 +264,24 @@ export function ChatBot() {
             )}
             {error && (
               <div className="flex justify-start">
-                <p className="text-xs text-brand-soft">{error}</p>
+                <p className="text-xs text-red-400">{error}</p>
               </div>
             )}
             <div ref={bottomRef} />
           </div>
 
-          <form onSubmit={send} className="flex gap-2 border-t border-white/10 p-3">
+          <form onSubmit={send} className="flex gap-2 border-t border-white/10 p-3 bg-[#111115]">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="What should I watch?"
-              aria-label="Message CineBot"
-              className="flex-1 rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm text-text-vivid outline-none placeholder:text-text-muted focus:border-brand/50"
+              aria-label="Message AI assistant"
+              className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white outline-none placeholder:text-white/40 focus:border-white/30"
             />
             <button
               type="submit"
               disabled={busy || !input.trim()}
-              className="rounded-full bg-brand px-4 py-2 text-sm font-bold text-white shadow-brand-glow transition hover:bg-brand-soft disabled:opacity-40"
+              className="rounded-full bg-white px-4 py-2 text-sm font-extrabold text-black transition hover:bg-zinc-200 disabled:opacity-40"
             >
               Send
             </button>
@@ -292,13 +291,12 @@ export function ChatBot() {
 
       <button
         onClick={() => setOpen((v) => !v)}
-        aria-label={open ? "Close CineBot" : "Open CineBot"}
-        className="fixed bottom-5 right-5 z-[9900] flex h-14 w-14 items-center justify-center rounded-full bg-brand text-2xl font-bold text-white shadow-brand-glow transition hover:scale-105"
+        aria-label={open ? "Close AI Assistant" : "Open AI Assistant"}
+        className="fixed bottom-5 right-5 z-[9900] flex h-14 w-14 items-center justify-center rounded-full bg-white text-black border border-white/20 shadow-2xl transition hover:bg-zinc-200 hover:scale-105 active:scale-95"
       >
-        <span className="absolute -inset-1 animate-radial-pulse rounded-full" aria-hidden="true" />
         {open ? (
           <svg width="22" height="22" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
           </svg>
         ) : (
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">

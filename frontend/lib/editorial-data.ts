@@ -39,7 +39,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     category: "Guides",
     author: {
       name: "Marcus Vance",
-      role: "Senior Film Critic & CinemaOS Curator",
+      role: "Senior Film Critic & Apollo Curator",
       avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
     },
     publishedAt: "August 14, 2026",
@@ -155,7 +155,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   {
     slug: "cinema-os-ai-movie-night",
     title: "Beyond Recommendations: How AI is Transforming the Modern Movie Night",
-    subtitle: "How CinemaOS AI evaluates mood, pacing, user preferences, and real-time streaming availability to curate unforgettable movie nights.",
+    subtitle: "How Apollo AI evaluates mood, pacing, user preferences, and real-time streaming availability to curate unforgettable movie nights.",
     category: "AI Insights",
     author: {
       name: "Dr. Aris Thorne",
@@ -165,7 +165,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     publishedAt: "August 02, 2026",
     readTime: "7 min read",
     coverImage: "https://image.tmdb.org/t/p/w1280/gNdLJU9TxrpGx4dkZidjys3fyy0.jpg",
-    excerpt: "Generic algorithmic recommendations often fail because they ignore viewer mood and context. Discover how Apollo's CinemaOS AI revolutionizes decision-making for group viewing.",
+    excerpt: "Generic algorithmic recommendations often fail because they ignore viewer mood and context. Discover how Apollo AI revolutionizes decision-making for group viewing.",
     content: [
       {
         type: "paragraph",
@@ -173,7 +173,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       },
       {
         type: "heading2",
-        text: "The Three Pillars of CinemaOS AI",
+        text: "The Three Pillars of Apollo AI",
       },
       {
         type: "list",
@@ -194,7 +194,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     category: "Reviews",
     author: {
       name: "Marcus Vance",
-      role: "Senior Film Critic & CinemaOS Curator",
+      role: "Senior Film Critic & Apollo Curator",
       avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
     },
     publishedAt: "July 28, 2026",
@@ -217,7 +217,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     category: "Spotlights",
     author: {
       name: "Marcus Vance",
-      role: "Senior Film Critic & CinemaOS Curator",
+      role: "Senior Film Critic & Apollo Curator",
       avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
     },
     publishedAt: "July 20, 2026",
@@ -294,7 +294,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     category: "Spotlights",
     author: {
       name: "Marcus Vance",
-      role: "Senior Film Critic & CinemaOS Curator",
+      role: "Senior Film Critic & Apollo Curator",
       avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
     },
     publishedAt: "June 19, 2026",
@@ -340,7 +340,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     category: "Reviews",
     author: {
       name: "Marcus Vance",
-      role: "Senior Film Critic & CinemaOS Curator",
+      role: "Senior Film Critic & Apollo Curator",
       avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
     },
     publishedAt: "May 29, 2026",

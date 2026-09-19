@@ -492,7 +492,7 @@ export function Footer() {
   return (
     <footer className="mx-auto max-w-7xl px-4 sm:px-6 pb-12 pt-12 text-[#A1A1AA]">
       <div className="border-t border-white/10 pt-10">
-        {/* CinemaOS Tagline Header Band */}
+        {/* Tagline Header Band */}
         <div className="mb-8 text-center sm:text-left">
           <h2 className="text-xl font-black text-white sm:text-2xl tracking-tight">
             All Your Favorite Platforms In One Place
@@ -510,7 +510,7 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-5 mb-10">
           <div className="md:col-span-2 space-y-3">
             <p className="text-2xl font-black tracking-tight text-[#FAFAFA]">
-              CinemaOS <span className="text-xs font-normal text-white/50">(Apollo Hub)</span>
+              Apollo Hub
             </p>
             <p className="max-w-sm text-xs sm:text-sm leading-relaxed text-[#A1A1AA]">
               Your ultimate entertainment hub. Powered by Consumet & TMDB API for seamless catalog discovery, live match schedules, and synchronized watch rooms.
@@ -550,30 +550,9 @@ export function Footer() {
           </div>
         </div>
 
-        {/* CinemaOS Legal Disclaimer Card */}
-        <div className="rounded-3xl border border-white/10 bg-[#09090B]/60 p-6 backdrop-blur-xl space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-base">🍿</span>
-              <p className="text-xs font-bold uppercase tracking-wider text-white">Important Disclaimer</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="rounded-full border border-white/15 bg-white/5 px-2.5 py-0.5 text-[10px] font-semibold text-white/80">
-                Third-party Content
-              </span>
-              <span className="rounded-full border border-white/15 bg-white/5 px-2.5 py-0.5 text-[10px] font-semibold text-white/80">
-                No File Hosting
-              </span>
-            </div>
-          </div>
-          <p className="max-w-4xl text-xs sm:text-sm leading-relaxed text-[#A1A1AA]">
-            Apollo (CinemaOS) operates strictly as an index and media information aggregator. We do not host, store, or upload media files to our servers. Metadata, artwork, and third-party links are indexed from public APIs in accordance with fair use standards. For copyright inquiries, please submit notices to our <Link href="/contact" className="text-white hover:underline font-semibold">DMCA Contact Portal</Link>.
-          </p>
-        </div>
-
         <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-white/5 pt-6 text-xs text-white/60">
-          <p>© {new Date().getFullYear()} Apollo CinemaOS. All rights reserved.</p>
-          <p className="font-medium text-white/80">Built with ❤️ for entertainment enthusiasts worldwide</p>
+          <p>© {new Date().getFullYear()} Apollo Hub. All rights reserved.</p>
+          <p className="font-medium text-white/80">Built for entertainment enthusiasts worldwide</p>
         </div>
       </div>
     </footer>

@@ -50,7 +50,7 @@ export default function TermsOfServicePage() {
           <section className="space-y-3 border-t border-white/10 pt-6">
             <h2 className="text-xl font-bold text-text-vivid">3. Intellectual Property Rights</h2>
             <p>
-              All original editorial text, articles, site layouts, CinemaOS software code, logos, and custom graphics created by Apollo are protected by intellectual property laws. Movie posters, titles, logos, and trademarks belong to their respective studios and rights owners.
+              All original editorial text, articles, site layouts, Apollo software code, logos, and custom graphics created by Apollo are protected by intellectual property laws. Movie posters, titles, logos, and trademarks belong to their respective studios and rights owners.
             </p>
           </section>
 

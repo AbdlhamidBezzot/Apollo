@@ -28,8 +28,8 @@ const FAQS = [
     a: "Yes! Apollo is 100% legal. We do not host or upload pirated video media. Instead, we index metadata, provide editorial commentary, and link users to verified legal streaming providers and authorized video sources.",
   },
   {
-    q: "How does CinemaOS AI work?",
-    a: "CinemaOS AI is our specialized recommendation companion. By analyzing film tropes, director styles, pacing, and viewer preferences, CinemaOS AI helps you build personalized movie night schedules, filter out anime filler episodes, and find hidden gems across all major platforms.",
+    q: "How does Apollo AI work?",
+    a: "Apollo AI is our specialized recommendation companion. By analyzing film tropes, director styles, pacing, and viewer preferences, Apollo AI helps you build personalized movie night schedules, filter out anime filler episodes, and find hidden gems across all major platforms.",
   },
   {
     q: "What is the Movie Night Room?",

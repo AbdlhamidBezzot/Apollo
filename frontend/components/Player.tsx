@@ -1347,7 +1347,6 @@ export function Player({
                         : "border-white/10 bg-white/[0.04] text-[#A1A1AA] hover:border-white/20 hover:text-white"
                     }`}
                   >
-                    <span>⚡</span>
                     <span className="max-w-[140px] truncate">
                       {selectedAddonStream
                         ? selectedAddonStream.title || selectedAddonStream.addon_name
@@ -1412,7 +1411,6 @@ export function Player({
                     chatOpen ? "bg-[var(--brand-accent)]/15 border-[var(--brand-accent)]/40 text-[var(--brand-accent)] font-bold" : "border-white/10 bg-white/[0.04] text-[#A1A1AA] hover:border-white/20 hover:text-white"
                   }`}
                 >
-                  <span>👥</span>
                   <span>Room ({room.members})</span>
                 </button>
               )}
@@ -1539,7 +1537,7 @@ export function Player({
                 <div className="py-6 text-center text-xs font-mono text-[#A1A1AA] animate-pulse">Loading comments...</div>
               ) : comments.length === 0 ? (
                 <div className="rounded-2xl border border-white/10 bg-[#121215]/40 p-8 text-center text-xs text-[#A1A1AA] backdrop-blur-xl">
-                  💬 No comments yet. Be the first to share your thoughts on this title!
+                  No comments yet. Be the first to share your thoughts on this title!
                 </div>
               ) : (
                 comments.map((comment) => (
@@ -1580,7 +1578,7 @@ export function Player({
                             className="flex items-center gap-1 text-red-400/80 hover:text-red-400 text-xs transition ml-2"
                             title="Delete your comment"
                           >
-                            🗑️ <span className="hover:underline">Delete</span>
+                            <span className="hover:underline">Delete</span>
                           </button>
                         )}
                       </div>

@@ -276,12 +276,12 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
               style={{ backgroundColor: "#0c0c0e" }}
             >
               {[
-                { value: "multi", label: "Movies & TV", icon: "🎬" },
-                { value: "movie", label: "Movie", icon: "🍿" },
-                { value: "tv", label: "TV", icon: "📺" },
-                { value: "anime", label: "Anime", icon: "🐰" },
-                { value: "manga", label: "Manga", icon: "📖" },
-                { value: "recent", label: "Recent", icon: "🕒" },
+                { value: "multi", label: "Movies & TV" },
+                { value: "movie", label: "Movie" },
+                { value: "tv", label: "TV" },
+                { value: "anime", label: "Anime" },
+                { value: "manga", label: "Manga" },
+                { value: "recent", label: "Recent" },
               ].map((c) => {
                 const active = cat === c.value;
                 return (
@@ -290,13 +290,12 @@ function CommandSearch({ open, setOpen }: { open: boolean; setOpen: (v: boolean)
                     type="button"
                     onClick={() => setCat(c.value as any)}
                     aria-pressed={active}
-                    className={`flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
+                    className={`whitespace-nowrap rounded-xl px-3.5 py-1.5 text-xs font-semibold transition ${
                       active
-                        ? "bg-white/15 text-white border border-white/20 shadow-sm"
+                        ? "bg-white text-black font-extrabold shadow-sm"
                         : "text-white/60 hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    <span>{c.icon}</span>
                     <span>{c.label}</span>
                   </button>
                 );

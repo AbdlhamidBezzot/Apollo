@@ -158,7 +158,7 @@ export function DetailViewClient({
                       Pacing & Tone: <strong className="text-[var(--brand-accent)] font-semibold">{take.pacing}</strong>
                     </span>
                     <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[#A1A1AA]">
-                      CinemaOS Context: <strong className="text-white font-semibold">{take.tone}</strong>
+                      Apollo Context: <strong className="text-white font-semibold">{take.tone}</strong>
                     </span>
                   </div>
                 </div>

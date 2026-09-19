@@ -324,7 +324,7 @@ export function FootballPlayerModal({ match, onClose }: FootballPlayerModalProps
         <div className="relative aspect-video w-full bg-black flex items-center justify-center">
           {errorMsg ? (
             <div className="p-8 text-center max-w-md">
-              <div className="mb-3 text-3xl">⚠️</div>
+              <div className="mb-3 font-bold text-xs uppercase text-red-400">Playback Error</div>
               <p className="text-sm font-semibold text-red-400 mb-4">{errorMsg}</p>
               {servers.length > 1 && (
                 <button
@@ -406,7 +406,7 @@ export function FootballPlayerModal({ match, onClose }: FootballPlayerModalProps
 
         {/* Footer Notes */}
         <div className="flex items-center justify-between bg-black/60 px-6 py-3 text-[11px] text-text-muted border-t border-white/10">
-          <span>⚡ Streams updated every minute with auto-failover servers</span>
+          <span>Streams updated every minute with auto-failover servers</span>
           <span>Press ESC or ✕ to exit player</span>
         </div>
       </div>

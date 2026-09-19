@@ -68,7 +68,7 @@ export function ContactClient() {
             <div className="rounded-2xl border border-white/10 bg-[#121215]/60 p-6 backdrop-blur-xl space-y-3">
               <h2 className="text-base font-bold text-white">General Inquiries</h2>
               <p className="text-xs text-[#A1A1AA]">
-                For questions regarding CinemaOS AI recommendations, site features, or partnerships.
+                For questions regarding Apollo AI recommendations, site features, or partnerships.
               </p>
               <p className="text-xs font-semibold text-[var(--brand-accent)]">support@missapollo.me</p>
             </div>

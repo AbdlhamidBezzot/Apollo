@@ -84,7 +84,7 @@ export function SportsClient() {
         {isDemo && (
           <div className="mb-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-300 backdrop-blur">
             <div className="flex items-start gap-3">
-              <span className="text-xl">⚡</span>
+              <span className="text-xs font-bold uppercase rounded bg-amber-500/20 px-2 py-0.5">Demo</span>
               <div>
                 <h4 className="font-bold text-amber-200">Demo Mode Active</h4>
                 <p className="text-xs text-amber-300/90 mt-0.5">
@@ -102,14 +102,14 @@ export function SportsClient() {
 
         {/* Hero Header */}
         <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#09090B]/80 p-8 sm:p-10 shadow-2xl backdrop-blur-xl">
-          <div className="absolute -right-10 -top-10 h-64 w-64 rounded-full bg-[var(--brand-accent)]/10 blur-3xl" />
+          <div className="absolute -right-10 -top-10 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
           <div className="relative z-10 max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--brand-accent)]/30 bg-[var(--brand-accent)]/10 px-3.5 py-1 text-xs font-bold text-[var(--brand-accent)] mb-4">
-              <span className="h-2 w-2 rounded-full bg-[var(--brand-accent)] animate-pulse" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3.5 py-1 text-xs font-bold text-white mb-4">
+              <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
               LIVE FOOTBALL STREAMING
             </div>
             <h1 className="text-3xl font-black tracking-tight text-[#FAFAFA] sm:text-5xl">
-              Watch Football Matches <span className="text-[var(--brand-accent)]">Live</span>
+              Watch Football Matches <span className="text-white">Live</span>
             </h1>
             <p className="mt-3 text-sm text-[#A1A1AA] sm:text-base">
               Real-time streams from Premier League, La Liga, Serie A, Champions League, and more. Multiple
@@ -130,11 +130,11 @@ export function SportsClient() {
                 }}
                 className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition ${
                   activeTab === "live"
-                    ? "bg-[var(--brand-accent)] text-[var(--brand-accent-text)] shadow-brand-glow"
+                    ? "bg-white text-black shadow-md"
                     : "text-[#A1A1AA] hover:text-white"
                 }`}
               >
-                <span className="h-2 w-2 rounded-full bg-[var(--brand-accent-text)] animate-ping" />
+                <span className="h-2 w-2 rounded-full bg-black animate-ping" />
                 LIVE NOW ({liveCount})
               </button>
               <button
@@ -173,9 +173,11 @@ export function SportsClient() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search team or league..."
-                  className="w-full rounded-full border border-white/15 bg-[#09090B]/80 px-4 py-2 pl-9 text-xs text-white placeholder:text-[#A1A1AA] outline-none focus:border-[var(--brand-accent)]"
+                  className="w-full rounded-full border border-white/15 bg-[#09090B]/80 px-4 py-2 pl-9 text-xs text-white placeholder:text-[#A1A1AA] outline-none focus:border-white"
                 />
-                <span className="absolute left-3 top-2.5 text-xs text-[#A1A1AA]">🔍</span>
+                <svg className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#A1A1AA]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
               </div>
             </div>
           </div>
@@ -187,7 +189,7 @@ export function SportsClient() {
                 onClick={() => setSelectedLeague("all")}
                 className={`rounded-full px-3.5 py-1 text-xs font-semibold whitespace-nowrap transition ${
                   selectedLeague === "all"
-                    ? "bg-[var(--brand-accent)] text-[var(--brand-accent-text)]"
+                    ? "bg-white text-black font-bold"
                     : "bg-[#09090B]/60 text-[#A1A1AA] border border-white/10 hover:text-white"
                 }`}
               >
@@ -199,7 +201,7 @@ export function SportsClient() {
                   onClick={() => setSelectedLeague(lg)}
                   className={`rounded-full px-3.5 py-1 text-xs font-semibold whitespace-nowrap transition ${
                     selectedLeague === lg
-                      ? "bg-[var(--brand-accent)]/20 text-[var(--brand-accent)] border border-[var(--brand-accent)]/40"
+                      ? "bg-white/20 text-white border border-white/40"
                       : "bg-[#09090B]/60 text-[#A1A1AA] border border-white/10 hover:text-white"
                   }`}
                 >
@@ -226,14 +228,13 @@ export function SportsClient() {
               <p className="text-sm font-semibold text-red-400 mb-3">{error}</p>
               <button
                 onClick={() => fetchMatches(1)}
-                className="cinema-btn-gold px-5 py-2 text-xs font-bold"
+                className="rounded-full bg-white px-5 py-2 text-xs font-bold text-black hover:bg-zinc-200"
               >
                 Retry Loading Matches
               </button>
             </div>
           ) : filteredMatches.length === 0 ? (
             <div className="rounded-2xl border border-white/10 bg-[#09090B]/60 p-12 text-center">
-              <div className="text-4xl mb-3">⚽</div>
               <h3 className="text-lg font-bold text-white">No matches found</h3>
               <p className="text-xs text-[#A1A1AA] mt-1">
                 There are no matches currently matching your selected filters. Try switching tabs or clearing
@@ -249,7 +250,7 @@ export function SportsClient() {
                 return (
                   <div
                     key={match.match_id || idx}
-                    className="card-lift group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#09090B]/60 p-5 shadow-glass backdrop-blur-xl transition duration-300 hover:border-[var(--brand-accent)]/40"
+                    className="card-lift group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#09090B]/60 p-5 shadow-glass backdrop-blur-xl transition duration-300 hover:border-white/40"
                   >
                     {/* Card Top Row */}
                     <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
@@ -257,8 +258,8 @@ export function SportsClient() {
                         {match.league_name || "Match"}
                       </span>
                       {isMatchLive ? (
-                        <span className="flex items-center gap-1.5 rounded-full bg-[var(--brand-accent)]/15 px-2.5 py-0.5 text-[11px] font-bold text-[var(--brand-accent)] border border-[var(--brand-accent)]/30">
-                          <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand-accent)] animate-ping" />
+                        <span className="flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-bold text-white border border-white/30">
+                          <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
                           LIVE
                         </span>
                       ) : (
@@ -280,7 +281,7 @@ export function SportsClient() {
                             onError={(e) => ((e.target as HTMLElement).style.display = "none")}
                           />
                         ) : (
-                          <div className="h-8 w-8 rounded bg-[var(--brand-accent)]/15 flex items-center justify-center font-bold text-[var(--brand-accent)] text-xs shrink-0 border border-[var(--brand-accent)]/30">
+                          <div className="h-8 w-8 rounded bg-white/15 flex items-center justify-center font-bold text-white text-xs shrink-0 border border-white/30">
                             {match.home_team_name.charAt(0)}
                           </div>
                         )}
@@ -309,7 +310,7 @@ export function SportsClient() {
                             onError={(e) => ((e.target as HTMLElement).style.display = "none")}
                           />
                         ) : (
-                          <div className="h-8 w-8 rounded bg-[var(--brand-accent)]/15 flex items-center justify-center font-bold text-[var(--brand-accent)] text-xs shrink-0 border border-[var(--brand-accent)]/30">
+                          <div className="h-8 w-8 rounded bg-white/15 flex items-center justify-center font-bold text-white text-xs shrink-0 border border-white/30">
                             {match.away_team_name.charAt(0)}
                           </div>
                         )}
@@ -319,18 +320,18 @@ export function SportsClient() {
                     {/* Card Bottom / Action Row */}
                     <div className="mt-4 flex items-center justify-between pt-3 border-t border-white/10">
                       <span className="text-[11px] font-medium text-[#A1A1AA]">
-                        📺 {serversCount} {serversCount === 1 ? "Server" : "Servers"} Available
+                        {serversCount} {serversCount === 1 ? "Server" : "Servers"} Available
                       </span>
 
                       <button
                         onClick={() => setSelectedMatch(match)}
                         className={`rounded-full px-4 py-1.5 text-xs font-bold transition ${
                           isMatchLive
-                            ? "cinema-btn-gold py-1.5 px-4 text-xs font-bold shadow-brand-glow"
-                            : "cinema-btn-pill py-1.5 px-4 text-xs font-semibold"
+                            ? "bg-white text-black hover:bg-zinc-200 font-extrabold shadow-md"
+                            : "bg-white/10 text-white hover:bg-white/20 border border-white/15"
                         }`}
                       >
-                        Watch Stream ▶
+                        Watch Stream
                       </button>
                     </div>
                   </div>

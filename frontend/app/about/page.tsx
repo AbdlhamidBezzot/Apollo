@@ -45,7 +45,7 @@ export default function AboutPage() {
             </div>
             <h2 className="text-xl font-bold text-text-vivid">AI-Driven Discovery</h2>
             <p className="mt-2 text-sm leading-relaxed text-text-muted">
-              Powered by CinemaOS AI, Apollo analyzes tone, mood, pacing, and story arcs to help users discover exactly what to watch without endless scrolling.
+              Powered by Apollo AI, Apollo analyzes tone, mood, pacing, and story arcs to help users discover exactly what to watch without endless scrolling.
             </p>
           </div>
 

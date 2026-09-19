@@ -66,7 +66,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
 
   return (
     <section
-      className="relative w-full min-h-[85vh] lg:min-h-[90vh] -mt-16 pt-20 pb-16 flex flex-col justify-end overflow-hidden bg-[#09090B]"
+      className="relative w-full min-h-screen h-screen -mt-16 pt-20 pb-16 flex flex-col justify-end overflow-hidden bg-[#09090B]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -96,7 +96,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
               go(index - 1);
             }}
             aria-label="Previous movie"
-            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white backdrop-blur-md transition-all hover:bg-[var(--brand-accent)] hover:border-[var(--brand-accent)] hover:scale-110 active:scale-95 shadow-2xl"
+            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/70 text-white backdrop-blur-md transition-all hover:bg-white hover:text-black hover:border-white hover:scale-110 active:scale-95 shadow-2xl"
           >
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -108,7 +108,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
               go(index + 1);
             }}
             aria-label="Next movie"
-            className="absolute right-3 sm:right-16 top-1/2 -translate-y-1/2 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white backdrop-blur-md transition-all hover:bg-[var(--brand-accent)] hover:border-[var(--brand-accent)] hover:scale-110 active:scale-95 shadow-2xl"
+            className="absolute right-3 sm:right-16 top-1/2 -translate-y-1/2 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/70 text-white backdrop-blur-md transition-all hover:bg-white hover:text-black hover:border-white hover:scale-110 active:scale-95 shadow-2xl"
           >
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -118,21 +118,21 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
       )}
 
       {/* Main Hero Content */}
-      <div className="relative z-20 mx-auto w-full max-w-7xl px-6 lg:px-12 pt-16 pb-8">
+      <div className="relative z-20 mx-auto w-full max-w-7xl px-6 lg:px-12 pt-16 pb-12">
         <div className="max-w-xl sm:max-w-2xl lg:max-w-3xl space-y-4">
-          {/* CinemaOS Title */}
+          {/* Title */}
           <h1 className="text-4xl font-black uppercase tracking-tight text-white sm:text-6xl lg:text-8xl drop-shadow-2xl leading-[0.95] max-w-3xl">
             {shownTitle}
           </h1>
 
-          {/* CinemaOS 5-Star Rating & Details Row */}
+          {/* 5-Star Rating & Details Row */}
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((s) => (
                 <svg
                   key={s}
                   className={`h-4 w-4 ${
-                    s <= starsCount ? "fill-[var(--brand-accent)] text-[var(--brand-accent)]" : "fill-white/20 text-white/20"
+                    s <= starsCount ? "fill-white text-white" : "fill-white/20 text-white/20"
                   }`}
                   viewBox="0 0 24 24"
                 >
@@ -165,12 +165,12 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
             {item.overview || "A hapless medical courier fights for his life amid an outbreak of a deadly mutagenic virus in an isolated mountain town."}
           </p>
 
-          {/* CinemaOS Control Buttons */}
+          {/* Control Buttons - White and Black theme */}
           <div className="flex items-center gap-3 pt-2">
-            {/* Brand Accent Play Button */}
+            {/* White/Black Play Button */}
             <Link
               href={watchHref}
-              className="group flex h-12 items-center gap-2.5 rounded-full px-8 font-extrabold transition-all hover:scale-[1.03] active:scale-95 shadow-2xl cinema-btn-accent"
+              className="group flex h-12 items-center gap-2.5 rounded-full bg-white px-8 font-extrabold text-black transition-all hover:bg-zinc-200 hover:scale-[1.03] active:scale-95 shadow-2xl"
             >
               <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden="true">
                 <path d="M7 5l12 7-12 7V5z" />
@@ -185,7 +185,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
                 setCastOpen(true);
               }}
               aria-label="Add to Bookmark"
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md transition-all hover:border-[var(--brand-accent)]/60 hover:bg-[var(--brand-accent)]/10 hover:scale-105 active:scale-95 shadow-lg"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white backdrop-blur-md transition-all hover:bg-white hover:text-black hover:border-white hover:scale-105 active:scale-95 shadow-lg"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
@@ -196,7 +196,7 @@ export function HeroBillboard({ slides }: { slides: Title[] }) {
             <Link
               href={href}
               aria-label="View Details"
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md transition-all hover:border-[var(--brand-accent)]/60 hover:bg-[var(--brand-accent)]/10 hover:scale-105 active:scale-95 shadow-lg"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white backdrop-blur-md transition-all hover:bg-white hover:text-black hover:border-white hover:scale-105 active:scale-95 shadow-lg"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

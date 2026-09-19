@@ -65,7 +65,7 @@ function TorrentioConfigModal({
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <div>
             <h2 className="text-xl font-bold text-text-vivid flex items-center gap-2">
-              ⚙️ Configurer Torrentio Lite
+              Configurer Torrentio Lite
             </h2>
             <p className="text-xs text-text-muted mt-0.5">
               Personnalise tes options ou ajoute une clé Debrid pour du streaming instantané.
@@ -271,7 +271,7 @@ function CatalogCard({
                 onClick={() => onConfigure(addon)}
                 className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-brand-soft transition hover:border-brand/40 hover:bg-brand/10 flex items-center gap-1"
               >
-                ⚙️ Configurer Torrentio
+                Configurer Torrentio
               </button>
             )}
           </div>
