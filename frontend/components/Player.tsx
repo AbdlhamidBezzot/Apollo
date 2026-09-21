@@ -49,18 +49,9 @@ const PROVIDER_KEY = "apollo:provider";
 const IDLE_HIDE_MS = 3000;
 const NEXT_CARD_SECONDS = 15;
 
-const PROVIDER_LABELS: Record<string, string> = {
-  framextv: "frameXTV",
-  stellar: "Stellar 4K",
-  cinemaos: "CinemaOS",
-  videasy: "Videasy",
-  vidsrc: "VidSrc",
-};
-
 const providerLabel = (p: string, list: string[] = []) => {
-  if (PROVIDER_LABELS[p]) return PROVIDER_LABELS[p];
   const idx = list.indexOf(p);
-  return idx >= 0 ? `Server ${idx + 1}` : p;
+  return `Server ${idx >= 0 ? idx + 1 : 1}`;
 };
 
 const isEmbed = (contentType: string) => contentType === "text/html";

@@ -279,7 +279,7 @@ export function FootballPlayerModal({ match, onClose }: FootballPlayerModalProps
                         : "bg-white/5 text-text-muted hover:bg-white/10 hover:text-white"
                     }`}
                   >
-                    <span>{server.name || `Server ${idx + 1}`}</span>
+                    <span>{`Server ${idx + 1}`}</span>
                     <span
                       className={`rounded px-1.5 py-0.5 text-[10px] uppercase font-mono ${
                         server.type === "referer"
@@ -391,7 +391,7 @@ export function FootballPlayerModal({ match, onClose }: FootballPlayerModalProps
 
             <div className="flex items-center gap-3">
               <span className="text-xs font-mono text-text-muted">
-                {currentServer?.name || `Server ${activeServerIdx + 1}`}
+                {`Server ${activeServerIdx + 1}`}
               </span>
               <button
                 onClick={toggleFullscreen}
