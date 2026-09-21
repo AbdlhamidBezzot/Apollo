@@ -5,7 +5,7 @@ os.environ.setdefault("APP_ENV", "test")
 os.environ.setdefault("DATABASE_URL", "sqlite:///./test_apollo.db")
 
 # Pin test-only values so the suite is deterministic regardless of backend/.env.
-os.environ.setdefault("PLAYBACK_PROVIDER", "pekka")
+os.environ.setdefault("PLAYBACK_PROVIDER", "framextv")
 os.environ.setdefault("TMDB_API_KEY", "")
 os.environ.setdefault("TMDB_API_READ_ACCESS_TOKEN", "")
 os.environ.setdefault("REDIS_URL", "redis://localhost:6399/0")

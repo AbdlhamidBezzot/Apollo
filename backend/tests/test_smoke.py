@@ -126,7 +126,7 @@ def test_recommend_empty_without_signals():
         assert r.json()["results"] == []
 
 
-def test_playback_resolve_pekka_default():
+def test_playback_resolve_framextv_default():
     with get_client() as client:
         client.post(
             "/api/v1/auth/register",
@@ -138,36 +138,9 @@ def test_playback_resolve_pekka_default():
         )
         assert r.status_code == 200, r.text
         data = r.json()
-        assert data["provider"] == "pekka"
+        assert data["provider"] == "framextv"
         assert data["content_type"] == "text/html"
-        assert data["stream_url"] == "https://framextv.tech/embed/550?autoplay=1&muted=0&server=pekka"
-
-
-def test_playback_resolve_framextv_servers():
-    with get_client() as client:
-        # Barbarian I
-        r = client.post(
-            "/api/v1/playback/resolve",
-            json={"tmdb_id": 550, "media_type": "movie", "provider": "barbarian"},
-        )
-        assert r.status_code == 200
-        assert r.json()["stream_url"] == "https://framextv.tech/embed/550?autoplay=1&muted=0&server=barbarian"
-
-        # Archer II TV
-        r = client.post(
-            "/api/v1/playback/resolve",
-            json={"tmdb_id": 1399, "media_type": "tv", "season": 2, "episode": 3, "provider": "archer"},
-        )
-        assert r.status_code == 200
-        assert r.json()["stream_url"] == "https://framextv.tech/embed/1399/2/3?autoplay=1&muted=0&server=archer"
-
-        # Goblin III
-        r = client.post(
-            "/api/v1/playback/resolve",
-            json={"tmdb_id": 550, "media_type": "movie", "provider": "goblin"},
-        )
-        assert r.status_code == 200
-        assert r.json()["stream_url"] == "https://framextv.tech/embed/550?autoplay=1&muted=0&server=goblin"
+        assert "framextv.tech/embed/550" in data["stream_url"]
 
 
 def test_playback_resolve_vidsrc():
@@ -237,14 +210,7 @@ def test_playback_providers_endpoint():
         r = client.get("/api/v1/playback/providers")
         assert r.status_code == 200, r.text
         names = r.json()
-        assert "pekka" in names
-        assert "barbarian" in names
-        assert "archer" in names
-        assert "goblin" in names
-        assert "framextv" in names
-        assert "stellar" in names
-        assert "videasy" in names
-        assert "cinemaos" in names
+        assert names == ["framextv", "stellar", "cinemaos", "videasy", "vidsrc"]
 
 
 async def test_playback_resolve_vidsrc_tv():

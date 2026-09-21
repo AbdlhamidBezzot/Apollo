@@ -50,12 +50,8 @@ const IDLE_HIDE_MS = 3000;
 const NEXT_CARD_SECONDS = 15;
 
 const PROVIDER_LABELS: Record<string, string> = {
-  pekka: "P.E.K.K.A IV",
-  barbarian: "Barbarian I",
-  archer: "Archer II",
-  goblin: "Goblin III",
-  stellar: "Stellar 4K",
   framextv: "frameXTV",
+  stellar: "Stellar 4K",
   cinemaos: "CinemaOS",
   videasy: "Videasy",
   vidsrc: "VidSrc",
@@ -108,7 +104,7 @@ export function Player({
   const [rate, setRate] = useState(1);
   const [savedPos, setSavedPos] = useState(0);
   const lastReport = useRef(0);
-  const [provider, setProvider] = useState<string>(providerProp || "pekka");
+  const [provider, setProvider] = useState<string>(providerProp || "framextv");
   const [activeContentType, setActiveContentType] = useState<string>(contentType);
   const embed = !selectedAddonStream && isEmbed(activeContentType);
   const embedGotRealProgress = useRef(false);
@@ -118,11 +114,8 @@ export function Player({
   const [episodeNum, setEpisodeNum] = useState(episode ?? 1);
   const [busyResolve, setBusyResolve] = useState(false);
   const [providers, setProviders] = useState<string[]>([
-    "pekka",
-    "barbarian",
-    "archer",
-    "goblin",
     "framextv",
+    "stellar",
     "cinemaos",
     "videasy",
     "vidsrc",
@@ -801,7 +794,7 @@ export function Player({
         } catch {
           /* ignore */
         }
-        const current = providerProp || "pekka";
+        const current = providerProp || "framextv";
         if (pref && pref !== current && list.includes(pref)) {
           changeProvider(pref);
         } else if (!list.includes(current)) {
@@ -1295,7 +1288,7 @@ export function Player({
                 💬
               </span>
               <p className="leading-snug text-[11px] sm:text-xs">
-                <strong className="font-semibold text-amber-300">Subtitle out of sync?</strong> If subtitles aren&apos;t synchronized, try switching to another streaming server (e.g. Barbarian I or Stellar 4K) or adjust subtitle sync in settings.
+                <strong className="font-semibold text-amber-300">Subtitle out of sync?</strong> If subtitles aren&apos;t synchronized, try switching to another video source or streaming server, or adjust subtitle sync in settings.
               </p>
             </div>
           </div>
