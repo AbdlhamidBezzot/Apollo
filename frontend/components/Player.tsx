@@ -49,9 +49,22 @@ const PROVIDER_KEY = "apollo:provider";
 const IDLE_HIDE_MS = 3000;
 const NEXT_CARD_SECONDS = 15;
 
+const PROVIDER_LABELS: Record<string, string> = {
+  pekka: "P.E.K.K.A IV",
+  barbarian: "Barbarian I",
+  archer: "Archer II",
+  goblin: "Goblin III",
+  stellar: "Stellar 4K",
+  framextv: "frameXTV",
+  cinemaos: "CinemaOS",
+  videasy: "Videasy",
+  vidsrc: "VidSrc",
+};
+
 const providerLabel = (p: string, list: string[] = []) => {
+  if (PROVIDER_LABELS[p]) return PROVIDER_LABELS[p];
   const idx = list.indexOf(p);
-  return idx >= 0 ? `Server ${idx + 1}` : "Server 1";
+  return idx >= 0 ? `Server ${idx + 1}` : p;
 };
 
 const isEmbed = (contentType: string) => contentType === "text/html";
@@ -80,6 +93,7 @@ export function Player({
   const { user } = useAuth();
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Add-ons & Subtitles
@@ -94,7 +108,7 @@ export function Player({
   const [rate, setRate] = useState(1);
   const [savedPos, setSavedPos] = useState(0);
   const lastReport = useRef(0);
-  const [provider, setProvider] = useState<string>(providerProp || "cinemaos");
+  const [provider, setProvider] = useState<string>(providerProp || "pekka");
   const [activeContentType, setActiveContentType] = useState<string>(contentType);
   const embed = !selectedAddonStream && isEmbed(activeContentType);
   const embedGotRealProgress = useRef(false);
@@ -103,7 +117,16 @@ export function Player({
   const [seasonNum, setSeasonNum] = useState(season ?? 1);
   const [episodeNum, setEpisodeNum] = useState(episode ?? 1);
   const [busyResolve, setBusyResolve] = useState(false);
-  const [providers, setProviders] = useState<string[]>(["cinemaos", "videasy", "vidsrc"]);
+  const [providers, setProviders] = useState<string[]>([
+    "pekka",
+    "barbarian",
+    "archer",
+    "goblin",
+    "framextv",
+    "cinemaos",
+    "videasy",
+    "vidsrc",
+  ]);
 
   // Details & Recommendations
   const [detail, setDetail] = useState<TitleDetail | null>(null);
@@ -356,16 +379,49 @@ export function Player({
   useEffect(() => {
     if (!embed) return;
     const onMessage = (event: MessageEvent) => {
-      if (typeof event.data !== "string") return;
-      try {
-        const data = JSON.parse(event.data);
-        const secs = Number(data.timestamp ?? data.progress);
-        if (Number.isFinite(secs) && secs > 0) {
-          embedGotRealProgress.current = true;
-          saveProgress(Math.floor(secs), Number(data.progress) >= 0.95);
+      let data = event.data;
+      if (typeof data === "string") {
+        try {
+          data = JSON.parse(data);
+        } catch {
+          /* ignore non-json payload */
         }
-      } catch {
-        /* ignore */
+      }
+      if (data && typeof data === "object") {
+        // frameXTV telemetry event: frameXTV:timeupdate
+        if (data.event === "frameXTV:timeupdate") {
+          const cur = Number(data.currentTime);
+          const dur = Number(data.duration);
+          if (Number.isFinite(cur) && cur > 0) {
+            embedGotRealProgress.current = true;
+            setCurrentTime(cur);
+            if (Number.isFinite(dur) && dur > 0) setDuration(dur);
+            saveProgress(Math.floor(cur), dur > 0 && cur / dur >= 0.95);
+          }
+        } else if (data.type === "PLAYER_EVENT" && data.data) {
+          // Stellar player event
+          const cur = Number(data.data.currentTime);
+          const dur = Number(data.data.duration);
+          if (Number.isFinite(cur) && cur > 0) {
+            embedGotRealProgress.current = true;
+            setCurrentTime(cur);
+            if (Number.isFinite(dur) && dur > 0) setDuration(dur);
+            saveProgress(Math.floor(cur), dur > 0 && cur / dur >= 0.95);
+          }
+        } else if (data.type === "MEDIA_DATA" && data.data) {
+          // Stellar media snapshot
+          const cur = Number(data.data.currentTime ?? data.data.progress);
+          if (Number.isFinite(cur) && cur > 0) {
+            embedGotRealProgress.current = true;
+            saveProgress(Math.floor(cur), Boolean(data.data.completed));
+          }
+        } else {
+          const secs = Number(data.timestamp ?? data.progress);
+          if (Number.isFinite(secs) && secs > 0) {
+            embedGotRealProgress.current = true;
+            saveProgress(Math.floor(secs), Number(data.progress) >= 0.95);
+          }
+        }
       }
     };
     window.addEventListener("message", onMessage);
@@ -745,7 +801,7 @@ export function Player({
         } catch {
           /* ignore */
         }
-        const current = providerProp || "cinemaos";
+        const current = providerProp || "pekka";
         if (pref && pref !== current && list.includes(pref)) {
           changeProvider(pref);
         } else if (!list.includes(current)) {
@@ -970,6 +1026,7 @@ export function Player({
               onDoubleClick={fullscreen}
             >
               <iframe
+                ref={iframeRef}
                 key={`${tmdbId}-${seasonNum}-${episodeNum}-${embedSrc}`}
                 src={embedSrc}
                 title={displayTitle}
@@ -1231,6 +1288,18 @@ export function Player({
             </div>
           )}
 
+          {/* Subtitle Sync Notice Tip */}
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-500/25 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent px-3.5 py-2.5 text-xs text-amber-200/90 backdrop-blur-md shadow-sm">
+            <div className="flex items-center gap-2.5">
+              <span className="shrink-0 flex h-6 w-6 items-center justify-center rounded-full bg-amber-500/20 text-amber-300 font-bold text-xs">
+                💬
+              </span>
+              <p className="leading-snug text-[11px] sm:text-xs">
+                <strong className="font-semibold text-amber-300">Subtitle out of sync?</strong> If subtitles aren&apos;t synchronized, try switching to another streaming server (e.g. Barbarian I or Stellar 4K) or adjust subtitle sync in settings.
+              </p>
+            </div>
+          </div>
+
           {/* Title Heading */}
           <div>
             <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">{displayTitle}</h1>
@@ -1330,7 +1399,7 @@ export function Player({
                           : "text-[#A1A1AA] hover:text-white"
                       }`}
                     >
-                      Server {idx + 1}
+                      {providerLabel(p, providers)}
                     </button>
                   ))}
                 </div>

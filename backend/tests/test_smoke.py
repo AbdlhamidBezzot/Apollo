@@ -126,7 +126,7 @@ def test_recommend_empty_without_signals():
         assert r.json()["results"] == []
 
 
-def test_playback_resolve_vidsrc():
+def test_playback_resolve_pekka_default():
     with get_client() as client:
         client.post(
             "/api/v1/auth/register",
@@ -135,6 +135,46 @@ def test_playback_resolve_vidsrc():
         r = client.post(
             "/api/v1/playback/resolve",
             json={"tmdb_id": 550, "media_type": "movie"},
+        )
+        assert r.status_code == 200, r.text
+        data = r.json()
+        assert data["provider"] == "pekka"
+        assert data["content_type"] == "text/html"
+        assert data["stream_url"] == "https://framextv.tech/embed/550?autoplay=1&muted=0&server=pekka"
+
+
+def test_playback_resolve_framextv_servers():
+    with get_client() as client:
+        # Barbarian I
+        r = client.post(
+            "/api/v1/playback/resolve",
+            json={"tmdb_id": 550, "media_type": "movie", "provider": "barbarian"},
+        )
+        assert r.status_code == 200
+        assert r.json()["stream_url"] == "https://framextv.tech/embed/550?autoplay=1&muted=0&server=barbarian"
+
+        # Archer II TV
+        r = client.post(
+            "/api/v1/playback/resolve",
+            json={"tmdb_id": 1399, "media_type": "tv", "season": 2, "episode": 3, "provider": "archer"},
+        )
+        assert r.status_code == 200
+        assert r.json()["stream_url"] == "https://framextv.tech/embed/1399/2/3?autoplay=1&muted=0&server=archer"
+
+        # Goblin III
+        r = client.post(
+            "/api/v1/playback/resolve",
+            json={"tmdb_id": 550, "media_type": "movie", "provider": "goblin"},
+        )
+        assert r.status_code == 200
+        assert r.json()["stream_url"] == "https://framextv.tech/embed/550?autoplay=1&muted=0&server=goblin"
+
+
+def test_playback_resolve_vidsrc():
+    with get_client() as client:
+        r = client.post(
+            "/api/v1/playback/resolve",
+            json={"tmdb_id": 550, "media_type": "movie", "provider": "vidsrc"},
         )
         assert r.status_code == 200, r.text
         data = r.json()
@@ -172,11 +212,37 @@ def test_playback_resolve_cinemaos_tv_with_provider():
         assert data["stream_url"] == "https://cinemaos.tech/player/1399/1/1"
 
 
+def test_playback_resolve_stellar():
+    with get_client() as client:
+        r = client.post(
+            "/api/v1/playback/resolve",
+            json={"tmdb_id": 1081003, "media_type": "movie", "provider": "stellar"},
+        )
+        assert r.status_code == 200, r.text
+        data = r.json()
+        assert data["provider"] == "stellar"
+        assert data["content_type"] == "text/html"
+        assert "stellar.rip/en/watch/embed/movie/1081003" in data["stream_url"]
+
+        r_tv = client.post(
+            "/api/v1/playback/resolve",
+            json={"tmdb_id": 83867, "media_type": "tv", "season": 1, "episode": 1, "provider": "stellar"},
+        )
+        assert r_tv.status_code == 200, r_tv.text
+        assert "stellar.rip/en/watch/embed/tv/83867-1-1" in r_tv.json()["stream_url"]
+
+
 def test_playback_providers_endpoint():
     with get_client() as client:
         r = client.get("/api/v1/playback/providers")
         assert r.status_code == 200, r.text
         names = r.json()
+        assert "pekka" in names
+        assert "barbarian" in names
+        assert "archer" in names
+        assert "goblin" in names
+        assert "framextv" in names
+        assert "stellar" in names
         assert "videasy" in names
         assert "cinemaos" in names
 
