@@ -1,0 +1,35 @@
+name: Keep Apollo Alive
+
+on:
+  schedule:
+    # GitHub Actions schedules run on a best-effort basis; this targets every 10 minutes.
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check Apollo health endpoint
+        run: |
+          echo "Checking Apollo health endpoint..."
+          curl --fail --silent --show-error --location \
+            --connect-timeout 10 --max-time 30 \
+            --write-out "\nHealth check HTTP status: %{http_code}\n" \
+            "https://apollo-makx.onrender.com/health"
+          echo "Health check succeeded."
+
+      - name: Send one follow-up request
+        run: |
+          echo "Waiting 5 seconds before the follow-up request..."
+          sleep 5
+          echo "Sending follow-up request to Apollo..."
+          curl --fail --silent --show-error --location \
+            --connect-timeout 10 --max-time 30 \
+            --write-out "\nFollow-up HTTP status: %{http_code}\n" \
+            "https://apollo-makx.onrender.com/health"
+          echo "Follow-up request succeeded."
