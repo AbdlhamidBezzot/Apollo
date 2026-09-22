@@ -15,7 +15,6 @@ import {
   TopRatedHub,
 } from "@/components/HomeEnhancements";
 import { MovieRow } from "@/components/MovieRow";
-import { PokePingsAd } from "@/components/PokePingsAd";
 import { RecommendationsRow } from "@/components/RecommendationsRow";
 import { SignInNotice } from "@/components/SignInNotice";
 import { get } from "@/lib/http";
@@ -147,10 +146,6 @@ export function HomeClient() {
       <GenreBrowseHub />
 
       <SignInNotice />
-
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 my-4">
-        <PokePingsAd />
-      </div>
 
       {/* Additional Curated Rows */}
       {trending.length > 0 && (

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 
 import { Ad300x250 } from "@/components/Ad300x250";
 import { MovieCard } from "@/components/MovieCard";
-import { PokePingsAd } from "@/components/PokePingsAd";
 import { get } from "@/lib/http";
 import type { ContentListResponse, Title } from "@/lib/types";
 
@@ -423,13 +422,7 @@ export function BrowseClient({
                   ))}
                 </div>
                 {/* Show an ad banner after each chunk */}
-                {chunkIdx % 2 === 0 ? (
-                  <Ad300x250 format="auto" className="mt-6" />
-                ) : (
-                  <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 my-6">
-                    <PokePingsAd />
-                  </div>
-                )}
+                <Ad300x250 format="auto" className="mt-6" />
               </div>
             ));
           })()}
