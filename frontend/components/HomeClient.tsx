@@ -100,18 +100,23 @@ export function HomeClient() {
   return (
     <div className="space-y-[64px] sm:space-y-[80px] pb-12">
       {/* 1. Hero Billboard Banner */}
-      {trending.length > 0 ? (
-        <HeroBillboard slides={trending} />
-      ) : loading ? (
-        <section className="relative w-full min-h-[80vh] -mt-16 pt-20 pb-16 flex items-end overflow-hidden bg-[#121215] px-6 lg:px-12">
-          <div className="max-w-2xl space-y-4">
-            <div className="h-4 w-28 animate-pulse rounded-full bg-white/10" />
-            <h1 className="text-4xl font-black tracking-tight text-white sm:text-6xl">Find your next great watch.</h1>
-            <p className="max-w-lg text-sm leading-relaxed text-zinc-300 sm:text-base">Browse movies and series across the streaming services you already use.</p>
-            <div className="h-12 w-36 animate-pulse rounded-full bg-white/15" aria-label="Loading featured title" />
-          </div>
-        </section>
-      ) : null}
+      <div className="relative">
+        <h1 className="pointer-events-none absolute left-6 top-24 z-30 text-5xl font-black tracking-tight text-white drop-shadow-2xl sm:left-12 sm:text-7xl">
+          Mehdi alami
+        </h1>
+        {trending.length > 0 ? (
+          <HeroBillboard slides={trending} />
+        ) : loading ? (
+          <section className="relative w-full min-h-[80vh] -mt-16 pt-20 pb-16 flex items-end overflow-hidden bg-[#121215] px-6 lg:px-12">
+            <div className="max-w-2xl space-y-4">
+              <div className="h-4 w-28 animate-pulse rounded-full bg-white/10" />
+              <h2 className="text-4xl font-black tracking-tight text-white sm:text-6xl">Find your next great watch.</h2>
+              <p className="max-w-lg text-sm leading-relaxed text-zinc-300 sm:text-base">Browse movies and series across the streaming services you already use.</p>
+              <div className="h-12 w-36 animate-pulse rounded-full bg-white/15" aria-label="Loading featured title" />
+            </div>
+          </section>
+        ) : null}
+      </div>
 
       {/* 2. Continue Watching Carousel */}
       <ContinueWatchingRow />
