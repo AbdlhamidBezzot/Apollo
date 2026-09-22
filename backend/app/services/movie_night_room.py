@@ -356,7 +356,7 @@ async def decide_async(
     if participant.profile_id != room.host_profile_id:
         raise MovieNightRoomError("Only the host can confirm the group pick")
 
-    provider = get_provider()
+    provider = get_provider("framextv")
     try:
         result = await provider.resolve(tmdb_id, media_type)
         detail = await tmdb.detail(media_type, tmdb_id)

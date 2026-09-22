@@ -45,7 +45,6 @@ interface PlaybackSession {
 }
 
 const PROGRESS_KEY = "apollo:progress";
-const PROVIDER_KEY = "apollo:provider";
 const IDLE_HIDE_MS = 3000;
 const NEXT_CARD_SECONDS = 15;
 
@@ -758,11 +757,6 @@ export function Player({
         setSrc(res.stream_url);
         setProvider(target);
         embedGotRealProgress.current = false;
-        try {
-          localStorage.setItem(PROVIDER_KEY, target);
-        } catch {
-          /* ignore */
-        }
         announce(`Source: ${providerLabel(target, providers)}`);
       } catch {
         announce("Could not load that source");
@@ -779,16 +773,7 @@ export function Player({
       .then((list) => {
         if (cancelled) return;
         if (list.length) setProviders(list);
-        let pref: string | null = null;
-        try {
-          pref = localStorage.getItem(PROVIDER_KEY);
-        } catch {
-          /* ignore */
-        }
-        const current = providerProp || "framextv";
-        if (pref && pref !== current && list.includes(pref)) {
-          changeProvider(pref);
-        } else if (!list.includes(current)) {
+        if (!list.includes("framextv")) {
           changeProvider(list[0]);
         }
       })

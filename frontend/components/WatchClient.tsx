@@ -83,6 +83,7 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
             media_type: mediaType,
             season,
             episode,
+            provider: "framextv",
           });
           setSession(res);
         }
