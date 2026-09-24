@@ -2,6 +2,8 @@ import { revalidatePath } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 import { publishBatch } from "@/lib/content-queue";
 
+export const dynamic = "force-static";
+
 export async function GET(req: NextRequest) {
   return handleCron(req);
 }

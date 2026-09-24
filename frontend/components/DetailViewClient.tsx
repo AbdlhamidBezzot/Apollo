@@ -6,10 +6,9 @@ import { useState } from "react";
 import { Ad300x250 } from "@/components/Ad300x250";
 import { DetailTabs } from "@/components/DetailTabs";
 import { MovieNightButton } from "@/components/MovieNightButton";
-
-
-
 import { TitleActions } from "@/components/TitleActions";
+import { MobileDetailView } from "@/components/mobile/MobileDetailView";
+import { useIsMobile } from "@/lib/useIsMobile";
 import { backdropUrl, posterUrl, releaseYear, titleName } from "@/lib/api";
 import { getEditorialTake } from "@/lib/editorial-generator";
 import type { Title, TitleDetail } from "@/lib/types";
@@ -23,6 +22,7 @@ export function DetailViewClient({
   similar: Title[];
   mediaType: "movie" | "tv";
 }) {
+  const { isMobile, mounted } = useIsMobile();
   const [playing, setPlaying] = useState(false);
 
   const year = releaseYear(item);
@@ -31,6 +31,10 @@ export function DetailViewClient({
   const runtime = item.runtime ? `${item.runtime} min` : "";
   const trailer = item.videos?.results?.find((v) => v.type === "Trailer" && v.site === "YouTube");
   const cast = (item.credits?.cast || []).slice(0, 12);
+
+  if (mounted && isMobile) {
+    return <MobileDetailView item={item} similar={similar} mediaType={mediaType} />;
+  }
 
   return (
     <div className="min-h-screen bg-[#09090B] pb-16">
@@ -203,5 +207,4 @@ export function DetailViewClient({
       </div>
     </div>
   );
-
 }

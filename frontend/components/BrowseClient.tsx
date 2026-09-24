@@ -155,12 +155,13 @@ function urlFor(f: Filters): string {
 
 export function BrowseClient({
   initial,
-  genres,
+  genres: initialGenres,
 }: {
   initial: Partial<BrowseParams>;
   genres: { id: number; name: string }[];
 }) {
   const router = useRouter();
+  const [genres, setGenres] = useState<{ id: number; name: string }[]>(initialGenres || []);
   const [f, setF] = useState<Filters>(cleanParams(initial));
   const [items, setItems] = useState<Title[]>([]);
   const [page, setPage] = useState(1);
@@ -168,6 +169,16 @@ export function BrowseClient({
   const [totalResults, setTotalResults] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!genres || genres.length === 0) {
+      get<{ genres: { id: number; name: string }[] }>("/api/v1/content/genres")
+        .then((res) => {
+          if (res?.genres) setGenres(res.genres);
+        })
+        .catch(() => {});
+    }
+  }, [genres]);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const seqRef = useRef(0);

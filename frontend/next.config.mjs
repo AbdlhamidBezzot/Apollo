@@ -6,9 +6,10 @@ const __dirname = path.dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "export",
   reactStrictMode: true,
-  outputFileTracingRoot: path.resolve(__dirname, ".."),
   images: {
+    unoptimized: true,
     remotePatterns: [
       { protocol: "https", hostname: "image.tmdb.org" },
       { protocol: "https", hostname: "images.unsplash.com" },

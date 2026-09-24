@@ -3,6 +3,8 @@ import { EDITORIAL_ARTICLES } from "@/lib/editorial-data";
 import { get } from "@/lib/http";
 import type { ContentListResponse, Title } from "@/lib/types";
 
+export const dynamic = "force-static";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.missapollo.me";
   const now = new Date();

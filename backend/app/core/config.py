@@ -33,7 +33,8 @@ class Settings(BaseSettings):
     # baked in so the API works online even before you set the variable.
     cors_origins: str = (
         "http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,"
-        "https://apollo-94zv.vercel.app"
+        "https://apollo-94zv.vercel.app,https://localhost,http://localhost,"
+        "capacitor://localhost,http://localhost:8000,http://10.0.2.2:8000"
     )
 
     database_url: str = "sqlite:///./apollo.db"
@@ -126,7 +127,24 @@ class Settings(BaseSettings):
 
     @property
     def cors_origin_list(self) -> list[str]:
-        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+        configured = [o.strip() for o in (self.cors_origins or "").split(",") if o.strip()]
+        mandatory = [
+            "https://localhost",
+            "http://localhost",
+            "capacitor://localhost",
+            "https://www.missapollo.me",
+            "https://missapollo.me",
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:3000",
+            "http://localhost:8000",
+            "http://10.0.2.2:8000",
+        ]
+        out = list(configured)
+        for m in mandatory:
+            if m not in out:
+                out.append(m)
+        return out
 
     @property
     def token_secret(self) -> str:

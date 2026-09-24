@@ -87,17 +87,17 @@ export function MovieCard({ item, onRemove }: { item: Title; onRemove?: (item: T
       </div>
 
       {/* Bottom info */}
-      <div className="absolute inset-x-0 bottom-0 p-2.5">
+      <div className="absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
         <p
-          className={`truncate text-sm font-semibold text-text-vivid transition-all duration-300 ${
-            hovered ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+          className={`truncate text-xs sm:text-sm font-semibold text-text-vivid transition-all duration-300 ${
+            hovered ? "translate-y-0 opacity-100" : "opacity-100 sm:opacity-0 sm:translate-y-2"
           }`}
         >
           {titleName(item)}
         </p>
         <p
-          className={`text-xs text-text-muted transition-all duration-300 ${
-            hovered ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+          className={`text-[11px] text-text-muted transition-all duration-300 ${
+            hovered ? "translate-y-0 opacity-100" : "opacity-100 sm:opacity-0 sm:translate-y-2"
           }`}
         >
           {releaseYear(item)}

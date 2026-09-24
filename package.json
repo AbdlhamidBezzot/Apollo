@@ -1,4 +1,13 @@
 {
+  "name": "apollo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix frontend run build",
+    "build:mobile": "npm --prefix frontend run build:mobile",
+    "cap:sync": "cd frontend && npx cap sync android",
+    "cap:open": "cd frontend && npx cap open android"
+  },
   "dependencies": {
     "@upstash/redis": "^1.38.2"
   }

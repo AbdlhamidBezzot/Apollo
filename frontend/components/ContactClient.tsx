@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { API_URL } from "@/lib/api";
+import { getResolvedApiUrl } from "@/lib/api";
 
 type FormState = {
   name: string;
@@ -29,7 +29,8 @@ export function ContactClient() {
     setError(null);
 
     try {
-      const res = await fetch(`${API_URL}/api/v1/contact`, {
+      const baseUrl = getResolvedApiUrl();
+      const res = await fetch(`${baseUrl}/api/v1/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

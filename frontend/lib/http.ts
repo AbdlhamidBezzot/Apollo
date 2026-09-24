@@ -1,4 +1,5 @@
-import { API_URL, warnIfProductionPointsAtLocalhost } from "./api";
+import { Capacitor, CapacitorHttp } from "@capacitor/core";
+import { API_URL, getResolvedApiUrl, warnIfProductionPointsAtLocalhost } from "./api";
 
 const GENERIC_ERROR_MESSAGE = "We couldn't load this page right now. Please try again in a moment.";
 
@@ -31,8 +32,6 @@ function parseRetryAfter(value: string | null): number | undefined {
   return Number.isFinite(seconds) ? seconds : undefined;
 }
 
-// How long the HTTP client will wait (max) before auto-retrying a rate-limited
-// read. Longer Retry-After values surface as a friendly 429 to the UI instead.
 const MAX_AUTO_RETRY_AFTER_S = 5;
 
 export function getAccessToken(): string | null {
@@ -84,11 +83,8 @@ export function clearTokens(): void {
   setRefreshToken(null);
 }
 
-// Access tokens expire (~15 min). Single shared in-flight refresh so concurrent
-// 401s don't fire multiple refresh requests, and dedupe the retry.
 let refreshPromise: Promise<boolean> | null = null;
 
-/** Expose a direct one-shot refresh (used to hydrate tokens from httpOnly cookies). */
 export async function refreshSession(): Promise<boolean> {
   if (!refreshPromise) {
     refreshPromise = doRefresh().finally(() => {
@@ -107,34 +103,81 @@ async function refreshTokens(): Promise<boolean> {
   return refreshPromise;
 }
 
+function tryJsonParse(str: string) {
+  try {
+    return JSON.parse(str);
+  } catch {
+    return str;
+  }
+}
+
+async function doNativeCapacitorFetch(
+  url: string,
+  method: string,
+  headers: Record<string, string>,
+  body?: unknown
+): Promise<Response> {
+  try {
+    const options = {
+      url,
+      method: method.toUpperCase(),
+      headers,
+      data: body ? (typeof body === "string" ? tryJsonParse(body) : body) : undefined,
+    };
+
+    const response = await CapacitorHttp.request(options);
+    const status = response.status || 200;
+    const responseHeaders = new Headers();
+    if (response.headers) {
+      Object.entries(response.headers).forEach(([k, v]) => {
+        responseHeaders.append(k, String(v));
+      });
+    }
+
+    const responseText = typeof response.data === "object" ? JSON.stringify(response.data) : String(response.data ?? "");
+
+    return new Response(responseText, {
+      status,
+      statusText: String(status),
+      headers: responseHeaders,
+    });
+  } catch {
+    return fetch(url, {
+      method,
+      headers,
+      body: body ? (typeof body === "string" ? body : JSON.stringify(body)) : undefined,
+    });
+  }
+}
+
 async function doRefresh(): Promise<boolean> {
   const refreshToken = getRefreshToken();
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (refreshToken) {
     headers["Authorization"] = `Bearer ${refreshToken}`;
   }
-  return fetch(`${API_URL}/api/v1/auth/refresh`, {
-    method: "POST",
-    headers,
-    credentials: "include",
-  })
-    .then(async (r) => {
-      if (!r.ok) {
-        if (r.status === 401 || r.status === 403) clearTokens();
-        return false;
-      }
-      try {
-        const data = await r.json();
-        if (data.access_token) setAccessToken(data.access_token);
-        if (data.refresh_token) setRefreshToken(data.refresh_token);
-      } catch {
-        /* keep existing tokens */
-      }
-      return true;
-    })
-    .catch(() => {
+  const baseUrl = getResolvedApiUrl();
+  try {
+    const isNative = typeof window !== "undefined" && Capacitor.isNativePlatform();
+    const r = isNative
+      ? await doNativeCapacitorFetch(`${baseUrl}/api/v1/auth/refresh`, "POST", headers)
+      : await fetch(`${baseUrl}/api/v1/auth/refresh`, { method: "POST", headers, credentials: "include" });
+
+    if (!r.ok) {
+      if (r.status === 401 || r.status === 403) clearTokens();
       return false;
-    });
+    }
+    try {
+      const data = await r.json();
+      if (data.access_token) setAccessToken(data.access_token);
+      if (data.refresh_token) setRefreshToken(data.refresh_token);
+    } catch {
+      /* keep existing tokens */
+    }
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function canRetryAfter401(path: string): boolean {
@@ -153,51 +196,73 @@ export async function api<T>(path: string, init: RequestInit = {}, revalidate?: 
     ...((init.headers as Record<string, string>) || {}),
   };
 
-  const fullUrl = `${API_URL}${path}`;
-  const isReadMethod = !init.method || init.method.toUpperCase() === "GET" || init.method.toUpperCase() === "HEAD";
+  const baseUrl = getResolvedApiUrl();
+  const fullUrl = `${baseUrl}${path}`;
+  const method = (init.method || "GET").toUpperCase();
+  const isReadMethod = method === "GET" || method === "HEAD";
+  const isNative = typeof window !== "undefined" && Capacitor.isNativePlatform();
 
-  const doFetch = () =>
-    fetch(fullUrl, {
-      ...init,
-      headers,
-      credentials: "include",
-      ...(revalidate ? { next: { revalidate } } : { cache: "no-store" }),
-    });
+  const doFetch = async () => {
+    const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const timeoutId = controller ? setTimeout(() => controller.abort(), 50000) : null;
+    try {
+      if (isNative) {
+        return await doNativeCapacitorFetch(fullUrl, method, headers, init.body);
+      }
+      return await fetch(fullUrl, {
+        ...init,
+        headers,
+        signal: controller?.signal || init.signal,
+        credentials: "include",
+        ...(revalidate ? { next: { revalidate } } : { cache: "no-store" }),
+      });
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
+    }
+  };
 
   let res: Response;
   let attempt = 0;
-  const maxAttempts = isReadMethod ? 2 : 1; // Automatic single-retry with backoff for GET operations
+  const maxAttempts = 3;
   let rateLimitRetried = false;
+  const startTime = Date.now();
 
   while (true) {
     try {
       res = await doFetch();
-      // Rate-limit (429) comes with a Retry-After hint: for quick reads, back
-      // off and retry once instead of bouncing the user to an error screen.
-      if (
-        isReadMethod &&
-        res.status === 429 &&
-        !rateLimitRetried
-      ) {
+      const durationMs = Date.now() - startTime;
+      if (process.env.NODE_ENV !== "production" || isNative) {
+        // eslint-disable-next-line no-console
+        console.log(`[Apollo HTTP] ${method} ${fullUrl} -> Status ${res.status} (${durationMs}ms)`);
+      }
+
+      if (res.status === 429 && !rateLimitRetried) {
         const retryAfter = parseRetryAfter(res.headers.get("Retry-After"));
         if (retryAfter !== undefined && retryAfter <= MAX_AUTO_RETRY_AFTER_S) {
           rateLimitRetried = true;
-          await sleep(Math.max(400, retryAfter * 1000));
+          await sleep(Math.max(500, retryAfter * 1000));
           continue;
         }
       }
-      // Retry transient server gateway/unavailable errors (502, 503, 504) once
-      if (isReadMethod && attempt < maxAttempts - 1 && (res.status === 502 || res.status === 503 || res.status === 504)) {
+      if (attempt < maxAttempts - 1 && (res.status === 502 || res.status === 503 || res.status === 504)) {
         attempt++;
-        await sleep(350 * attempt);
+        await sleep(1000 * attempt);
         continue;
       }
       break;
-    } catch (err) {
-      if (isReadMethod && attempt < maxAttempts - 1) {
+    } catch (err: any) {
+      if (attempt < maxAttempts - 1) {
         attempt++;
-        await sleep(350 * attempt);
+        if (process.env.NODE_ENV !== "production" || isNative) {
+          // eslint-disable-next-line no-console
+          console.warn(`[Apollo HTTP Retry ${attempt}/${maxAttempts}] ${method} ${fullUrl}:`, err?.message || err);
+        }
+        await sleep(1000 * attempt);
         continue;
+      }
+      if (process.env.NODE_ENV !== "production" || isNative) {
+        // eslint-disable-next-line no-console
+        console.error(`[Apollo HTTP Error] ${method} ${fullUrl}:`, err?.message || err);
       }
       throw err;
     }
@@ -250,5 +315,3 @@ export const put = <T>(path: string, body?: unknown) =>
 export const patch = <T>(path: string, body?: unknown) =>
   api<T>(path, { method: "PATCH", body: body ? JSON.stringify(body) : undefined });
 export const del = <T>(path: string) => api<T>(path, { method: "DELETE" });
-
-

@@ -4,13 +4,20 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthContext";
 import { MovieCard } from "@/components/MovieCard";
+import { MobileWatchlistView } from "@/components/mobile/MobileWatchlistView";
+import { useIsMobile } from "@/lib/useIsMobile";
 import { del, get } from "@/lib/http";
 import type { Title } from "@/lib/types";
 
 export function MyListClient() {
+  const { isMobile, mounted } = useIsMobile();
   const { user, loading } = useAuth();
   const [items, setItems] = useState<Title[]>([]);
   const [status, setStatus] = useState<"loading" | "loaded" | "empty" | "error">("loading");
+
+  if (mounted && isMobile) {
+    return <MobileWatchlistView />;
+  }
 
   useEffect(() => {
     if (loading) return;

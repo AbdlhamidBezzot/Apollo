@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
-import { BrowseClient, type BrowseParams } from "@/components/BrowseClient";
+import { Suspense } from "react";
+import { BrowseWithParams } from "@/components/BrowseWithParams";
 import { get } from "@/lib/http";
+
+export const dynamic = "force-static";
 
 export const metadata: Metadata = {
   title: "Browse Movies & TV Shows - Apollo",
@@ -22,25 +25,29 @@ export const metadata: Metadata = {
   },
 };
 
-interface BrowseProps {
-  searchParams: Promise<Partial<Record<keyof BrowseParams, string>>>;
-}
-
-export default async function BrowsePage({ searchParams }: BrowseProps) {
-  const params = await searchParams;
-
+export default async function BrowsePage() {
   let genres: { id: number; name: string }[] = [];
   try {
     const genreResp = await get<{ genres: { id: number; name: string }[] }>("/api/v1/content/genres", 86400);
     genres = genreResp.genres || [];
   } catch {
-    /* degraded: genre dropdown shows "All genres" only */
+    /* degraded fallback */
   }
 
-  const initial: Partial<BrowseParams> = {};
-  for (const key of ["media_type", "genre", "year", "min_rating", "sort_by", "kind", "language", "country"] as const) {
-    if (params[key]) initial[key] = params[key]!;
-  }
-
-  return <BrowseClient initial={initial} genres={genres} />;
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-7xl px-4 py-8">
+          <div className="skeleton mb-6 h-10 w-48 rounded" />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div key={i} className="skeleton aspect-[2/3] rounded-2xl" />
+            ))}
+          </div>
+        </div>
+      }
+    >
+      <BrowseWithParams genres={genres} />
+    </Suspense>
+  );
 }

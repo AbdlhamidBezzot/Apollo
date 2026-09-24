@@ -78,18 +78,35 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
           setTitle(target.title || "");
           setPoster(target.poster);
         } else {
-          const res = await post<PlaybackSession>("/api/v1/playback/resolve", {
-            tmdb_id: id,
-            media_type: mediaType,
-            season,
-            episode,
-            provider: "framextv",
-          });
-          setSession(res);
+          const providersToTry = ["framextv", "cinemaos", "vidsrc", "videasy", "stellar"];
+          let resolvedSession: PlaybackSession | null = null;
+          let lastErr: unknown = null;
+
+          for (const prov of providersToTry) {
+            try {
+              const res = await post<PlaybackSession>("/api/v1/playback/resolve", {
+                tmdb_id: id,
+                media_type: mediaType,
+                season,
+                episode,
+                provider: prov,
+              });
+              if (res && res.stream_url) {
+                resolvedSession = res;
+                break;
+              }
+            } catch (err) {
+              lastErr = err;
+            }
+          }
+
+          if (resolvedSession) {
+            setSession(resolvedSession);
+          } else {
+            throw lastErr || new Error("Unable to resolve playback for this title");
+          }
         }
       } catch (err: unknown) {
-
-
         const issue = classifyError(err);
         logTechnicalDetail(issue, { mediaType, id });
         setError(issue.message);

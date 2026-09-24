@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { API_URL } from "@/lib/api";
+import { getResolvedApiUrl } from "@/lib/api";
 import type { RoomChatMessage } from "@/lib/types";
 
 interface RemoteState {
@@ -29,7 +29,8 @@ export interface MovieNightState {
 }
 
 function wsUrl(code: string): string {
-  const base = API_URL.replace(/^http/, "ws");
+  const baseUrl = getResolvedApiUrl();
+  const base = baseUrl.replace(/^http/, "ws");
   return `${base}/api/v1/ws/movie-night/${encodeURIComponent(code)}`;
 }
 

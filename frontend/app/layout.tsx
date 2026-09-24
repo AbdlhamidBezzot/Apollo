@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import Script from "next/script";
 import "./globals.css";
@@ -8,10 +8,20 @@ import { MovieNightModal } from "@/components/MovieNightModal";
 import { AuthProvider } from "@/components/AuthContext";
 import { ThemeProvider } from "@/components/ThemeContext";
 import { Footer } from "@/components/HomeEnhancements";
+import { MobileLayoutShell } from "@/components/mobile/MobileLayoutShell";
 
 import { Analytics } from "@vercel/analytics/next";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.missapollo.me";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#09090b",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -95,13 +105,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning>
         <ThemeProvider>
           <AuthProvider>
+            {/* Desktop Navbar — automatically hidden on mobile by MobileLayoutShell */}
             <Suspense fallback={null}>
               <Navbar />
             </Suspense>
-            <main className="min-h-screen pb-8 pt-16">
-              {children}
-            </main>
-            <Footer />
+
+            {/*
+              MobileLayoutShell detects mobile/Capacitor devices.
+              On mobile  → wraps content with mobile bottom nav, no desktop chrome.
+              On desktop → passes children through without modification.
+            */}
+            <MobileLayoutShell>
+              <main className="min-h-screen pb-8 pt-16">
+                {children}
+              </main>
+            </MobileLayoutShell>
+
+            {/* Desktop Footer — hidden on mobile via .desktop-footer CSS rule */}
+            <footer className="desktop-footer">
+              <Footer />
+            </footer>
+
             <ChatBot />
             <MovieNightModal />
           </AuthProvider>
@@ -111,6 +135,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Script id="adsterra-social-bar" src="https://heavenlysuspicious.com/a7/af/9d/a7af9dd53724b72f361ecca2360aad8a.js" strategy="afterInteractive" />
       </body>
     </html>
-
   );
 }

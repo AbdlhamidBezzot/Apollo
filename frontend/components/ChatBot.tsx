@@ -3,8 +3,9 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { API_URL, posterUrl } from "@/lib/api";
+import { getResolvedApiUrl, posterUrl } from "@/lib/api";
 import { getAccessToken, get, post } from "@/lib/http";
+import { useIsMobile } from "@/lib/useIsMobile";
 import type { ChatResponse, SuggestedTitle } from "@/lib/types";
 
 interface EnrichedSuggestion extends SuggestedTitle {
@@ -37,6 +38,7 @@ async function enrich(suggestions: SuggestedTitle[]): Promise<EnrichedSuggestion
 }
 
 export function ChatBot() {
+  const { isMobile, mounted } = useIsMobile();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -71,6 +73,11 @@ export function ChatBot() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, busy]);
 
+  // Hide ChatBot completely on mobile / phone app
+  if (mounted && isMobile) {
+    return null;
+  }
+
   const send = async (e: FormEvent) => {
     e.preventDefault();
     const text = input.trim();
@@ -85,7 +92,8 @@ export function ChatBot() {
 
     try {
       const token = getAccessToken();
-      const response = await fetch(`${API_URL}/api/v1/chat/stream`, {
+      const baseUrl = getResolvedApiUrl();
+      const response = await fetch(`${baseUrl}/api/v1/chat/stream`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
