@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:mobile": "npx cross-env NEXT_PUBLIC_API_URL=https://apollo-makx.onrender.com next build",
+    "build:mobile": "npx cross-env CAPACITOR_BUILD=true NEXT_PUBLIC_API_URL=https://apollo-makx.onrender.com next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"

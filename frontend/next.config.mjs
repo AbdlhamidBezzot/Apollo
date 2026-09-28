@@ -4,9 +4,11 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const isStaticExport = process.env.CAPACITOR_BUILD === "true" || process.env.STATIC_EXPORT === "true";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "export",
+  ...(isStaticExport ? { output: "export" } : {}),
   reactStrictMode: true,
   images: {
     unoptimized: true,
@@ -20,3 +22,4 @@ const nextConfig = {
 };
 
 export default nextConfig;
+
