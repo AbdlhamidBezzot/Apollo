@@ -92,6 +92,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <head>
+        {/* Google tag (gtag.js) */}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-8YNTW2H5TN" strategy="afterInteractive" />
+        <Script id="google-gtag" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-8YNTW2H5TN');
+          `}
+        </Script>
         <meta name="6a97888e-site-verification" content="d10dde179d8ec2d925c8340a9c294592" />
         {/* Adsterra Popunder */}
         <Script id="adsterra-popunder" src="https://heavenlysuspicious.com/25/ea/fd/25eafdc0d5b5c73fff96db5f26b3fd80.js" strategy="beforeInteractive" />
