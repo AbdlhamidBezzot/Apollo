@@ -591,17 +591,40 @@ export function Player({
 
   const fullscreen = useCallback(async () => {
     const container = containerRef.current;
+    const video = videoRef.current;
     if (!container) return;
     const doc = document as Document & { webkitFullscreenElement?: Element | null; webkitExitFullscreen?: () => void };
-    const inFs = document.fullscreenElement || doc.webkitFullscreenElement;
+    const inFs = Boolean(document.fullscreenElement || doc.webkitFullscreenElement);
+
     try {
       if (inFs) {
         if (document.exitFullscreen) await document.exitFullscreen();
-        else doc.webkitExitFullscreen?.();
+        else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
+
+        const orientation = (screen as any)?.orientation;
+        if (orientation && typeof orientation.unlock === "function") {
+          try { orientation.unlock(); } catch {}
+        }
       } else {
         const c = container as HTMLDivElement & { webkitRequestFullscreen?: () => void };
-        if (container.requestFullscreen) await container.requestFullscreen();
-        else if (c.webkitRequestFullscreen) c.webkitRequestFullscreen();
+        const v = video as (HTMLVideoElement & { webkitEnterFullscreen?: () => void }) | null;
+
+        if (container.requestFullscreen) {
+          await container.requestFullscreen();
+        } else if (c.webkitRequestFullscreen) {
+          c.webkitRequestFullscreen();
+        } else if (v && typeof v.webkitEnterFullscreen === "function") {
+          v.webkitEnterFullscreen();
+        }
+
+        const orientation = (screen as any)?.orientation;
+        if (orientation && typeof orientation.lock === "function") {
+          try {
+            await orientation.lock("landscape");
+          } catch {
+            /* Orientation lock may not be allowed on non-fullscreen or unsupported devices */
+          }
+        }
       }
     } catch (err) {
       console.warn("[fullscreen] request denied:", err);
@@ -611,7 +634,17 @@ export function Player({
   useEffect(() => {
     const sync = () => {
       const doc = document as Document & { webkitFullscreenElement?: Element | null };
-      setIsFullscreen(Boolean(document.fullscreenElement || doc.webkitFullscreenElement));
+      const fs = Boolean(document.fullscreenElement || doc.webkitFullscreenElement);
+      setIsFullscreen(fs);
+
+      const orientation = (screen as any)?.orientation;
+      if (orientation) {
+        if (fs && typeof orientation.lock === "function") {
+          orientation.lock("landscape").catch(() => {});
+        } else if (!fs && typeof orientation.unlock === "function") {
+          try { orientation.unlock(); } catch {}
+        }
+      }
     };
     sync();
     document.addEventListener("fullscreenchange", sync);

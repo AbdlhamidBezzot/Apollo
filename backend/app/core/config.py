@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     cors_origins: str = (
         "http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,"
         "https://apollo-94zv.vercel.app,https://localhost,http://localhost,"
-        "capacitor://localhost,http://localhost:8000,http://10.0.2.2:8000"
+        "http://localhost:8000,http://10.0.2.2:8000"
     )
 
     database_url: str = "sqlite:///./apollo.db"
@@ -131,7 +131,6 @@ class Settings(BaseSettings):
         mandatory = [
             "https://localhost",
             "http://localhost",
-            "capacitor://localhost",
             "https://www.missapollo.me",
             "https://missapollo.me",
             "http://localhost:3000",

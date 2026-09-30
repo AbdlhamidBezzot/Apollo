@@ -1,4 +1,3 @@
-import { Capacitor, CapacitorHttp } from "@capacitor/core";
 import { API_URL, getResolvedApiUrl, warnIfProductionPointsAtLocalhost } from "./api";
 
 const GENERIC_ERROR_MESSAGE = "We couldn't load this page right now. Please try again in a moment.";
@@ -103,53 +102,6 @@ async function refreshTokens(): Promise<boolean> {
   return refreshPromise;
 }
 
-function tryJsonParse(str: string) {
-  try {
-    return JSON.parse(str);
-  } catch {
-    return str;
-  }
-}
-
-async function doNativeCapacitorFetch(
-  url: string,
-  method: string,
-  headers: Record<string, string>,
-  body?: unknown
-): Promise<Response> {
-  try {
-    const options = {
-      url,
-      method: method.toUpperCase(),
-      headers,
-      data: body ? (typeof body === "string" ? tryJsonParse(body) : body) : undefined,
-    };
-
-    const response = await CapacitorHttp.request(options);
-    const status = response.status || 200;
-    const responseHeaders = new Headers();
-    if (response.headers) {
-      Object.entries(response.headers).forEach(([k, v]) => {
-        responseHeaders.append(k, String(v));
-      });
-    }
-
-    const responseText = typeof response.data === "object" ? JSON.stringify(response.data) : String(response.data ?? "");
-
-    return new Response(responseText, {
-      status,
-      statusText: String(status),
-      headers: responseHeaders,
-    });
-  } catch {
-    return fetch(url, {
-      method,
-      headers,
-      body: body ? (typeof body === "string" ? body : JSON.stringify(body)) : undefined,
-    });
-  }
-}
-
 async function doRefresh(): Promise<boolean> {
   const refreshToken = getRefreshToken();
   const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -158,10 +110,7 @@ async function doRefresh(): Promise<boolean> {
   }
   const baseUrl = getResolvedApiUrl();
   try {
-    const isNative = typeof window !== "undefined" && Capacitor.isNativePlatform();
-    const r = isNative
-      ? await doNativeCapacitorFetch(`${baseUrl}/api/v1/auth/refresh`, "POST", headers)
-      : await fetch(`${baseUrl}/api/v1/auth/refresh`, { method: "POST", headers, credentials: "include" });
+    const r = await fetch(`${baseUrl}/api/v1/auth/refresh`, { method: "POST", headers, credentials: "include" });
 
     if (!r.ok) {
       if (r.status === 401 || r.status === 403) clearTokens();
@@ -200,15 +149,11 @@ export async function api<T>(path: string, init: RequestInit = {}, revalidate?: 
   const fullUrl = `${baseUrl}${path}`;
   const method = (init.method || "GET").toUpperCase();
   const isReadMethod = method === "GET" || method === "HEAD";
-  const isNative = typeof window !== "undefined" && Capacitor.isNativePlatform();
 
   const doFetch = async () => {
     const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
     const timeoutId = controller ? setTimeout(() => controller.abort(), 50000) : null;
     try {
-      if (isNative) {
-        return await doNativeCapacitorFetch(fullUrl, method, headers, init.body);
-      }
       return await fetch(fullUrl, {
         ...init,
         headers,
@@ -231,7 +176,7 @@ export async function api<T>(path: string, init: RequestInit = {}, revalidate?: 
     try {
       res = await doFetch();
       const durationMs = Date.now() - startTime;
-      if (process.env.NODE_ENV !== "production" || isNative) {
+      if (process.env.NODE_ENV !== "production") {
         // eslint-disable-next-line no-console
         console.log(`[Apollo HTTP] ${method} ${fullUrl} -> Status ${res.status} (${durationMs}ms)`);
       }
@@ -253,14 +198,14 @@ export async function api<T>(path: string, init: RequestInit = {}, revalidate?: 
     } catch (err: any) {
       if (attempt < maxAttempts - 1) {
         attempt++;
-        if (process.env.NODE_ENV !== "production" || isNative) {
+        if (process.env.NODE_ENV !== "production") {
           // eslint-disable-next-line no-console
           console.warn(`[Apollo HTTP Retry ${attempt}/${maxAttempts}] ${method} ${fullUrl}:`, err?.message || err);
         }
         await sleep(1000 * attempt);
         continue;
       }
-      if (process.env.NODE_ENV !== "production" || isNative) {
+      if (process.env.NODE_ENV !== "production") {
         // eslint-disable-next-line no-console
         console.error(`[Apollo HTTP Error] ${method} ${fullUrl}:`, err?.message || err);
       }

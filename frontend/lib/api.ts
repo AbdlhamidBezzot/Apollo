@@ -6,24 +6,11 @@ export const TMDB_IMAGE_BASE = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE || "https
 
 export function getResolvedApiUrl(): string {
   if (typeof window !== "undefined") {
-    const isCapacitorNative =
-      !!(window as any).Capacitor?.isNativePlatform?.() ||
-      window.location.protocol === "capacitor:" ||
-      window.location.protocol === "file:";
-
     const hostname = window.location.hostname;
     const isLocalHost = hostname === "localhost" || hostname === "127.0.0.1";
     const explicit = (process.env.NEXT_PUBLIC_API_URL || "").trim().replace(/\/+$/, "");
 
-    // 1. Native mobile app (Capacitor Android/iOS)
-    if (isCapacitorNative) {
-      if (explicit && !isLocalhostUrl(explicit)) {
-        return explicit;
-      }
-      return PRODUCTION_API_URL;
-    }
-
-    // 2. Mobile or remote browser connection (e.g. phone browsing at 192.168.x.x:3000 or production domain)
+    // 1. Mobile or remote browser connection (e.g. phone browsing at 192.168.x.x:3000 or production domain)
     if (!isLocalHost) {
       if (explicit && !isLocalhostUrl(explicit)) {
         return explicit;
@@ -31,7 +18,7 @@ export function getResolvedApiUrl(): string {
       return PRODUCTION_API_URL;
     }
 
-    // 3. Desktop dev mode (localhost/127.0.0.1)
+    // 2. Desktop dev mode (localhost/127.0.0.1)
     if (explicit) {
       return explicit;
     }
