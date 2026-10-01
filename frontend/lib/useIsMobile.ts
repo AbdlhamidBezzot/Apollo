@@ -10,25 +10,12 @@ export function useIsMobile() {
     setMounted(true);
     const checkIsMobile = () => {
       if (typeof window === "undefined") return;
-
-      // Use minimum dimension (width vs height) so rotating phone into landscape doesn't flip layout to desktop mode
-      const minDimension = Math.min(window.innerWidth, window.innerHeight);
-      const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-      const isSmallScreen = minDimension <= 768;
-      const userAgentMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent || ""
-      );
-
-      setIsMobile(isSmallScreen || (isTouch && userAgentMobile));
+      setIsMobile(window.innerWidth <= 768);
     };
 
     checkIsMobile();
     window.addEventListener("resize", checkIsMobile);
-    window.addEventListener("orientationchange", checkIsMobile);
-    return () => {
-      window.removeEventListener("resize", checkIsMobile);
-      window.removeEventListener("orientationchange", checkIsMobile);
-    };
+    return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
 
   return { isMobile, isNative: false, mounted };

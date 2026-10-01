@@ -6,23 +6,21 @@ export const TMDB_IMAGE_BASE = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE || "https
 
 export function getResolvedApiUrl(): string {
   if (typeof window !== "undefined") {
-    const hostname = window.location.hostname;
-    const isLocalHost = hostname === "localhost" || hostname === "127.0.0.1";
     const explicit = (process.env.NEXT_PUBLIC_API_URL || "").trim().replace(/\/+$/, "");
+    if (explicit) return explicit;
 
-    // 1. Mobile or remote browser connection (e.g. phone browsing at 192.168.x.x:3000 or production domain)
-    if (!isLocalHost) {
-      if (explicit && !isLocalhostUrl(explicit)) {
-        return explicit;
-      }
-      return PRODUCTION_API_URL;
+    const { hostname, protocol } = window.location;
+
+    // LAN IP local testing (e.g. testing phone on Wi-Fi at http://192.168.1.50:3000)
+    if (/^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.|127\.0\.0\.1)/.test(hostname)) {
+      return `${protocol}//${hostname}:8000`;
     }
 
-    // 2. Desktop dev mode (localhost/127.0.0.1)
-    if (explicit) {
-      return explicit;
+    if (hostname === "localhost") {
+      return DEFAULT_DEV_API_URL;
     }
-    return DEFAULT_DEV_API_URL;
+
+    return PRODUCTION_API_URL;
   }
   return API_URL;
 }
