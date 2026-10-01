@@ -4,8 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthContext";
-import { MobileProfileView } from "@/components/mobile/MobileProfileView";
-import { useIsMobile } from "@/lib/useIsMobile";
 import { del, get, put } from "@/lib/http";
 
 interface UserProfile {
@@ -16,15 +14,10 @@ interface UserProfile {
 }
 
 export function ProfileClient() {
-  const { isMobile, mounted } = useIsMobile();
   const { user, loading, refresh, signOut } = useAuth();
   const router = useRouter();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
-
-  if (mounted && isMobile) {
-    return <MobileProfileView />;
-  }
 
   // Avatar states
   const [avatarUrl, setAvatarUrl] = useState("");

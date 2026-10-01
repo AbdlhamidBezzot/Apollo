@@ -17,15 +17,12 @@ import {
 import { MovieRow } from "@/components/MovieRow";
 import { RecommendationsRow } from "@/components/RecommendationsRow";
 import { SignInNotice } from "@/components/SignInNotice";
-import { MobileHomeView } from "@/components/mobile/MobileHomeView";
-import { useIsMobile } from "@/lib/useIsMobile";
 import { get } from "@/lib/http";
 import type { ContentListResponse, Title } from "@/lib/types";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export function HomeClient() {
-  const { isMobile, mounted } = useIsMobile();
   const [loading, setLoading] = useState(true);
   const [retrying, setRetrying] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,10 +96,6 @@ export function HomeClient() {
   }, [loadData]);
 
   const hasAnyItems = trending.length > 0 || popularMovies.length > 0 || popularTv.length > 0 || topRated.length > 0;
-
-  if (mounted && isMobile) {
-    return <MobileHomeView />;
-  }
 
   return (
     <div className="space-y-[64px] sm:space-y-[80px] pb-12">

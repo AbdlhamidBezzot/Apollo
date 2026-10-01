@@ -3,21 +3,14 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { MovieCard } from "@/components/MovieCard";
-import { MobileSearchView } from "@/components/mobile/MobileSearchView";
-import { useIsMobile } from "@/lib/useIsMobile";
 import { get } from "@/lib/http";
 import type { ContentListResponse, Title } from "@/lib/types";
 
 export function SearchClient() {
-  const { isMobile, mounted } = useIsMobile();
   const searchParams = useSearchParams();
   const q = searchParams.get("q") || "";
   const [results, setResults] = useState<Title[]>([]);
   const [loading, setLoading] = useState(false);
-
-  if (mounted && isMobile) {
-    return <MobileSearchView />;
-  }
 
   useEffect(() => {
     const query = q.trim();

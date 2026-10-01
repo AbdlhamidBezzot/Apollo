@@ -8,8 +8,6 @@ import { MovieNightModal } from "@/components/MovieNightModal";
 import { AuthProvider } from "@/components/AuthContext";
 import { ThemeProvider } from "@/components/ThemeContext";
 import { Footer } from "@/components/HomeEnhancements";
-import { MobileLayoutShell } from "@/components/mobile/MobileLayoutShell";
-
 import { Analytics } from "@vercel/analytics/next";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.missapollo.me";
@@ -87,7 +85,6 @@ export const metadata: Metadata = {
   },
 };
 
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
@@ -115,24 +112,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning>
         <ThemeProvider>
           <AuthProvider>
-            {/* Desktop Navbar — automatically hidden on mobile by MobileLayoutShell */}
             <Suspense fallback={null}>
               <Navbar />
             </Suspense>
 
-            {/*
-              MobileLayoutShell detects mobile/Capacitor devices.
-              On mobile  → wraps content with mobile bottom nav, no desktop chrome.
-              On desktop → passes children through without modification.
-            */}
-            <MobileLayoutShell>
-              <main className="min-h-screen pb-8 pt-16">
-                {children}
-              </main>
-            </MobileLayoutShell>
+            <main className="min-h-screen pb-8 pt-16">
+              {children}
+            </main>
 
-            {/* Desktop Footer — hidden on mobile via .desktop-footer CSS rule */}
-            <footer className="desktop-footer">
+            <footer>
               <Footer />
             </footer>
 

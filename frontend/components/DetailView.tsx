@@ -3,7 +3,6 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { DetailViewClient } from "@/components/DetailViewClient";
-import { MobileDetailSkeleton } from "@/components/mobile/MobileSkeleton";
 import { posterUrl, titleName } from "@/lib/api";
 import { get } from "@/lib/http";
 import type { ContentListResponse, Title, TitleDetail } from "@/lib/types";
@@ -56,8 +55,10 @@ export function DetailView({ mediaType, id: propId }: { mediaType: "movie" | "tv
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#09090B] p-4">
-        <MobileDetailSkeleton />
+      <div className="mx-auto max-w-7xl px-4 py-16 space-y-6 animate-pulse">
+        <div className="h-80 w-full rounded-3xl bg-white/10" />
+        <div className="h-8 w-1/3 rounded-lg bg-white/15" />
+        <div className="h-4 w-1/2 rounded bg-white/10" />
       </div>
     );
   }
