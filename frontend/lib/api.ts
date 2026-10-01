@@ -7,19 +7,25 @@ export const TMDB_IMAGE_BASE = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE || "https
 export function getResolvedApiUrl(): string {
   if (typeof window !== "undefined") {
     const explicit = (process.env.NEXT_PUBLIC_API_URL || "").trim().replace(/\/+$/, "");
-    if (explicit) return explicit;
+    const isExplicitValidRemote = explicit && !isLocalhostUrl(explicit);
+
+    if (isExplicitValidRemote) {
+      return explicit;
+    }
 
     const { hostname, protocol } = window.location;
 
-    // LAN IP local testing (e.g. testing phone on Wi-Fi at http://192.168.1.50:3000)
-    if (/^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.|127\.0\.0\.1)/.test(hostname)) {
+    // 1. LAN IP local testing (e.g. testing phone on Wi-Fi at http://192.168.1.50:3000)
+    if (/^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)/.test(hostname)) {
       return `${protocol}//${hostname}:8000`;
     }
 
-    if (hostname === "localhost") {
-      return DEFAULT_DEV_API_URL;
+    // 2. Localhost dev mode
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return explicit || DEFAULT_DEV_API_URL;
     }
 
+    // 3. Public production deployment (e.g. missapollo.me or Vercel preview)
     return PRODUCTION_API_URL;
   }
   return API_URL;
