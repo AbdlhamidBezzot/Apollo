@@ -4,6 +4,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ErrorScreen } from "@/components/ErrorScreen";
 import { Player } from "@/components/Player";
+import { MobilePortraitPlayer } from "@/components/player/MobilePortraitPlayer";
+import { useIsMobile } from "@/lib/useIsMobile";
 
 import { classifyError, logTechnicalDetail } from "@/lib/errors";
 import { get, post } from "@/lib/http";
@@ -23,6 +25,7 @@ interface PlayTarget {
 export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: number }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isMobile, mounted: mobileMounted } = useIsMobile();
   const [session, setSession] = useState<PlaybackSession | null>(null);
   const [title, setTitle] = useState("");
   const [poster, setPoster] = useState<string | null>(null);
@@ -151,19 +154,26 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
   }
 
 
+  /* Branch: mobile → MobilePortraitPlayer, desktop → legacy Player */
+  /* Wait for mount to avoid hydration mismatch */
+  if (!mobileMounted) return null;
 
-  return (
-    <Player
-      streamUrl={session.stream_url}
-      contentType={session.content_type}
-      provider={session.provider}
-      tmdbId={id}
-      mediaType={mediaType}
-      title={title || `${mediaType === "tv" ? "TV" : "Movie"} ${id}`}
-      poster={poster}
-      season={mediaType === "tv" ? Number(searchParams.get("season") || 1) : undefined}
-      episode={mediaType === "tv" ? Number(searchParams.get("episode") || 1) : undefined}
-      roomCode={searchParams.get("room")}
-    />
-  );
+  const commonProps = {
+    streamUrl: session.stream_url,
+    contentType: session.content_type,
+    provider: session.provider,
+    tmdbId: id,
+    mediaType,
+    title: title || `${mediaType === "tv" ? "TV" : "Movie"} ${id}`,
+    poster,
+    season: mediaType === "tv" ? Number(searchParams.get("season") || 1) : undefined,
+    episode: mediaType === "tv" ? Number(searchParams.get("episode") || 1) : undefined,
+    roomCode: searchParams.get("room"),
+  } as const;
+
+  if (isMobile) {
+    return <MobilePortraitPlayer {...commonProps} />;
+  }
+
+  return <Player {...commonProps} />;
 }

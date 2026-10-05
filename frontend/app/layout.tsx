@@ -9,6 +9,8 @@ import { AuthProvider } from "@/components/AuthContext";
 import { ThemeProvider } from "@/components/ThemeContext";
 import { Footer } from "@/components/HomeEnhancements";
 import { Analytics } from "@vercel/analytics/next";
+import { PlayerProvider } from "@/lib/playerContext";
+import { GlobalPlayer } from "@/components/player/GlobalPlayer";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.missapollo.me";
 
@@ -110,24 +112,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body suppressHydrationWarning>
-        <ThemeProvider>
-          <AuthProvider>
-            <Suspense fallback={null}>
-              <Navbar />
-            </Suspense>
+        <PlayerProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <Suspense fallback={null}>
+                <Navbar />
+              </Suspense>
 
-            <main className="min-h-screen pb-8 pt-16">
-              {children}
-            </main>
+              <main className="min-h-screen pb-8 pt-16">
+                {children}
+              </main>
 
-            <footer>
-              <Footer />
-            </footer>
+              <footer>
+                <Footer />
+              </footer>
 
-            <ChatBot />
-            <MovieNightModal />
-          </AuthProvider>
-        </ThemeProvider>
+              <ChatBot />
+              <MovieNightModal />
+
+              {/* Global player — single <video> element, persists across navigation */}
+              <Suspense fallback={null}>
+                <GlobalPlayer />
+              </Suspense>
+            </AuthProvider>
+          </ThemeProvider>
+        </PlayerProvider>
         <Analytics />
         {/* Adsterra Social Bar */}
         <Script id="adsterra-social-bar" src="https://heavenlysuspicious.com/a7/af/9d/a7af9dd53724b72f361ecca2360aad8a.js" strategy="afterInteractive" />
