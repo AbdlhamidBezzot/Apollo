@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     rapidapi_football_host: str = "football-live-streaming-api.p.rapidapi.com"
     rapidapi_football_base_url: str = "https://football-live-streaming-api.p.rapidapi.com"
 
-    playback_provider: str = "framextv"
+    playback_provider: str = "cinemaos"
 
     # Development (same-origin localhost) uses Lax. In production the Vercel
     # frontend and Render API are cross-site, so cookies are always SameSite=None

@@ -140,7 +140,7 @@ export function GestureLayer({ onToggleControls, onSwipeDown }: GestureLayerProp
   return (
     <div
       id="gesture-layer"
-      className="absolute inset-0 z-20 touch-none"
+      className="absolute inset-0 z-20 touch-pan-y"
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
       onClick={onClick}

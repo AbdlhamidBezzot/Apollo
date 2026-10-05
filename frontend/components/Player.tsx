@@ -94,7 +94,7 @@ export function Player({
   const [rate, setRate] = useState(1);
   const [savedPos, setSavedPos] = useState(0);
   const lastReport = useRef(0);
-  const [provider, setProvider] = useState<string>(providerProp || "framextv");
+  const [provider, setProvider] = useState<string>(providerProp || "cinemaos");
   const [activeContentType, setActiveContentType] = useState<string>(contentType);
   const embed = !selectedAddonStream && isEmbed(activeContentType);
   const embedGotRealProgress = useRef(false);

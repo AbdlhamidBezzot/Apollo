@@ -635,7 +635,7 @@ async def accept_title(db: Session, profile_id: int, tmdb_id: int, media_type: s
     """User confirmed a suggestion -> resolve and return action=play."""
     from app.services.playback.base import get_provider
 
-    provider = get_provider("framextv")
+    provider = get_provider()
     result = await provider.resolve(tmdb_id, media_type)
     detail = await tmdb.detail(media_type, tmdb_id)
     return {

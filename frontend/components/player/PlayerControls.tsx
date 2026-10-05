@@ -85,6 +85,7 @@ export function PlayerControls({
         {/* Minimize / collapse button */}
         <button
           id="player-minimize-btn"
+          type="button"
           onClick={onMinimize}
           aria-label="Minimize player"
           className="ctrl-btn"
@@ -99,6 +100,7 @@ export function PlayerControls({
           {/* CC (subtitles) */}
           <button
             id="player-cc-btn"
+            type="button"
             aria-label="Subtitles"
             className="ctrl-btn text-xs font-bold tracking-tight"
           >
@@ -108,6 +110,7 @@ export function PlayerControls({
           {/* Settings */}
           <button
             id="player-settings-btn"
+            type="button"
             onClick={onSettings}
             aria-label="Settings"
             className="ctrl-btn"
@@ -121,6 +124,7 @@ export function PlayerControls({
           {/* Mute toggle */}
           <button
             id="player-mute-btn"
+            type="button"
             onClick={toggleMute}
             aria-label={muted ? "Unmute" : "Mute"}
             className="ctrl-btn text-base"
@@ -136,6 +140,7 @@ export function PlayerControls({
         {hasPrev && (
           <button
             id="player-prev-btn"
+            type="button"
             onClick={onPrev}
             aria-label="Previous episode"
             className="ctrl-btn-lg"
@@ -149,6 +154,7 @@ export function PlayerControls({
         {/* Play / Pause */}
         <button
           id="player-playpause-btn"
+          type="button"
           onClick={togglePlay}
           aria-label={playing ? "Pause" : "Play"}
           className="flex h-14 w-14 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white transition hover:bg-white/20 active:scale-95"
@@ -168,6 +174,7 @@ export function PlayerControls({
         {hasNext && (
           <button
             id="player-next-btn"
+            type="button"
             onClick={onNext}
             aria-label="Next episode"
             className="ctrl-btn-lg"
@@ -186,6 +193,7 @@ export function PlayerControls({
           <div className="mb-2 flex justify-end">
             <button
               id={showSkipIntro ? "player-skip-intro-btn" : "player-skip-outro-btn"}
+              type="button"
               onClick={showSkipIntro ? onSkipIntro : onSkipOutro}
               className="rounded-full border border-white/40 bg-black/60 px-4 py-1.5 text-xs font-bold text-white backdrop-blur-md transition hover:bg-[var(--brand-accent)] hover:text-[var(--brand-accent-text)]"
             >
@@ -207,7 +215,12 @@ export function PlayerControls({
           {/* Fullscreen */}
           <button
             id="player-fullscreen-btn"
-            onClick={onFullscreen}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onFullscreen();
+            }}
             aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
             className="ctrl-btn"
           >

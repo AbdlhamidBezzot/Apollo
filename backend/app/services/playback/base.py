@@ -43,9 +43,9 @@ def get_provider_registry() -> dict[str, type[PlaybackProvider]]:
     from . import cinemaos, framextv, stellar, videasy, vidsrc
 
     return {
+        "cinemaos": cinemaos.CinemaOSPlaybackProvider,
         "framextv": framextv.FrameXTVPlaybackProvider,
         "stellar": stellar.StellarPlaybackProvider,
-        "cinemaos": cinemaos.CinemaOSPlaybackProvider,
         "videasy": videasy.VideasyPlaybackProvider,
         "vidsrc": vidsrc.VidsrcPlaybackProvider,
     }

@@ -81,7 +81,7 @@ export function WatchClient({ mediaType, id }: { mediaType: "movie" | "tv"; id: 
           setTitle(target.title || "");
           setPoster(target.poster);
         } else {
-          const providersToTry = ["framextv", "cinemaos", "vidsrc", "videasy", "stellar"];
+          const providersToTry = ["cinemaos", "framextv", "stellar", "videasy", "vidsrc"];
           let resolvedSession: PlaybackSession | null = null;
           let lastErr: unknown = null;
 

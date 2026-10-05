@@ -184,7 +184,7 @@ export function MobilePortraitPlayer({
     playerCtx.open({
       src: streamUrl,
       contentType,
-      provider: providerProp || "framextv",
+      provider: providerProp || "cinemaos",
       tmdbId,
       mediaType,
       title: titleProp,
@@ -198,8 +198,8 @@ export function MobilePortraitPlayer({
   /* ── Provider / stream state ───────────────────────────────────────────── */
   const [src, setSrc] = useState(streamUrl);
   const [activeContentType, setActiveContentType] = useState(contentType);
-  const [provider, setProvider] = useState(providerProp || "framextv");
-  const [providers, setProviders] = useState<string[]>(["framextv", "stellar", "cinemaos", "videasy", "vidsrc"]);
+  const [provider, setProvider] = useState(providerProp || "cinemaos");
+  const [providers, setProviders] = useState<string[]>(["cinemaos", "framextv", "stellar", "videasy", "vidsrc"]);
   const [busyResolve, setBusyResolve] = useState(false);
   const [addonStreams, setAddonStreams] = useState<ApolloStream[]>([]);
   const [addonSubtitles, setAddonSubtitles] = useState<ApolloSubtitle[]>([]);
@@ -553,24 +553,73 @@ export function MobilePortraitPlayer({
   };
 
   /* ── Fullscreen ─────────────────────────────────────────────────────────── */
-  const toggleFullscreen = useCallback(async () => {
+  const toggleFullscreen = useCallback(async (e?: React.SyntheticEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     const container = containerRef.current;
-    if (!container) return;
+    const video = videoRef.current;
     const doc = document as Document & { webkitFullscreenElement?: Element | null; webkitExitFullscreen?: () => void };
-    const inFs = Boolean(document.fullscreenElement || doc.webkitFullscreenElement);
+    const currentlyFs = Boolean(document.fullscreenElement || doc.webkitFullscreenElement || isFullscreen);
+
     try {
-      if (inFs) {
-        if (document.exitFullscreen) await document.exitFullscreen();
-        else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
-        try { (screen as any)?.orientation?.unlock(); } catch { /* ok */ }
+      if (currentlyFs) {
+        setIsFullscreen(false);
+        playerCtx.setMode("portrait");
+        if (document.exitFullscreen) {
+          await document.exitFullscreen().catch(() => {});
+        } else if (doc.webkitExitFullscreen) {
+          doc.webkitExitFullscreen();
+        }
+        try {
+          const orientation = (screen as any).orientation;
+          if (orientation && typeof orientation.unlock === "function") {
+            orientation.unlock();
+          }
+        } catch { /* ignore */ }
+        try {
+          const cap = (window as any).Capacitor;
+          if (cap?.Plugins?.ScreenOrientation) {
+            await cap.Plugins.ScreenOrientation.unlock().catch(() => {});
+          }
+        } catch { /* ignore */ }
       } else {
+        setIsFullscreen(true);
+        playerCtx.setMode("fullscreen");
+
+        // 1. Fullscreen API
         const c = container as HTMLDivElement & { webkitRequestFullscreen?: () => void };
-        if (container.requestFullscreen) await container.requestFullscreen();
-        else if (c.webkitRequestFullscreen) c.webkitRequestFullscreen();
-        try { await (screen as any)?.orientation?.lock("landscape"); } catch { /* not always permitted */ }
+        if (container?.requestFullscreen) {
+          await container.requestFullscreen().catch(() => {});
+        } else if (c?.webkitRequestFullscreen) {
+          c.webkitRequestFullscreen();
+        } else if (video && typeof (video as any).webkitEnterFullscreen === "function") {
+          (video as any).webkitEnterFullscreen();
+        }
+
+        // 2. Lock screen orientation to landscape
+        try {
+          const orientation = (screen as any).orientation;
+          if (orientation && typeof orientation.lock === "function") {
+            await orientation.lock("landscape").catch(() => {
+              return orientation.lock("landscape-primary").catch(() => {});
+            });
+          }
+        } catch { /* ignore */ }
+
+        // 3. Capacitor ScreenOrientation for native Android/iOS app
+        try {
+          const cap = (window as any).Capacitor;
+          if (cap?.Plugins?.ScreenOrientation) {
+            await cap.Plugins.ScreenOrientation.lock({ orientation: "landscape" }).catch(() => {});
+          }
+        } catch { /* ignore */ }
       }
-    } catch (err) { console.warn("[fullscreen]", err); }
-  }, []);
+    } catch (err) {
+      console.warn("[fullscreen]", err);
+    }
+  }, [isFullscreen, playerCtx, videoRef]);
 
   useEffect(() => {
     const sync = () => {
@@ -769,13 +818,17 @@ export function MobilePortraitPlayer({
      RENDER
      ════════════════════════════════════════════════════════════════════════ */
   return (
-    <div className="flex min-h-dvh flex-col bg-[#09090b]" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
+    <div className="w-full bg-[#09090b]" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
 
       {/* ═══ STICKY VIDEO PLAYER (16:9) ══════════════════════════════════ */}
-      <div className="mobile-player-sticky">
+      <div className={isFullscreen ? "" : "mobile-player-sticky"}>
         <div
           ref={containerRef}
-          className="relative aspect-video w-full bg-black"
+          className={`relative bg-black transition-all ${
+            isFullscreen
+              ? "fixed inset-0 z-50 flex h-full w-full items-center justify-center"
+              : "aspect-video w-full"
+          }`}
           onPointerMove={pokeControls}
         >
           {/* ── Embed (iframe) mode ────────────────────────────────────── */}
@@ -868,7 +921,7 @@ export function MobilePortraitPlayer({
       </div>
 
       {/* ═══ SCROLLABLE CONTENT BELOW ════════════════════════════════════ */}
-      <div className="flex-1 overflow-y-auto overscroll-y-none pb-safe-bottom">
+      <div className="w-full pb-safe-bottom">
         <div className="px-4 pt-3 space-y-4 pb-8">
 
           {/* ── Title + episode info ──────────────────────────────────── */}

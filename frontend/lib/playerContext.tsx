@@ -65,7 +65,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [mode, setModeState] = useState<PlayerMode>("hidden");
   const [src, setSrcState] = useState("");
   const [contentType, setContentType] = useState("text/html");
-  const [provider, setProviderState] = useState("framextv");
+  const [provider, setProviderState] = useState("cinemaos");
   const [tmdbId, setTmdbId] = useState(0);
   const [mediaType, setMediaType] = useState<"movie" | "tv">("movie");
   const [title, setTitleState] = useState("");
