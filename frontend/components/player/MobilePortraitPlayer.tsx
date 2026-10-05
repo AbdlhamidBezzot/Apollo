@@ -41,7 +41,10 @@ function fmtTime(s: number): string {
   return hr > 0 ? `${hr}:${pad(min)}:${pad(sec)}` : `${min}:${pad(sec)}`;
 }
 
-const isEmbed = (ct: string) => ct === "text/html";
+const isEmbed = (ct: string, srcUrl: string = "") =>
+  ct === "text/html" ||
+  (!/\.(m3u8|mp4|webm|mkv|mov)(\?|$)/i.test(srcUrl) &&
+    /embed|player|framextv|cinemaos|vidsrc|videasy|stellar/i.test(srcUrl));
 const providerLabel = (p: string, list: string[] = []) => {
   const idx = list.indexOf(p);
   return `Server ${idx >= 0 ? idx + 1 : 1}`;
@@ -210,7 +213,7 @@ export function MobilePortraitPlayer({
   const [episodeNum, setEpisodeNum] = useState(episode ?? 1);
   const [savedPos, setSavedPos] = useState(0);
 
-  const embed = !selectedAddonStream && isEmbed(activeContentType);
+  const embed = !selectedAddonStream && isEmbed(activeContentType, src);
   const isHls = !embed && (activeContentType === "application/x-mpegURL" || /\.m3u8(\?|$)/i.test(src));
   const useHlsJs = !embed && isHls && typeof window !== "undefined" && Hls.isSupported();
 

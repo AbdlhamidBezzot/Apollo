@@ -53,7 +53,10 @@ const providerLabel = (p: string, list: string[] = []) => {
   return `Server ${idx >= 0 ? idx + 1 : 1}`;
 };
 
-const isEmbed = (contentType: string) => contentType === "text/html";
+const isEmbed = (ct: string, srcUrl: string = "") =>
+  ct === "text/html" ||
+  (!/\.(m3u8|mp4|webm|mkv|mov)(\?|$)/i.test(srcUrl) &&
+    /embed|player|framextv|cinemaos|vidsrc|videasy|stellar/i.test(srcUrl));
 
 function fmtTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
@@ -96,10 +99,10 @@ export function Player({
   const lastReport = useRef(0);
   const [provider, setProvider] = useState<string>(providerProp || "cinemaos");
   const [activeContentType, setActiveContentType] = useState<string>(contentType);
-  const embed = !selectedAddonStream && isEmbed(activeContentType);
+  const [src, setSrc] = useState(streamUrl);
+  const embed = !selectedAddonStream && isEmbed(activeContentType, src);
   const embedGotRealProgress = useRef(false);
 
-  const [src, setSrc] = useState(streamUrl);
   const [seasonNum, setSeasonNum] = useState(season ?? 1);
   const [episodeNum, setEpisodeNum] = useState(episode ?? 1);
   const [busyResolve, setBusyResolve] = useState(false);
