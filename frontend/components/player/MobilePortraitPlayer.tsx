@@ -624,10 +624,11 @@ export function MobilePortraitPlayer({
   useEffect(() => {
     const sync = () => {
       const doc = document as Document & { webkitFullscreenElement?: Element | null };
-      const fs = Boolean(document.fullscreenElement || doc.webkitFullscreenElement);
-      setIsFullscreen(fs);
+      const isNativeFs = Boolean(document.fullscreenElement || doc.webkitFullscreenElement);
+      if (isNativeFs) {
+        setIsFullscreen(true);
+      }
     };
-    sync();
     document.addEventListener("fullscreenchange", sync);
     document.addEventListener("webkitfullscreenchange", sync);
     return () => {
