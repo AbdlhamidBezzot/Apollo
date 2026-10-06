@@ -592,7 +592,11 @@ export function Player({
     syncState({ rate: next });
   }, [rate, announce, syncState]);
 
-  const fullscreen = useCallback(async () => {
+  const fullscreen = useCallback(async (e?: React.SyntheticEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     const container = containerRef.current;
     const video = videoRef.current;
     if (!container) return;
@@ -601,7 +605,7 @@ export function Player({
 
     try {
       if (inFs) {
-        if (document.exitFullscreen) await document.exitFullscreen();
+        if (document.exitFullscreen) await document.exitFullscreen().catch(() => {});
         else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
 
         const orientation = (screen as any)?.orientation;
@@ -613,7 +617,7 @@ export function Player({
         const v = video as (HTMLVideoElement & { webkitEnterFullscreen?: () => void }) | null;
 
         if (container.requestFullscreen) {
-          await container.requestFullscreen();
+          await container.requestFullscreen().catch(() => {});
         } else if (c.webkitRequestFullscreen) {
           c.webkitRequestFullscreen();
         } else if (v && typeof v.webkitEnterFullscreen === "function") {
@@ -623,7 +627,7 @@ export function Player({
         const orientation = (screen as any)?.orientation;
         if (orientation && typeof orientation.lock === "function") {
           try {
-            await orientation.lock("landscape");
+            await orientation.lock("landscape").catch(() => {});
           } catch {
             /* Orientation lock may not be allowed on non-fullscreen or unsupported devices */
           }
@@ -1032,7 +1036,7 @@ export function Player({
             >
               <iframe
                 ref={iframeRef}
-                key={`${tmdbId}-${seasonNum}-${episodeNum}-${embedSrc}`}
+                key={`${tmdbId}-${seasonNum}-${episodeNum}-${provider}`}
                 src={embedSrc}
                 title={displayTitle}
                 allowFullScreen
@@ -1040,7 +1044,12 @@ export function Player({
                 className="aspect-video w-full"
               />
               <button
-                onClick={fullscreen}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  fullscreen(e);
+                }}
                 aria-label="Toggle fullscreen"
                 title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
                 className="absolute bottom-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md transition hover:bg-[var(--brand-accent)] hover:text-[var(--brand-accent-text)]"
@@ -1284,7 +1293,16 @@ export function Player({
                       </div>
                     )}
 
-                    <button onClick={fullscreen} aria-label="Toggle fullscreen" className="text-white hover:text-[var(--brand-accent)]">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        fullscreen(e);
+                      }}
+                      aria-label="Toggle fullscreen"
+                      className="text-white hover:text-[var(--brand-accent)]"
+                    >
                       ⛶
                     </button>
                   </div>

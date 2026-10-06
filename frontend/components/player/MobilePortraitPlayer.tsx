@@ -839,7 +839,7 @@ export function MobilePortraitPlayer({
           {embed ? (
             <iframe
               ref={iframeRef}
-              key={`${tmdbId}-${seasonNum}-${episodeNum}-${embedSrc}`}
+              key={`${tmdbId}-${seasonNum}-${episodeNum}-${provider}`}
               src={embedSrc}
               title={displayTitle}
               allowFullScreen

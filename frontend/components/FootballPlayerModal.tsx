@@ -394,7 +394,12 @@ export function FootballPlayerModal({ match, onClose }: FootballPlayerModalProps
                 {`Server ${activeServerIdx + 1}`}
               </span>
               <button
-                onClick={toggleFullscreen}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleFullscreen();
+                }}
                 className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white transition hover:bg-white/20"
                 title="Toggle Fullscreen (F)"
               >
