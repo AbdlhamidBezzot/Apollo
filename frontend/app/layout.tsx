@@ -102,8 +102,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           `}
         </Script>
         <meta name="6a97888e-site-verification" content="d10dde179d8ec2d925c8340a9c294592" />
-        {/* Adsterra Popunder */}
-        <Script id="adsterra-popunder" src="https://heavenlysuspicious.com/25/ea/fd/25eafdc0d5b5c73fff96db5f26b3fd80.js" strategy="beforeInteractive" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -138,8 +136,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </ThemeProvider>
         </PlayerProvider>
         <Analytics />
-        {/* Adsterra Social Bar */}
-        <Script id="adsterra-social-bar" src="https://heavenlysuspicious.com/a7/af/9d/a7af9dd53724b72f361ecca2360aad8a.js" strategy="afterInteractive" />
       </body>
     </html>
   );
