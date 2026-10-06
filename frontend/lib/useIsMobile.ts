@@ -11,15 +11,13 @@ export function useIsMobile() {
     const checkIsMobile = () => {
       if (typeof window === "undefined") return;
 
-      const isMobileDevice =
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(
-          navigator.userAgent
-        ) || (typeof navigator !== "undefined" && navigator.maxTouchPoints > 1);
+      const ua = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
+      const isMobilePhoneUA = /iPhone|iPod|Android.*Mobile|BlackBerry|IEMobile|Opera Mini/i.test(ua);
 
-      // Use the minimum dimension (portrait width) so landscape rotation does NOT change mobile status
-      const minDimension = Math.min(window.innerWidth, window.innerHeight);
+      // Phone landscape fallback (small height <= 500px on actual mobile phone UAs)
+      const isPhoneLandscape = isMobilePhoneUA && window.innerHeight <= 500 && window.innerWidth <= 1024;
 
-      const mobile = minDimension <= 768 || (isMobileDevice && Math.min(window.innerWidth, window.innerHeight) <= 1024);
+      const mobile = window.innerWidth <= 768 || isPhoneLandscape;
       setIsMobile(mobile);
     };
 
@@ -34,3 +32,4 @@ export function useIsMobile() {
 
   return { isMobile, isNative: false, mounted };
 }
+
