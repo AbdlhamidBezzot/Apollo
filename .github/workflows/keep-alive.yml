@@ -12,15 +12,27 @@ permissions:
 jobs:
   health-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    timeout-minutes: 5
     steps:
-      - name: Check Apollo health endpoint
+      - name: Wake up Apollo (handles Render cold start)
         run: |
-          echo "Checking Apollo health endpoint..."
-          curl --fail --silent --show-error --location \
-            --connect-timeout 10 --max-time 30 \
-            --write-out "\nHealth check HTTP status: %{http_code}\n" \
-            "https://apollo-makx.onrender.com/health"
+          echo "Checking Apollo health endpoint (with cold-start tolerance)..."
+          # Render free tier can take up to ~90 s to cold-start.
+          # We retry up to 6 times (every 15 s) before giving up.
+          MAX_ATTEMPTS=6
+          ATTEMPT=0
+          until curl --fail --silent --show-error --location \
+                  --connect-timeout 15 --max-time 90 \
+                  --write-out "\nHealth check HTTP status: %{http_code}\n" \
+                  "https://apollo-makx.onrender.com/health"; do
+            ATTEMPT=$((ATTEMPT + 1))
+            if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
+              echo "Apollo did not respond after $MAX_ATTEMPTS attempts. Failing."
+              exit 1
+            fi
+            echo "Attempt $ATTEMPT failed. Retrying in 15 seconds..."
+            sleep 15
+          done
           echo "Health check succeeded."
 
       - name: Send one follow-up request
